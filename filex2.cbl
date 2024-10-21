@@ -4,12 +4,7 @@
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-           CLASS printable-ASCII-characters IS SPACE
-                                              X'21' THRU X'2F'
-                                               '0'  THRU '9'
-                                              X'3A' THRU X'40'
-                                               'A'  THRU 'Z'
-                                               'a'  THRU 'z' 
+           CLASS printable-ASCII-characters IS X'20' THRU X'7F'
            SYMBOLIC CHARACTERS     asterisk IS 43.
 
        INPUT-OUTPUT SECTION.
@@ -82,14 +77,14 @@
                     OR sw-no-continue-capt
 
               CLOSE f-filex2
-          END-IF
 
-          DISPLAY SPACE
-          DISPLAY "Final results."
-          DISPLAY "Attempts to record the logs   : ["
-                   ws-attempt-counter "]."
-          DISPLAY "Records successfully recorded : ["
-                   ws-records-counter "]."
+              DISPLAY SPACE
+              DISPLAY "Final results."
+              DISPLAY "Attempts to record the logs   : ["
+                       ws-attempt-counter "]."
+              DISPLAY "Records successfully recorded : ["
+                       ws-records-counter "]."
+          END-IF
 
           STOP RUN.
 
