@@ -5,13 +5,14 @@
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
            CLASS printable-ASCII-characters IS X'20' THRU X'7F'
-           SYMBOLIC CHARACTERS     asterisk IS 43.
+           SYMBOLIC CHARACTERS     asterisk IS 42.
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT OPTIONAL f-filex2 ASSIGN TO ws-f-filex2
-                              ORGANIZATION IS LINE SEQUENTIAL
+                              ORGANIZATION IS SEQUENTIAL
                          PADDING CHARACTER IS asterisk
+                          RECORD DELIMITER IS LINE-SEQUENTIAL
                                FILE STATUS IS fs-f-filex2.
 
        DATA DIVISION.
@@ -56,6 +57,7 @@
            USE AFTER ERROR PROCEDURE ON f-filex2.
        Status-Check.
            DISPLAY SPACE
+           DISPLAY "Error information."
            DISPLAY "Error in file    : [" ws-f-filex2 "]."
            DISPLAY "File status code : [" fs-f-filex2 "]."
            STOP "Press Enter to continue...".
@@ -68,6 +70,7 @@
 
            IF ws-f-filex2 IS printable-ASCII-characters
               OPEN EXTEND f-filex2
+              DISPLAY "Opening. Status code: [" fs-f-filex2 "]"
 
               PERFORM 100-process-capture
                  THRU 100-end-process-capture
@@ -77,6 +80,7 @@
                     OR sw-no-continue-capt
 
               CLOSE f-filex2
+              DISPLAY "Closing. Status code: [" fs-f-filex2 "]"
 
               DISPLAY SPACE
               DISPLAY "Final results."
