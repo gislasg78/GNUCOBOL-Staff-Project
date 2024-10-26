@@ -72,8 +72,10 @@
        Status-Check.
            DISPLAY SPACE
            DISPLAY "Information about errors in files."
-           DISPLAY "File Name   : [" ws-idxfile-name "]."
-           DISPLAY "Status Code : [" fs-idxfile "]."
+           DISPLAY "File Name     : [" ws-idxfile-name "]."
+           DISPLAY "Employee Code : [" ws-f-idxfile-rec-cod-employee
+                   "]."
+           DISPLAY "Status Code   : [" fs-idxfile "]."
            STOP "Press ENTER to continue...".
        END DECLARATIVES.
 
@@ -138,9 +140,7 @@
                     DISPLAY "File Not Found!"
 
                WHEN OTHER
-                    DISPLAY "A code error [" fs-idxfile
-                            "] has occurred in the file: ["
-                            ws-idxfile-name "]."
+                    PERFORM Status-Check
 
            END-EVALUATE.
        100000-end-tolerating-error-codes.
@@ -266,11 +266,8 @@
            EXIT.
 
        100000-add-records.
-           PERFORM 100111-capture-employee-code
-              THRU 100111-end-capture-employee-code
-
-           PERFORM 100112-capture-employee-salary
-              THRU 100112-end-capture-employee-salary
+           PERFORM 100110-capture-employee-fields
+              THRU 100110-end-capture-employee-fields
 
            PERFORM 100113-add-a-record
               THRU 100113-end-add-a-record
@@ -281,6 +278,15 @@
            PERFORM 101010-question-continue-operation
               THRU 101010-end-question-continue-operation.
        100000-end-add-records.
+           EXIT.
+
+       100110-capture-employee-fields.
+           PERFORM 100111-capture-employee-code
+              THRU 100111-end-capture-employee-code
+
+           PERFORM 100112-capture-employee-salary
+              THRU 100112-end-capture-employee-salary.
+       100110-end-capture-employee-fields.
            EXIT.
 
        100111-capture-employee-code.
@@ -311,16 +317,13 @@
            WRITE f-idxfile-rec     FROM ws-f-idxfile-rec
                  INVALID KEY
                           DISPLAY "Operation     : [Writing]."
-                          DISPLAY "Employee Code : ["
-                                   ws-f-idxfile-rec-cod-employee
-                                  "]."
-                          DISPLAY "Status Code   : [" fs-idxfile "]."
+                          PERFORM Status-Check
 
              NOT INVALID KEY
-                     ADD cte-01      TO ws-written-records
+                         ADD cte-01      TO ws-written-records
 
-                     PERFORM 100100-display-employee-info
-                        THRU 100100-end-display-employee-info
+                         PERFORM 100100-display-employee-info
+                            THRU 100100-end-display-employee-info
 
            END-WRITE
 
@@ -373,10 +376,7 @@
            DELETE idxfile RECORD
                   INVALID KEY
                           DISPLAY "Operation     : [Deleting]."
-                          DISPLAY "Employee Code : ["
-                                   ws-f-idxfile-rec-cod-employee
-                                  "]."
-                          DISPLAY "Status Code   : [" fs-idxfile "]."
+                          PERFORM Status-Check
 
               NOT INVALID KEY
                           ADD cte-01          TO ws-eliminated-records
@@ -386,7 +386,7 @@
 
            END-DELETE
 
-           DISPLAY "Deletion. Status Code: [" fs-idxfile "].".
+           DISPLAY "Deleting. Status Code: [" fs-idxfile "].".
        100550-end-erase-a-record.
            EXIT.
 
@@ -420,16 +420,13 @@
            REWRITE f-idxfile-rec     FROM ws-f-idxfile-rec
                    INVALID KEY
                            DISPLAY "Operation     : [Rewriting]."
-                           DISPLAY "Employee Code : ["
-                                   ws-f-idxfile-rec-cod-employee
-                                   "]."
-                           DISPLAY "Status Code   : [" fs-idxfile "]."
+                           PERFORM Status-Check
 
                NOT INVALID KEY
-                   ADD cte-01          TO ws-rewritten-records
+                           ADD cte-01          TO ws-rewritten-records
 
-                   PERFORM 100100-display-employee-info
-                      THRU 100100-end-display-employee-info
+                           PERFORM 100100-display-employee-info
+                              THRU 100100-end-display-employee-info
 
            END-REWRITE
 
@@ -460,11 +457,8 @@
            READ idxfile INTO ws-f-idxfile-rec
                         KEY IS f-idxfile-rec-cod-employee
                 INVALID KEY
-                           DISPLAY "Operation     : [Direct Reading]."
-                           DISPLAY "Employee Code : ["
-                                   ws-f-idxfile-rec-cod-employee
-                                   "]."
-                           DISPLAY "Status Code   : [" fs-idxfile "]."
+                        DISPLAY "Operation     : [Reading] - [Direct]."
+                        PERFORM Status-Check
 
             NOT INVALID KEY
                         ADD cte-01  TO ws-reading-records
@@ -494,7 +488,7 @@
                        SET sw-idxfile-EOF-Y TO TRUE
 
                 NOT AT END
-                       ADD cte-01  TO ws-reading-records
+                       ADD cte-01           TO ws-reading-records
 
                        PERFORM 100100-display-employee-info
                           THRU 100100-end-display-employee-info
@@ -535,10 +529,7 @@
                  f-idxfile-rec-cod-employee
                  INVALID KEY
                          DISPLAY "Operation     : [Starting]."
-                         DISPLAY "Employee Code : ["
-                                  ws-f-idxfile-rec-cod-employee
-                                 "]."
-                         DISPLAY "Status Code   : [" fs-idxfile "]."
+                         PERFORM Status-Check
 
              NOT INVALID KEY
                          ADD  cte-01  TO ws-repositioning-records
