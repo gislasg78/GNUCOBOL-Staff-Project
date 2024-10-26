@@ -23,24 +23,38 @@
 
        WORKING-STORAGE SECTION.
        78  cte-01                                        VALUE 01.
-       78  cte-02                                        VALUE 02.
-       78  cte-03                                        VALUE 03.
-       78  cte-04                                        VALUE 04.
-       78  cte-05                                        VALUE 05.
-       78  cte-06                                        VALUE 06.
 
        77  fs-idxfile                         PIC 9(02)  VALUE ZEROES.
+           88  sw-fs-idxfile-success-completion          VALUE ZEROES.
+           88  sw-fs-idxfile-missing-optional-file       VALUE 05.
+           88  sw-fs-idxfile-end-of-file                 VALUE 10.
+           88  sw-fs-idxfile-invalid-key                 VALUE 21.
+           88  sw-fs-idxfile-duplicate-key               VALUE 22.
+           88  sw-fs-idxfile-record-not-found            VALUE 23.
+           88  sw-fs-idxfile-file-not-found              VALUE 35.
+
        77  ws-idxfile-name                    PIC X(12)  VALUE SPACES.
        77  ws-idxfile-EOF                     PIC A(01)  VALUE SPACE.
            88  sw-idxfile-EOF-Y                          VALUE 'Y'.
 
-       77  ws-reading-records                 PIC 9(03)  VALUE ZEROES.
-       77  ws-written-records                 PIC 9(03)  VALUE ZEROES.
+       01  ws-statistics-processed-records.
+           03  ws-eliminated-records          PIC 9(04)  VALUE ZEROES.
+           03  ws-reading-records             PIC 9(04)  VALUE ZEROES.
+           03  ws-repositioning-records       PIC 9(04)  VALUE ZEROES.
+           03  ws-rewritten-records           PIC 9(04)  VALUE ZEROES.
+           03  ws-written-records             PIC 9(04)  VALUE ZEROES.
 
        01  ws-continue-response               PIC A(01)  VALUE SPACE.
            88  sw-continue-response-N         VALUES ARE 'N', 'n'.
 
        01  ws-menu-option                     PIC 9(01)  VALUE ZERO.
+           88  sw-menu-option-add             VALUE 1.
+           88  sw-menu-option-delete          VALUE 2.
+           88  sw-menu-option-modify          VALUE 3.
+           88  sw-menu-option-view-one        VALUE 4.
+           88  sw-menu-option-view-all        VALUE 5.
+           88  sw-menu-option-exit            VALUE 6.
+
        01  ws-menu-mode-read-option           PIC 9(01)  VALUE ZERO.
            88  sw-menu-mode-read-option-forward          VALUE 01.
            88  sw-menu-mode-read-option-backward         VALUE 02.
@@ -59,7 +73,7 @@
            DISPLAY SPACE
            DISPLAY "Information about errors in files."
            DISPLAY "File Name   : [" ws-idxfile-name "]."
-           DISPLAY "Status code : [" fs-idxfile "]."
+           DISPLAY "Status Code : [" fs-idxfile "]."
            STOP "Press ENTER to continue...".
        END DECLARATIVES.
 
@@ -75,7 +89,7 @@
            PERFORM 100000-main-menu
               THRU 100000-end-main-menu
              UNTIL fs-idxfile IS NOT EQUAL TO ZEROES
-                OR ws-menu-option IS EQUAL TO cte-06
+                OR sw-menu-option-exit
 
            CLOSE idxfile
            DISPLAY "Closing. Status Code: [" fs-idxfile "]."
@@ -96,33 +110,38 @@
            EXIT.
 
        100000-tolerating-error-codes.
-           EVALUATE fs-idxfile
-               WHEN ZEROES
+           EVALUATE TRUE
+               WHEN sw-fs-idxfile-success-completion
                     DISPLAY "Successfull completion!"
 
-               WHEN 05
+               WHEN sw-fs-idxfile-missing-optional-file
                     DISPLAY "Missing Optional file!"
                     MOVE ZEROES TO fs-idxfile
 
-               WHEN 10
+               WHEN sw-fs-idxfile-end-of-file
                     DISPLAY "End of file!"
                     MOVE ZEROES TO fs-idxfile
 
-               WHEN 22
+               WHEN sw-fs-idxfile-invalid-key
+                    DISPLAY "Invalid Key!"
+                    MOVE ZEROES TO fs-idxfile
+
+               WHEN sw-fs-idxfile-duplicate-key
                     DISPLAY "Duplicate Key!"
                     MOVE ZEROES TO fs-idxfile
 
-               WHEN 23
+               WHEN sw-fs-idxfile-record-not-found
                     DISPLAY "Record Not Found!"
                     MOVE ZEROES TO fs-idxfile
 
-               WHEN 35
+               WHEN sw-fs-idxfile-file-not-found
                     DISPLAY "File Not Found!"
 
                WHEN OTHER
                     DISPLAY "A code error [" fs-idxfile
                             "] has occurred in the file: ["
                             ws-idxfile-name "]."
+
            END-EVALUATE.
        100000-end-tolerating-error-codes.
            EXIT.
@@ -156,26 +175,38 @@
            EXIT.
 
        200000-validate-selected-menu-option.
-           EVALUATE ws-menu-option
-               WHEN cte-01
+           EVALUATE TRUE
+               WHEN sw-menu-option-add
                     PERFORM 100000-add-records
                        THRU 100000-end-add-records
                       UNTIL fs-idxfile IS NOT EQUAL TO ZEROES
                          OR sw-continue-response-N
 
-               WHEN cte-04
+               WHEN sw-menu-option-delete
+                    PERFORM 100500-delete-a-record
+                       THRU 100500-end-delete-a-record
+                      UNTIL fs-idxfile IS NOT EQUAL TO ZEROES
+                         OR sw-continue-response-N
+
+               WHEN sw-menu-option-modify
+                    PERFORM 110000-modify-record
+                       THRU 110000-end-modify-record
+                      UNTIL fs-idxfile IS NOT EQUAL TO ZEROES
+                         OR sw-continue-response-N
+
+               WHEN sw-menu-option-view-one
                     PERFORM 200000-view-any-record
                        THRU 200000-end-view-any-record
                       UNTIL fs-idxfile IS NOT EQUAL TO ZEROES
                          OR sw-continue-response-N
 
-               WHEN cte-05
+               WHEN sw-menu-option-view-all
                     PERFORM 200100-main-reading-menu
                        THRU 200100-end-main-reading-menu
                       UNTIL fs-idxfile IS NOT EQUAL TO ZEROES
                          OR sw-menu-mode-read-option-exit
                         
-               WHEN cte-06
+               WHEN sw-menu-option-exit
                     DISPLAY SPACE
                     DISPLAY "Leaving this program..."
 
@@ -235,12 +266,11 @@
            EXIT.
 
        100000-add-records.
-           DISPLAY SPACE
-           DISPLAY "Capturing employee data."
-           DISPLAY "Employee Code   : " WITH NO ADVANCING
-           ACCEPT ws-f-idxfile-rec-cod-employee
-           DISPLAY "Employee Salary : " WITH NO ADVANCING
-           ACCEPT ws-f-idxfile-rec-salary-employee
+           PERFORM 100111-capture-employee-code
+              THRU 100111-end-capture-employee-code
+
+           PERFORM 100112-capture-employee-salary
+              THRU 100112-end-capture-employee-salary
 
            DISPLAY SPACE
            WRITE f-idxfile-rec     FROM ws-f-idxfile-rec
@@ -250,12 +280,11 @@
                              ws-f-idxfile-rec-cod-employee "]."
 
              NOT INVALID KEY
-                     ADD cte-01  TO ws-written-records
+                     ADD cte-01      TO ws-written-records
 
-                     DISPLAY "Captured employee record."
                      PERFORM 100100-display-employee-info
                         THRU 100100-end-display-employee-info
-                     DISPLAY "Record saved successfully!" 
+
            END-WRITE
            DISPLAY "Writing. Status Code: [" fs-idxfile "]."
 
@@ -267,7 +296,31 @@
        100000-end-add-records.
            EXIT.
 
+       100111-capture-employee-code.
+           DISPLAY SPACE
+           DISPLAY "Capture employee code."
+           DISPLAY "Employee Code   : " WITH NO ADVANCING
+           ACCEPT ws-f-idxfile-rec-cod-employee
+
+           MOVE ws-f-idxfile-rec-cod-employee
+             TO f-idxfile-rec-cod-employee.
+       100111-end-capture-employee-code.
+           EXIT.
+
+       100112-capture-employee-salary.
+           DISPLAY SPACE
+           DISPLAY "Capturing employee salary."
+           DISPLAY "Employee Salary : " WITH NO ADVANCING
+           ACCEPT ws-f-idxfile-rec-salary-employee
+
+           MOVE ws-f-idxfile-rec-salary-employee
+             TO f-idxfile-rec-salary-employee.
+       100112-end-capture-employee-salary.
+           EXIT.
+
        100100-display-employee-info.
+           DISPLAY SPACE
+           DISPLAY "Displaying employee information."
            DISPLAY "Employee Code   : ["
                    ws-f-idxfile-rec-cod-employee "]."
            DISPLAY "Employee Salary : ["
@@ -283,32 +336,105 @@
        101010-end-question-continue-operation.
            EXIT.
 
+       100500-delete-a-record.
+           PERFORM 100111-capture-employee-code
+              THRU 100111-end-capture-employee-code
+
+           PERFORM 200200-see-a-record
+              THRU 200220-end-see-a-record
+
+           PERFORM 100000-tolerating-error-codes
+              THRU 100000-end-tolerating-error-codes
+
+           PERFORM 100550-erase-a-record
+              THRU 100550-end-erase-a-record
+
+           PERFORM 100000-tolerating-error-codes
+              THRU 100000-end-tolerating-error-codes
+
+           PERFORM 101010-question-continue-operation
+              THRU 101010-end-question-continue-operation.
+       100500-end-delete-a-record.
+           EXIT.
+
+       100550-erase-a-record.
+           DISPLAY SPACE
+
+           DELETE idxfile RECORD
+                  INVALID KEY
+                          DISPLAY "Operation     : [Rewriting]."
+                          DISPLAY "Employee Code : ["
+                                   ws-f-idxfile-rec-cod-employee
+                                  "]."
+                          DISPLAY "Status Code   : [" fs-idxfile "]."
+
+              NOT INVALID KEY
+                          ADD cte-01          TO ws-eliminated-records
+
+                          PERFORM 100100-display-employee-info
+                             THRU 100100-end-display-employee-info
+
+           END-DELETE
+
+           DISPLAY "Deletion. Status Code: [" fs-idxfile "].".
+       100550-end-erase-a-record.
+           EXIT.
+
+       110000-modify-record.
+           PERFORM 100111-capture-employee-code
+              THRU 100111-end-capture-employee-code
+
+           PERFORM 200200-see-a-record
+              THRU 200220-end-see-a-record
+
+           PERFORM 100000-tolerating-error-codes
+              THRU 100000-end-tolerating-error-codes
+
+           PERFORM 100112-capture-employee-salary
+              THRU 100112-end-capture-employee-salary
+
+           PERFORM 110113-change-a-record
+              THRU 110113-end-change-a-record
+
+           PERFORM 100000-tolerating-error-codes
+              THRU 100000-end-tolerating-error-codes
+
+           PERFORM 101010-question-continue-operation
+              THRU 101010-end-question-continue-operation.
+       110000-end-modify-record.
+           EXIT.
+
+       110113-change-a-record.
+           DISPLAY SPACE
+
+           REWRITE f-idxfile-rec     FROM ws-f-idxfile-rec
+                   INVALID KEY
+                           DISPLAY "Operation     : [Rewriting]."
+                           DISPLAY "Employee Code : ["
+                                   ws-f-idxfile-rec-cod-employee
+                                   "]."
+                           DISPLAY "Status Code   : [" fs-idxfile "]."
+
+               NOT INVALID KEY
+                   ADD cte-01          TO ws-rewritten-records
+
+                   PERFORM 100100-display-employee-info
+                      THRU 100100-end-display-employee-info
+
+           END-REWRITE
+
+           DISPLAY "Rewriting. Status Code: [" fs-idxfile "].".
+       110113-end-change-a-record.
+           EXIT.
+
        200000-view-any-record.
            DISPLAY SPACE
            DISPLAY "View a specific record."
-           DISPLAY "Employee Code   : " WITH NO ADVANCING
-           ACCEPT ws-f-idxfile-rec-cod-employee
+           PERFORM 100111-capture-employee-code
+              THRU 100111-end-capture-employee-code
 
-           MOVE ws-f-idxfile-rec-cod-employee
-             TO f-idxfile-rec-cod-employee
-
-           DISPLAY SPACE
-           READ idxfile INTO ws-f-idxfile-rec
-                        KEY IS f-idxfile-rec-cod-employee
-                INVALID KEY
-                        DISPLAY "Error code: [" fs-idxfile "] when"
-                                " searching for employee code: ["
-                                ws-f-idxfile-rec-cod-employee "]."
-
-            NOT INVALID KEY
-                        ADD cte-01  TO ws-reading-records
-
-                        DISPLAY "Recovered employee record."
-                        PERFORM 100100-display-employee-info
-                           THRU 100100-end-display-employee-info
-                        DISPLAY "Record recovered successfully!"
-           END-READ
-           DISPLAY "Direct Reading. Status Code: [" fs-idxfile "]."
+           PERFORM 200200-see-a-record
+              THRU 200220-end-see-a-record
 
            PERFORM 100000-tolerating-error-codes
               THRU 100000-end-tolerating-error-codes
@@ -316,6 +442,30 @@
            PERFORM 101010-question-continue-operation
               THRU 101010-end-question-continue-operation.
        200000-end-view-any-record.
+           EXIT.
+
+       200200-see-a-record.
+           DISPLAY SPACE
+
+           READ idxfile INTO ws-f-idxfile-rec
+                        KEY IS f-idxfile-rec-cod-employee
+                INVALID KEY
+                           DISPLAY "Operation     : [Direct Reading]."
+                           DISPLAY "Employee Code : ["
+                                   ws-f-idxfile-rec-cod-employee
+                                   "]."
+                           DISPLAY "Status Code   : [" fs-idxfile "]."
+
+            NOT INVALID KEY
+                        ADD cte-01  TO ws-reading-records
+
+                        PERFORM 100100-display-employee-info
+                           THRU 100100-end-display-employee-info
+
+           END-READ
+
+           DISPLAY "Direct Reading. Status Code: [" fs-idxfile "].".
+       200220-end-see-a-record.
            EXIT.
 
        300000-reading-forward.
@@ -336,10 +486,9 @@
                 NOT AT END
                        ADD cte-01  TO ws-reading-records
 
-                       DISPLAY "Recovered employee record."
                        PERFORM 100100-display-employee-info
                           THRU 100100-end-display-employee-info
-                       DISPLAY "Record recovered successfully!"
+
                END-READ
                DISPLAY "Reading Forward. Status Code: [" fs-idxfile "]."
 
@@ -360,28 +509,26 @@
            DISPLAY "View all records."
            DISPLAY "Press Enter to start from the first possible "
                    "logical record."
-           DISPLAY "Employee Code   : " WITH NO ADVANCING
-           ACCEPT ws-f-idxfile-rec-cod-employee
 
-           MOVE ws-f-idxfile-rec-cod-employee
-             TO f-idxfile-rec-cod-employee
+           PERFORM 100111-capture-employee-code
+              THRU 100111-end-capture-employee-code
 
            DISPLAY SPACE
            START idxfile KEY IS GREATER THAN OR EQUAL TO
                  f-idxfile-rec-cod-employee
                  INVALID KEY
-                         DISPLAY "No Employee Code equivalent to ["
-                                 ws-f-idxfile-rec-cod-employee
-                                 "] was found to start searching."
+                         DISPLAY "Operation     : [Repositioning]."
+                         DISPLAY "Employee Code : ["
+                                  ws-f-idxfile-rec-cod-employee
+                                 "]."
+                         DISPLAY "Status Code   : [" fs-idxfile "]."
 
              NOT INVALID KEY
+                         ADD  cte-01  TO ws-repositioning-records
                          DISPLAY "Successful repositioning!"
 
            END-START
-           DISPLAY "Starting. Status Code: [" fs-idxfile "]."
-
-           PERFORM 100000-tolerating-error-codes
-              THRU 100000-end-tolerating-error-codes.
+           DISPLAY "Starting. Status Code: [" fs-idxfile "].".
        300300-end-reposition-idxfile-pointer.
            EXIT.
 
@@ -403,10 +550,9 @@
                 NOT AT END
                        ADD cte-01  TO ws-reading-records
 
-                       DISPLAY "Recovered employee record."
                        PERFORM 100100-display-employee-info
                           THRU 100100-end-display-employee-info
-                       DISPLAY "Record recovered successfully!"
+
                END-READ
                DISPLAY "Reading Backward. Status Code: [" fs-idxfile
                        "]."
@@ -423,11 +569,12 @@
 
        300000-results-obtained.
            DISPLAY SPACE
-           DISPLAY "Statistics generated in the processes."
-           DISPLAY "Records readed  successfully: ["
-                    ws-reading-records "]."
-           DISPLAY "Records written successfully: ["
-                    ws-written-records "].".
+           DISPLAY "Statistics of successfully processed records."
+           DISPLAY "Eliminated   : [" ws-eliminated-records "]."
+           DISPLAY "Read         : [" ws-reading-records "]."
+           DISPLAY "Repositioned : [" ws-repositioning-records "]."
+           DISPLAY "Rewritten    : [" ws-rewritten-records "]."
+           DISPLAY "Writings     : [" ws-written-records "].".
        300000-end-results-obtained.
            EXIT.
 
