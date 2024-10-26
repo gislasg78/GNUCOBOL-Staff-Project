@@ -14,7 +14,7 @@
        DATA DIVISION.
        FILE SECTION.
        FD  idxfile
-           DATA RECORD IS f-idxfile-rec
+           DATA   RECORD   IS f-idxfile-rec
            RECORD CONTAINS 13 CHARACTERS.
        01  f-idxfile-rec.
            03  f-idxfile-rec-cod-employee     PIC 9(05)  VALUE ZEROES.
@@ -272,21 +272,8 @@
            PERFORM 100112-capture-employee-salary
               THRU 100112-end-capture-employee-salary
 
-           DISPLAY SPACE
-           WRITE f-idxfile-rec     FROM ws-f-idxfile-rec
-                 INVALID KEY
-                     DISPLAY "Error code: [" fs-idxfile "] when"
-                             " recording employee code: ["
-                             ws-f-idxfile-rec-cod-employee "]."
-
-             NOT INVALID KEY
-                     ADD cte-01      TO ws-written-records
-
-                     PERFORM 100100-display-employee-info
-                        THRU 100100-end-display-employee-info
-
-           END-WRITE
-           DISPLAY "Writing. Status Code: [" fs-idxfile "]."
+           PERFORM 100113-add-a-record
+              THRU 100113-end-add-a-record
 
            PERFORM 100000-tolerating-error-codes
               THRU 100000-end-tolerating-error-codes
@@ -316,6 +303,29 @@
            MOVE ws-f-idxfile-rec-salary-employee
              TO f-idxfile-rec-salary-employee.
        100112-end-capture-employee-salary.
+           EXIT.
+
+       100113-add-a-record.
+           DISPLAY SPACE
+
+           WRITE f-idxfile-rec     FROM ws-f-idxfile-rec
+                 INVALID KEY
+                          DISPLAY "Operation     : [Writing]."
+                          DISPLAY "Employee Code : ["
+                                   ws-f-idxfile-rec-cod-employee
+                                  "]."
+                          DISPLAY "Status Code   : [" fs-idxfile "]."
+
+             NOT INVALID KEY
+                     ADD cte-01      TO ws-written-records
+
+                     PERFORM 100100-display-employee-info
+                        THRU 100100-end-display-employee-info
+
+           END-WRITE
+
+           DISPLAY "Writing. Status Code: [" fs-idxfile "].".
+       100113-end-add-a-record.
            EXIT.
 
        100100-display-employee-info.
@@ -362,7 +372,7 @@
 
            DELETE idxfile RECORD
                   INVALID KEY
-                          DISPLAY "Operation     : [Rewriting]."
+                          DISPLAY "Operation     : [Deleting]."
                           DISPLAY "Employee Code : ["
                                    ws-f-idxfile-rec-cod-employee
                                   "]."
@@ -490,7 +500,7 @@
                           THRU 100100-end-display-employee-info
 
                END-READ
-               DISPLAY "Reading Forward. Status Code: [" fs-idxfile "]."
+               DISPLAY "Forwarding. Status Code: [" fs-idxfile "]."
 
            END-PERFORM
 
@@ -513,11 +523,18 @@
            PERFORM 100111-capture-employee-code
               THRU 100111-end-capture-employee-code
 
+           PERFORM 100121-start-a-record
+              THRU 100121-end-start-a-record.
+       300300-end-reposition-idxfile-pointer.
+           EXIT.
+
+       100121-start-a-record.
            DISPLAY SPACE
+
            START idxfile KEY IS GREATER THAN OR EQUAL TO
                  f-idxfile-rec-cod-employee
                  INVALID KEY
-                         DISPLAY "Operation     : [Repositioning]."
+                         DISPLAY "Operation     : [Starting]."
                          DISPLAY "Employee Code : ["
                                   ws-f-idxfile-rec-cod-employee
                                  "]."
@@ -528,8 +545,9 @@
                          DISPLAY "Successful repositioning!"
 
            END-START
+
            DISPLAY "Starting. Status Code: [" fs-idxfile "].".
-       300300-end-reposition-idxfile-pointer.
+       100121-end-start-a-record.
            EXIT.
 
        400000-reading-backward.
@@ -542,20 +560,19 @@
                       OR sw-idxfile-EOF-Y
 
                DISPLAY SPACE
-               READ idxfile PREVIOUS RECORD INTO ws-f-idxfile-rec
+               READ idxfile PREVIOUS RECORD    INTO ws-f-idxfile-rec
                     AT END
-                       DISPLAY "Start of archive reached..."
-                       SET sw-idxfile-EOF-Y TO TRUE
+                       DISPLAY "Start of archive reached."
+                       SET sw-idxfile-EOF-Y      TO TRUE
 
                 NOT AT END
-                       ADD cte-01  TO ws-reading-records
+                       ADD cte-01                TO ws-reading-records
 
                        PERFORM 100100-display-employee-info
                           THRU 100100-end-display-employee-info
 
                END-READ
-               DISPLAY "Reading Backward. Status Code: [" fs-idxfile
-                       "]."
+               DISPLAY "Backwarding. Status Code: [" fs-idxfile "]."
 
            END-PERFORM
 
