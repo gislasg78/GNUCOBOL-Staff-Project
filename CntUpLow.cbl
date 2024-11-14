@@ -4,7 +4,7 @@
         DATA DIVISION.
         WORKING-STORAGE SECTION.
         78  cte-80                                    VALUE 80.
-        78  cte-95                                    VALUE 95.
+        78  cte-96                                    VALUE 96.
 
         01  ws-environmental-variables.
             03  ws-character-set-group.
@@ -109,16 +109,17 @@
                     07  ws-character-set-printables-X7B-X7F.
                         09  FILLER         PIC X(01)  VALUE X'7B'.
                         09  FILLER         PIC X(01)  VALUE X'7C'.
+                        09  FILLER         PIC X(01)  VALUE X'7D'.
                         09  FILLER         PIC X(01)  VALUE X'7E'.
                         09  FILLER         PIC X(01)  VALUE X'7F'.
 
                 05  ws-character-set-red   REDEFINES  ws-character-set.
-                    07  ws-charset-item    OCCURS  cte-95 TIMES
+                    07  ws-charset-item    OCCURS  cte-96 TIMES
                                            INDEXED BY idx-charset-item
                                            PIC X(01).
 
                 05  ws-character-set-counting.
-                    07  ws-charset-count   OCCURS  cte-95 TIMES
+                    07  ws-charset-count   OCCURS  cte-96 TIMES
                                            INDEXED BY idx-charset-count
                                            PIC 9(02)  VALUE ZEROES.
 
@@ -147,7 +148,7 @@
                     07  ws-cte-91          PIC 9(02)  VALUE 91.
                 05  ws-ctes-pos-X7B-X7F.
                     07  ws-cte-92          PIC 9(02)  VALUE 92.
-                    07  ws-cte-95          PIC 9(02)  VALUE 95.
+                    07  ws-cte-96          PIC 9(02)  VALUE 96.
 
             03  ws-options-menu-choice     PIC 9(01)  VALUE ZERO.
                 88  sw-options-menu-choice-allvalids  VALUES 1 THRU 8.
@@ -388,7 +389,7 @@
               THRU 122100-finish-counting-cases
 
            MOVE ws-cte-92  TO ws-starting-position
-           MOVE ws-cte-95  TO ws-finishing-position
+           MOVE ws-cte-96  TO ws-finishing-position
            PERFORM 122100-start-counting-cases
               THRU 122100-finish-counting-cases.
          127000-finish-tally-printsymb.
@@ -409,7 +410,7 @@
            DISPLAY "Count of all printable characters."
 
            MOVE ws-cte-01  TO ws-starting-position
-           MOVE ws-cte-95  TO ws-finishing-position
+           MOVE ws-cte-96  TO ws-finishing-position
            PERFORM 122100-start-counting-cases
               THRU 122100-finish-counting-cases.
          129000-finish-tally-allchars.
