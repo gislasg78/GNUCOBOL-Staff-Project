@@ -3,6 +3,8 @@
 
         DATA DIVISION.
         WORKING-STORAGE SECTION.
+        78  cte-95                                    VALUE 95.
+
         01  ws-environmental-variables.
             03  ws-character-set-group.
                 05  ws-character-set.
@@ -110,16 +112,16 @@
                         09  FILLER         PIC X(01)  VALUE X'7F'.
 
                 05  ws-character-set-red   REDEFINES  ws-character-set.
-                    07  ws-charset-item    OCCURS  95 TIMES
+                    07  ws-charset-item    OCCURS  cte-95 TIMES
                                            INDEXED BY idx-charset-item
                                            PIC X(01).
 
                 05  ws-character-set-counting.
-                    07  ws-charset-count   OCCURS  95 TIMES
+                    07  ws-charset-count   OCCURS  cte-95 TIMES
                                            INDEXED BY idx-charset-count
                                            PIC 9(02)  VALUE ZEROES.
 
-            03  ws-accounting-pointers.
+            03  ws-accounting-positions.
                 05  ws-starting-position   PIC 9(02)  VALUE ZEROES.
                 05  ws-finishing-position  PIC 9(02)  VALUE ZEROES.
 
@@ -147,22 +149,24 @@
                     07  ws-cte-95          PIC 9(02)  VALUE 95.
 
             03  ws-options-menu-choice     PIC 9(01)  VALUE ZERO.
+                88  sw-options-menu-choice-allvalids  VALUES 1 THRU 8.
                 88  sw-options-menu-choice-uppercase  VALUE 1.
                 88  sw-options-menu-choice-lowercase  VALUE 2.
                 88  sw-options-menu-choice-bothcase   VALUE 3.
                 88  sw-options-menu-choice-numdigits  VALUE 4.
                 88  sw-options-menu-choice-letanddig  VALUE 5.
                 88  sw-options-menu-choice-printsymb  VALUE 6.
-                88  sw-options-menu-choice-allchars   VALUE 7.
-                88  sw-options-menu-choice-exitprog   VALUE 8.
+                88  sw-options-menu-choice-numbsymb   VALUE 7.
+                88  sw-options-menu-choice-allchars   VALUE 8.
+                88  sw-options-menu-choice-exitprog   VALUE 9.
 
             03  ws-string.         
-                05  ws-string-char         OCCURS 260 TIMES
-                                           PIC A(01)  VALUE SPACE.
+                05  ws-string-char         OCCURS 285 TIMES
+                                           PIC X(01)  VALUE SPACE.
 
         PROCEDURE DIVISION.
         MAIN-PARAGRAPH.
-           DISPLAY "Program to count upper and lower case letters."
+           DISPLAY "Program to count characters in strings."
 
            PERFORM 100000-start-options-menu
               THRU 100000-finish-options-menu
@@ -172,7 +176,7 @@
            STOP RUN.
 
        100000-start-options-menu.
-           INITIALIZE ws-accounting-pointers
+           INITIALIZE ws-accounting-positions
                       ws-character-set-counting
                       ws-options-menu-choice
                       ws-string
@@ -195,16 +199,19 @@
            DISPLAY "| [4]. Numeric Digits.          |"
            DISPLAY "| [5]. Upper & lower & digits.  |"
            DISPLAY "| [6]. Printable symbols.       |"
-           DISPLAY "| [7]. All printable chars.     |"
-           DISPLAY "| [8]. Exit this program.       |"
+           DISPLAY "| [7]. Digits & symbols.        |"
+           DISPLAY "| [8]. All printable chars.     |"
+           DISPLAY "| [9]. Exit this program.       |"
            DISPLAY "+===+===+===+===+===+===+===+===+"
            DISPLAY "Enter your choice: " WITH NO ADVANCING
-           ACCEPT ws-options-menu-choice.
+           ACCEPT ws-options-menu-choice
+
+           DISPLAY "The chosen option was: " ws-options-menu-choice.
         110000-finish-display-options-menu.
            EXIT.
 
         120000-start-validate-menu-option.
-           IF NOT (sw-options-menu-choice-exitprog) THEN
+           IF sw-options-menu-choice-allvalids THEN
               PERFORM 121000-start-get-string-chars
                  THRU 121000-finish-get-string-chars
            END-IF
@@ -231,12 +238,16 @@
                        THRU 126000-finish-tally-letanddig
 
                WHEN sw-options-menu-choice-printsymb
-                    PERFORM 127000-start-tally-print-symb
-                       THRU 127000-finish-tally-print-symb
+                    PERFORM 127000-start-tally-printsymb
+                       THRU 127000-finish-tally-printsymb
+
+               WHEN sw-options-menu-choice-numbsymb
+                    PERFORM 128000-start-tally-numbsymb
+                    PERFORM 128000-finish-tally-numbsymb
 
                WHEN sw-options-menu-choice-allchars
-                    PERFORM 128000-start-tally-all-chars
-                       THRU 128000-finish-tally-all-chars
+                    PERFORM 129000-start-tally-allchars
+                       THRU 129000-finish-tally-allchars
 
                WHEN sw-options-menu-choice-exitprog
                     DISPLAY "Leaving this program..."
@@ -256,7 +267,7 @@
            EXIT.
 
          122000-start-tally-uppercase.
-           DISPLAY "Accounting for upper case letters."
+           DISPLAY "Capitalization Count."
 
            MOVE ws-cte-34  TO ws-starting-position
            MOVE ws-cte-59  TO ws-finishing-position
@@ -267,8 +278,9 @@
            EXIT.
 
           122100-start-counting-cases.
-            SET idx-charset-count          TO ws-starting-position
+            DISPLAY "Counting statistics."
 
+            SET idx-charset-count        TO ws-starting-position
             PERFORM 122110-start-counting-appearances
                THRU 122110-finish-counting-appearances
             VARYING idx-charset-item
@@ -276,9 +288,7 @@
               UNTIL idx-charset-item
                  IS GREATER THAN ws-finishing-position
 
-            DISPLAY "Counting statistics."
-
-            SET idx-charset-item             TO ws-starting-position
+            SET idx-charset-item         TO ws-starting-position
             PERFORM 122120-start-view-appearance-counts
                THRU 122120-finish-view-appearance-counts
             VARYING idx-charset-count
@@ -299,8 +309,8 @@
  
           122120-start-view-appearance-counts.
             IF ws-charset-count (idx-charset-count) IS NOT EQUAL TO ZEROES
-               DISPLAY "["    ws-charset-item    (idx-charset-item)
-                       "] = {" ws-charset-count  (idx-charset-count)
+               DISPLAY "["       ws-charset-item   (idx-charset-item)
+                       "] = {"   ws-charset-count  (idx-charset-count)
                        "}."
             END-IF
                             
@@ -309,7 +319,7 @@
             EXIT.
 
          123000-start-tally-lowercase.
-           DISPLAY "Accounting for lower case letters."
+           DISPLAY "Lowercase Counting."
 
            MOVE ws-cte-66  TO ws-starting-position
            MOVE ws-cte-91  TO ws-finishing-position
@@ -320,7 +330,7 @@
            EXIT.
 
          124000-start-tally-bothcase.
-           DISPLAY "Accounting for upper and lower case letters."
+           DISPLAY "Uppercase and Lowercase Counting."
    
            PERFORM 122000-start-tally-uppercase
               THRU 122000-finish-tally-uppercase
@@ -331,7 +341,7 @@
             EXIT.
 
          125000-start-tally-numdigits.
-           DISPLAY "Counting pure numerical digits."
+           DISPLAY "Counting Numerical Digits."
 
            MOVE ws-cte-17  TO ws-starting-position
            MOVE ws-cte-26  TO ws-finishing-position
@@ -342,8 +352,7 @@
            EXIT.
 
          126000-start-tally-letanddig.
-           DISPLAY "Counting uppercase, lowercase letters "
-                   "and digits."
+           DISPLAY "Counting Uppercase, Lowercase and Numeric Digits."
 
            PERFORM 124000-start-tally-bothcase
               THRU 124000-finish-tally-bothcase
@@ -353,8 +362,8 @@
          126000-finish-tally-letanddig.
            EXIT.
 
-         127000-start-tally-print-symb.
-           DISPLAY "Counting all printable characters."
+         127000-start-tally-printsymb.
+           DISPLAY "Printable Special Symbol Counting."
 
            MOVE ws-cte-01  TO ws-starting-position
            MOVE ws-cte-16  TO ws-finishing-position
@@ -375,17 +384,28 @@
            MOVE ws-cte-95  TO ws-finishing-position
            PERFORM 122100-start-counting-cases
               THRU 122100-finish-counting-cases.
-         127000-finish-tally-print-symb.
+         127000-finish-tally-printsymb.
            EXIT.
 
-         128000-start-tally-all-chars.
-           DISPLAY "Counting all possible characters."
+         128000-start-tally-numbsymb.
+           DISPLAY "Number Digit and Special Symbols Counting."
+
+           PERFORM 125000-start-tally-numdigits
+              THRU 125000-finish-tally-numdigits
+
+           PERFORM 127000-start-tally-printsymb
+              THRU 127000-finish-tally-printsymb.
+         128000-finish-tally-numbsymb.
+           EXIT.
+
+         129000-start-tally-allchars.
+           DISPLAY "Count of all printable characters."
 
            MOVE ws-cte-01  TO ws-starting-position
            MOVE ws-cte-95  TO ws-finishing-position
            PERFORM 122100-start-counting-cases
               THRU 122100-finish-counting-cases.
-         128000-finish-tally-all-chars.
+         129000-finish-tally-allchars.
            EXIT.
 
        END PROGRAM CntUpLow.
