@@ -3,10 +3,16 @@
 
         DATA DIVISION.
         WORKING-STORAGE SECTION.
-        78  cte-80                                        VALUE 80.
+        78  cte-01                                        VALUE 01.
         78  cte-96                                        VALUE 96.
 
         01  ws-environmental-variables.
+            03  ws-accounting-positions.
+                05  ws-built-str-position      PIC 9(02)  VALUE ZEROES.
+                05  ws-charging-positions      PIC 9(02)  VALUE ZEROES.
+                05  ws-starting-position       PIC 9(02)  VALUE ZEROES.
+                05  ws-finishing-position      PIC 9(02)  VALUE ZEROES.
+
             03  ws-character-set-conjoin.
                 05  ws-character-set.
                     07  ws-character-set-printables-X20-X2F.
@@ -118,17 +124,6 @@
                                     INDEXED BY idx-charset-element
                                                PIC X(01).
 
-                05  ws-character-set-grouping.
-                    07  ws-character-set-group    OCCURS  cte-96 TIMES
-                                    INDEXED BY idx-character-set-group.
-                        09  ws-charset-sg-item PIC X(01)  VALUE SPACE.
-                        09  ws-charset-sg-cnt  PIC 9(02)  VALUE ZEROES.
-
-            03  ws-accounting-positions.
-                05  ws-charging-positions      PIC 9(02)  VALUE ZEROES.
-                05  ws-starting-position       PIC 9(02)  VALUE ZEROES.
-                05  ws-finishing-position      PIC 9(02)  VALUE ZEROES.
-
             03  ws-constants-group.
                 05  ws-ctes-pos-X20-X2F.
                     07  ws-cte-01              PIC 9(01)  VALUE 1.
@@ -165,10 +160,22 @@
                 88  sw-options-menu-choice-allchars       VALUE 8.
                 88  sw-options-menu-choice-exitprog       VALUE 9.
 
-            03  ws-string.         
-                05  ws-string-char                OCCURS cte-80 TIMES
+            03  ws-strings.
+                05  ws-string.
+                    07  ws-string-char            OCCURS cte-96 TIMES
                                     INDEXED BY idx-string-char
                                                PIC X(01)  VALUE SPACE.
+                05  ws-built-string-s.
+                    07  ws-built-str-char         OCCURS cte-96 TIMES
+                                    INDEXED BY idx-built-str-char
+                                               PIC X(01)  VALUE SPACE.
+
+            03  ws-character-set-grouping.
+                05  ws-character-set-group OCCURS cte-01 TO cte-96 TIMES
+                                    DEPENDING ON ws-charging-positions
+                                    INDEXED BY idx-character-set-group.
+                    07  ws-charset-sg-item     PIC X(01)  VALUE SPACE.
+                    07  ws-charset-sg-cnt      PIC 9(02)  VALUE ZEROES.
 
         PROCEDURE DIVISION.
         MAIN-PARAGRAPH.
@@ -182,20 +189,28 @@
            STOP RUN.
 
        100000-start-options-menu.
-           INITIALIZE ws-accounting-positions
-                      ws-character-set-grouping
-                      ws-options-menu-choice
-                      ws-string
+           PERFORM 110000-start-initialize-values
+              THRU 110000-finish-initialize-values
 
-           PERFORM 110000-start-display-options-menu
-              THRU 110000-finish-display-options-menu
+           PERFORM 120000-start-display-options-menu
+              THRU 120000-finish-display-options-menu
 
-           PERFORM 120000-start-validate-menu-option
-              THRU 120000-finish-validate-menu-option.
+           PERFORM 130000-start-validate-menu-option
+              THRU 130000-finish-validate-menu-option.
        100000-finish-options-menu.
            EXIT.
 
-        110000-start-display-options-menu.
+        110000-start-initialize-values.
+           INITIALIZE ws-accounting-positions
+                      ws-character-set-grouping
+                      ws-options-menu-choice
+                      ws-strings
+
+           MOVE ws-cte-01  TO ws-built-str-position.
+        110000-finish-initialize-values.
+           EXIT.
+
+        120000-start-display-options-menu.
            DISPLAY "+===+===+===+===+===+===+===+===+"
            DISPLAY "|    Counting Options Menu.     |"
            DISPLAY "+===+===+===+===+===+===+===+===+"
@@ -213,47 +228,47 @@
            ACCEPT ws-options-menu-choice
 
            DISPLAY "The chosen option was: " ws-options-menu-choice.
-        110000-finish-display-options-menu.
+        120000-finish-display-options-menu.
            EXIT.
 
-        120000-start-validate-menu-option.
+        130000-start-validate-menu-option.
            IF sw-options-menu-choice-allvalids THEN
-              PERFORM 121000-start-get-string-chars
-                 THRU 121000-finish-get-string-chars
+              PERFORM 131000-start-get-string-chars
+                 THRU 131000-finish-get-string-chars
            END-IF
 
            EVALUATE TRUE
                WHEN sw-options-menu-choice-uppercase
-                    PERFORM 122000-start-tally-uppercase
-                       THRU 122000-finish-tally-uppercase
+                    PERFORM 132000-start-tally-uppercase
+                       THRU 132000-finish-tally-uppercase
 
                WHEN sw-options-menu-choice-lowercase
-                    PERFORM 123000-start-tally-lowercase
-                       THRU 123000-finish-tally-lowercase
+                    PERFORM 133000-start-tally-lowercase
+                       THRU 133000-finish-tally-lowercase
 
                WHEN sw-options-menu-choice-bothcase
-                    PERFORM 124000-start-tally-bothcase
-                       THRU 124000-finish-tally-bothcase
+                    PERFORM 134000-start-tally-bothcase
+                       THRU 134000-finish-tally-bothcase
 
                WHEN sw-options-menu-choice-numdigits
-                    PERFORM 125000-start-tally-numdigits
-                       THRU 125000-finish-tally-numdigits
+                    PERFORM 135000-start-tally-numdigits
+                       THRU 135000-finish-tally-numdigits
 
                WHEN sw-options-menu-choice-letanddig
-                    PERFORM 126000-start-tally-letanddig
-                       THRU 126000-finish-tally-letanddig
+                    PERFORM 136000-start-tally-letanddig
+                       THRU 136000-finish-tally-letanddig
 
                WHEN sw-options-menu-choice-printsymb
-                    PERFORM 127000-start-tally-printsymb
-                       THRU 127000-finish-tally-printsymb
+                    PERFORM 137000-start-tally-printsymb
+                       THRU 137000-finish-tally-printsymb
 
                WHEN sw-options-menu-choice-numbsymb
-                    PERFORM 128000-start-tally-numbsymb
-                    PERFORM 128000-finish-tally-numbsymb
+                    PERFORM 138000-start-tally-numbsymb
+                    PERFORM 138000-finish-tally-numbsymb
 
                WHEN sw-options-menu-choice-allchars
-                    PERFORM 129000-start-tally-allchars
-                       THRU 129000-finish-tally-allchars
+                    PERFORM 139000-start-tally-allchars
+                       THRU 139000-finish-tally-allchars
 
                WHEN sw-options-menu-choice-exitprog
                     DISPLAY "Leaving this program..."
@@ -263,80 +278,100 @@
                             "Please correct your capture."
 
            END-EVALUATE.
-        120000-finish-validate-menu-option.
+        130000-finish-validate-menu-option.
            EXIT.
 
-         121000-start-get-string-chars.
+         131000-start-get-string-chars.
            DISPLAY "Enter any character string: " WITH NO ADVANCING
-           ACCEPT ws-string.
-         121000-finish-get-string-chars.
+           ACCEPT ws-string
+
+           DISPLAY "Captured chain:"
+           DISPLAY "-> " ws-string " <-".
+         131000-finish-get-string-chars.
            EXIT.
 
-         122000-start-tally-uppercase.
+         132000-start-tally-uppercase.
            DISPLAY "Capitalization Count."
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-34  TO ws-starting-position
            MOVE ws-cte-59  TO ws-finishing-position
 
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases.
-         122000-finish-tally-uppercase.
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases.
+         132000-finish-tally-uppercase.
            EXIT.
 
-          122100-start-counting-cases.
+          132100-start-counting-cases.
             DISPLAY "Counting statistics."
+            MOVE ZEROES                  TO ws-charging-positions
 
+            DISPLAY "Loading values ​​to search for..."
             SET idx-character-set-group  TO ws-cte-01
-            PERFORM 122110-start-charging-elements
-               THRU 122110-finish-charging-elements
+            PERFORM 132110-start-charging-elements
+               THRU 132110-finish-charging-elements
             VARYING idx-charset-element
                FROM ws-starting-position BY ws-cte-01
               UNTIL idx-charset-element
                  IS GREATER THAN ws-finishing-position
+                 OR idx-character-set-group
+                 IS GREATER THAN cte-96
 
-            PERFORM 122120-start-counting-appearances
-               THRU 122120-finish-counting-appearances
+            DISPLAY "Count the appearances and extract them..."
+            SET idx-built-str-char       TO ws-built-str-position
+            PERFORM 132120-start-counting-appearances
+               THRU 132120-finish-counting-appearances
             VARYING idx-string-char
                FROM ws-cte-01            BY ws-cte-01
-              UNTIL idx-string-char      IS GREATER THAN cte-80
+              UNTIL idx-string-char      IS GREATER THAN cte-96
               AFTER idx-character-set-group
                FROM ws-cte-01            BY ws-cte-01
               UNTIL idx-character-set-group
                  IS GREATER THAN ws-charging-positions
+                 OR idx-built-str-char
+                 IS GREATER THAN cte-96
 
-            PERFORM 122130-start-view-appearance-counts
-               THRU 122130-finish-view-appearance-counts
+            DISPLAY "Display the occurrences of each element found..."
+            PERFORM 132130-start-view-appearance-counts
+               THRU 132130-finish-view-appearance-counts
             VARYING idx-character-set-group
                FROM ws-cte-01            BY ws-cte-01
               UNTIL idx-character-set-group
-                 IS GREATER THAN ws-charging-positions.
-          122100-finish-counting-cases.
+                 IS GREATER THAN ws-charging-positions
+
+            DISPLAY "Purified chain according to criteria:"
+            DISPLAY "-> " ws-built-string-s " <-".
+          132100-finish-counting-cases.
             EXIT.
 
-          122110-start-charging-elements.
+          132110-start-charging-elements.
+             ADD ws-cte-01                  TO ws-charging-positions
+
             MOVE ws-charset-element (idx-charset-element)
               TO ws-charset-sg-item (idx-character-set-group)
 
             MOVE ZEROES
               TO ws-charset-sg-cnt  (idx-character-set-group)
 
-             ADD ws-cte-01                  TO ws-charging-positions
-
              SET idx-character-set-group UP BY ws-cte-01.
-          122110-finish-charging-elements.
+          132110-finish-charging-elements.
             EXIT.
 
-          122120-start-counting-appearances.
-            IF ws-string-char          (idx-string-char) IS EQUAL TO 
-               ws-charset-sg-item      (idx-character-set-group)
+          132120-start-counting-appearances.
+            IF ws-string-char            (idx-string-char) IS EQUAL TO 
+               ws-charset-sg-item        (idx-character-set-group)
                  ADD ws-cte-01
-                  TO ws-charset-sg-cnt (idx-character-set-group)
+                  TO ws-charset-sg-cnt   (idx-character-set-group)
+                     ws-built-str-position
+
+                MOVE ws-string-char      (idx-string-char)
+                  TO ws-built-str-char   (idx-built-str-char)
+
+                 SET idx-built-str-char UP BY ws-cte-01
             END-IF.
-          122120-finish-counting-appearances.
+          132120-finish-counting-appearances.
             EXIT.
  
-          122130-start-view-appearance-counts.
+          132130-start-view-appearance-counts.
             IF ws-charset-sg-cnt (idx-character-set-group) NOT = ZEROES
                DISPLAY "["        ws-charset-sg-item
                                  (idx-character-set-group)
@@ -344,104 +379,97 @@
                                  (idx-character-set-group)
                        "}."
             END-IF.
-          122130-finish-view-appearance-counts.
+          132130-finish-view-appearance-counts.
             EXIT.
 
-         123000-start-tally-lowercase.
+         133000-start-tally-lowercase.
            DISPLAY "Lowercase Counting."
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-66  TO ws-starting-position
            MOVE ws-cte-91  TO ws-finishing-position
 
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases.
-         123000-finish-tally-lowercase.
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases.
+         133000-finish-tally-lowercase.
            EXIT.
 
-         124000-start-tally-bothcase.
+         134000-start-tally-bothcase.
            DISPLAY "Uppercase and Lowercase Counting."
    
-           PERFORM 122000-start-tally-uppercase
-              THRU 122000-finish-tally-uppercase
+           PERFORM 132000-start-tally-uppercase
+              THRU 132000-finish-tally-uppercase
 
-           PERFORM 123000-start-tally-lowercase
-              THRU 123000-finish-tally-lowercase.
-         124000-finish-tally-bothcase.
+           PERFORM 133000-start-tally-lowercase
+              THRU 133000-finish-tally-lowercase.
+         134000-finish-tally-bothcase.
             EXIT.
 
-         125000-start-tally-numdigits.
+         135000-start-tally-numdigits.
            DISPLAY "Counting Numerical Digits."
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-17  TO ws-starting-position
            MOVE ws-cte-26  TO ws-finishing-position
 
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases.
-         125000-finish-tally-numdigits.
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases.
+         135000-finish-tally-numdigits.
            EXIT.
 
-         126000-start-tally-letanddig.
+         136000-start-tally-letanddig.
            DISPLAY "Counting Uppercase, Lowercase and Numeric Digits."
 
-           PERFORM 124000-start-tally-bothcase
-              THRU 124000-finish-tally-bothcase
+           PERFORM 134000-start-tally-bothcase
+              THRU 134000-finish-tally-bothcase
 
-           PERFORM 125000-start-tally-numdigits
-              THRU 125000-finish-tally-numdigits.
-         126000-finish-tally-letanddig.
+           PERFORM 135000-start-tally-numdigits
+              THRU 135000-finish-tally-numdigits.
+         136000-finish-tally-letanddig.
            EXIT.
 
-         127000-start-tally-printsymb.
+         137000-start-tally-printsymb.
            DISPLAY "Printable Special Symbol Counting."
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-01  TO ws-starting-position
            MOVE ws-cte-16  TO ws-finishing-position
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-27  TO ws-starting-position
            MOVE ws-cte-33  TO ws-finishing-position
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-60  TO ws-starting-position
            MOVE ws-cte-65  TO ws-finishing-position
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-92  TO ws-starting-position
            MOVE ws-cte-96  TO ws-finishing-position
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases.
-         127000-finish-tally-printsymb.
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases.
+         137000-finish-tally-printsymb.
            EXIT.
 
-         128000-start-tally-numbsymb.
+         138000-start-tally-numbsymb.
            DISPLAY "Number Digit and Special Symbols Counting."
 
-           PERFORM 125000-start-tally-numdigits
-              THRU 125000-finish-tally-numdigits
+           PERFORM 135000-start-tally-numdigits
+              THRU 135000-finish-tally-numdigits
 
-           PERFORM 127000-start-tally-printsymb
-              THRU 127000-finish-tally-printsymb.
-         128000-finish-tally-numbsymb.
+           PERFORM 137000-start-tally-printsymb
+              THRU 137000-finish-tally-printsymb.
+         138000-finish-tally-numbsymb.
            EXIT.
 
-         129000-start-tally-allchars.
+         139000-start-tally-allchars.
            DISPLAY "Count of all printable characters."
 
-           MOVE ZEROES     TO ws-charging-positions
            MOVE ws-cte-01  TO ws-starting-position
            MOVE ws-cte-96  TO ws-finishing-position
-           PERFORM 122100-start-counting-cases
-              THRU 122100-finish-counting-cases.
-         129000-finish-tally-allchars.
+           PERFORM 132100-start-counting-cases
+              THRU 132100-finish-counting-cases.
+         139000-finish-tally-allchars.
            EXIT.
 
        END PROGRAM CntUpLow.
