@@ -3,6 +3,7 @@
 
         DATA DIVISION.
         WORKING-STORAGE SECTION.
+        78  cte-80                                    VALUE 80.
         78  cte-95                                    VALUE 95.
 
         01  ws-environmental-variables.
@@ -161,7 +162,8 @@
                 88  sw-options-menu-choice-exitprog   VALUE 9.
 
             03  ws-string.         
-                05  ws-string-char         OCCURS 285 TIMES
+                05  ws-string-char         OCCURS cte-80 TIMES
+                                           INDEXED BY idx-string-char
                                            PIC X(01)  VALUE SPACE.
 
         PROCEDURE DIVISION.
@@ -283,7 +285,10 @@
             SET idx-charset-count        TO ws-starting-position
             PERFORM 122110-start-counting-appearances
                THRU 122110-finish-counting-appearances
-            VARYING idx-charset-item
+            VARYING idx-string-char
+               FROM ws-cte-01            BY ws-cte-01
+              UNTIL idx-string-char      IS GREATER THAN cte-80
+              AFTER idx-charset-item
                FROM ws-starting-position BY ws-cte-01
               UNTIL idx-charset-item
                  IS GREATER THAN ws-finishing-position
@@ -299,11 +304,13 @@
             EXIT.
 
           122110-start-counting-appearances.
-             INSPECT ws-string
-            TALLYING ws-charset-count    (idx-charset-count)
-                 FOR ALL ws-charset-item (idx-charset-item)
+            IF ws-string-char  (idx-string-char) IS EQUAL TO 
+               ws-charset-item (idx-charset-item)
+                 SET idx-charset-count TO idx-charset-item
 
-            SET idx-charset-count UP BY ws-cte-01.
+                 ADD ws-cte-01
+                  TO ws-charset-count (idx-charset-count)
+            END-IF.
           122110-finish-counting-appearances.
             EXIT.
  
