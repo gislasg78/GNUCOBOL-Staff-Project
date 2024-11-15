@@ -61,12 +61,12 @@
        File-Handler SECTION.
            USE AFTER ERROR PROCEDURE ON myFilex.
        000000-status-check.
-           DISPLAY "+---+----+---+----+---+----+-"
-           DISPLAY "|Archive Status Information.|"
-           DISPLAY "+---+----+---+----+---+----+-"
+           DISPLAY "+---+----+---+----+---+----+---"
+           DISPLAY "| Archive Status Information. |"
+           DISPLAY "+---+----+---+----+---+----+---"
            DISPLAY "| File name  : [" ws-f-name-myFilex "]."
            DISPLAY "| Error code : [" fs-myFilex "]."
-           DISPLAY "+---+----+---+----+---+----+-"
+           DISPLAY "+---+----+---+----+---+----+---"
            STOP "Press the ENTER key to continue...".
        END DECLARATIVES.
 

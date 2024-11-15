@@ -69,16 +69,18 @@
                88  sw-menu-option-look-for-all             VALUE 5.
                88  sw-menu-option-exit                     VALUE 6.
 
-           03  ws-menu-mode-read-option         PIC 9(01)  VALUE ZERO.
-               88  sw-menu-mode-read-option-start          VALUE 1.
-               88  sw-menu-mode-read-option-givenkey-eq    VALUE 2.
-               88  sw-menu-mode-read-option-givenkey-gteq  VALUE 3.
-               88  sw-menu-mode-read-option-finish         VALUE 4.
-               88  sw-menu-mode-read-option-r-backward     VALUE 5.
-               88  sw-menu-mode-read-option-r-forward      VALUE 6.
-               88  sw-menu-mode-read-option-prev-rcrd      VALUE 7.
-               88  sw-menu-mode-read-option-next-rcrd      VALUE 8.
-               88  sw-menu-mode-read-option-exit           VALUE 9.
+           03  ws-menu-mode-read-option         PIC 9(02)  VALUE ZEROES.
+               88  sw-menu-mode-read-option-start          VALUE 01.
+               88  sw-menu-mode-read-option-givenkey-eq    VALUE 02.
+               88  sw-menu-mode-read-option-givenkey-gteq  VALUE 03.
+               88  sw-menu-mode-read-option-finish         VALUE 04.
+               88  sw-menu-mode-read-option-r-first-rcrd   VALUE 05.
+               88  sw-menu-mode-read-option-r-last-rcrd    VALUE 06.
+               88  sw-menu-mode-read-option-r-backward     VALUE 07.
+               88  sw-menu-mode-read-option-r-forward      VALUE 08.
+               88  sw-menu-mode-read-option-prev-rcrd      VALUE 09.
+               88  sw-menu-mode-read-option-next-rcrd      VALUE 10.
+               88  sw-menu-mode-read-option-exit           VALUE 11.
 
            03  ws-operation-class               PIC A(13)  VALUE SPACES.
                88  sw-operation-class-CLOSE     VALUE "CLOSE".
@@ -412,28 +414,33 @@
 
           225100-start-menu-reading-offset.
             DISPLAY SPACE
-            DISPLAY "+===+====+===+====+===+====+===+===+"
-            DISPLAY "|       Record Reading Menu.       |"
-            DISPLAY "+===+====+===+====+===+====+===+===+"
-            DISPLAY "| Input/Output Pointer Positioning.|"
-            DISPLAY "+---+----+---+----+---+----+---+---+"
-            DISPLAY "| [1]. At the start.               |"
-            DISPLAY "| [2]. At on a exact & given key.  |"
-            DISPLAY "| [3]. At on a aproximate key.     |"
-            DISPLAY "| [4]. At the finish.              |"
-            DISPLAY "+---+----+---+----+---+----+---+---+"
-            DISPLAY "| Sequential traversal of records. |"
-            DISPLAY "+---+----+---+----+---+----+---+---+"
-            DISPLAY "| [5]. Read the records backward.  |"
-            DISPLAY "| [6]. Read the records forward.   |"
-            DISPLAY "+---+----+---+----+---+----+---+---+"
-            DISPLAY "|     Record by record reading.    |"
-            DISPLAY "+---+----+---+----+---+----+---+---+"
-            DISPLAY "| [7]. Read previous record.       |"
-            DISPLAY "| [8]. Read next record.           |"
-            DISPLAY "+---+----+---+----+---+----+---+---+"
-            DISPLAY "| [9]. Return to main menu.        |"
-            DISPLAY "+===+====+===+====+===+====+===+===+"
+            DISPLAY "+===+====+===+====+===+====+===+===+="
+            DISPLAY "|        Record Reading Menu.       |"
+            DISPLAY "+===+====+===+====+===+====+===+===+="
+            DISPLAY "| Input/Output Pointer Positioning. |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "| [01]. At the start.               |"
+            DISPLAY "| [02]. At on a exact & given key.  |"
+            DISPLAY "| [03]. At on a aproximate key.     |"
+            DISPLAY "| [04]. At the finish.              |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "|      Reading extreme records.     |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "| [05]. Read first record.          |"
+            DISPLAY "| [06]. Read last record.           |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "|  Sequential traversal of records. |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "| [07]. Read the records backward.  |"
+            DISPLAY "| [08]. Read the records forward.   |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "|      Record by record reading.    |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "| [09]. Read previous record.       |"
+            DISPLAY "| [10]. Read next record.           |"
+            DISPLAY "+---+----+---+----+---+----+---+---+-"
+            DISPLAY "| [11]. Return to main menu.        |"
+            DISPLAY "+===+====+===+====+===+====+===+===+="
             DISPLAY "Enter your choice: " WITH NO ADVANCING
             ACCEPT ws-menu-mode-read-option
 
@@ -465,6 +472,18 @@
                 WHEN sw-menu-mode-read-option-finish
                      PERFORM 225240-start-menu-mode-finish-position
                         THRU 225240-finish-menu-mode-finish-position
+
+                WHEN sw-menu-mode-read-option-r-first-rcrd
+                     PERFORM 225210-start-menu-mode-start-position
+                        THRU 225210-finish-menu-mode-start-position
+                     PERFORM 225260-start-menu-mode-read-forwarding
+                        THRU 225260-finish-menu-mode-read-forwarding
+
+                WHEN sw-menu-mode-read-option-r-last-rcrd
+                     PERFORM 225240-start-menu-mode-finish-position
+                        THRU 225240-finish-menu-mode-finish-position
+                     PERFORM 225250-start-menu-mode-read-backwarding
+                        THRU 225250-finish-menu-mode-read-backwarding
 
                 WHEN sw-menu-mode-read-option-r-backward
                      PERFORM 225250-start-menu-mode-read-backwarding
