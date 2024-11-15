@@ -42,7 +42,7 @@
                05  ws-answer	           VALUE SPACE PIC A(01).
                    88  sw-exit-answer      VALUES ARE 'N', 'n'.
                05  ws-cnt-ins-rows         PIC S9(03) VALUE ZEROES
-                                           SIGN IS LEADING
+                                           SIGN  IS LEADING
                                            SEPARATE CHARACTER.
                05  ws-cte-01               PIC 9(01)  VALUE 1.
 
@@ -61,17 +61,23 @@
        File-Handler SECTION.
            USE AFTER ERROR PROCEDURE ON myFilex.
        000000-status-check.
-           DISPLAY "Archive Status Information."
-           DISPLAY asterisk " File name  : [" ws-f-name-myFilex "]."
-           DISPLAY asterisk " Error code : [" fs-myFilex "]."
+           DISPLAY "+---+----+---+----+---+----+-"
+           DISPLAY "|Archive Status Information.|"
+           DISPLAY "+---+----+---+----+---+----+-"
+           DISPLAY "| File name  : [" ws-f-name-myFilex "]."
+           DISPLAY "| Error code : [" fs-myFilex "]."
+           DISPLAY "+---+----+---+----+---+----+-"
            STOP "Press the ENTER key to continue...".
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
-           DISPLAY "Sequential Organizing File Creator and Generator."
+           DISPLAY "+---+----+---+----+---+----+"
+           DISPLAY "|     Sequential Files.    |"
+           DISPLAY "+---+----+---+----+---+----+"
            DISPLAY asterisk " File name to open: " WITH NO ADVANCING
            ACCEPT ws-f-name-myFilex
 
+           DISPLAY "Sequential Organizing File Creator and Generator."
            OPEN EXTEND myFilex
            DISPLAY "Opening file. Status Code: [" fs-myFilex "].".
 
@@ -93,17 +99,17 @@
 
            IF ws-f-rec-myFilex IS alphabetic-and-numeric
               DISPLAY "Validated content!"
-              DISPLAY "-> " ws-f-rec-myfilex " <-"
 
               PERFORM 110000-begin-keep-a-record
                  THRU 110000-end-keep-a-record
            ELSE
               DISPLAY "Input line contains other characters: "
-              DISPLAY "-> " ws-f-rec-myFilex " <-"
            END-IF
 
+           DISPLAY "[-> " ws-f-rec-myfilex " <-]"
+
            DISPLAY "Do you want to capture more lines of text "
-                   "(Y/N)? : " WITH NO ADVANCING
+                   "(y/n)? : " WITH NO ADVANCING
            ACCEPT ws-answer.
        100000-end-save-master-record.
            EXIT.
@@ -119,7 +125,9 @@
                     THRU 111000-end-add-page-break
 
              NOT AT EOP
-                 DISPLAY asterisk "Inserted line: [" LINAGE-COUNTER "]."
+                 DISPLAY asterisk
+                         " Inserted line: [" LINAGE-COUNTER "]. "
+                         asterisk
 
            END-WRITE
 
@@ -129,8 +137,10 @@
 
          111000-begin-add-page-break.
            DISPLAY asterisk
-           DISPLAY "Line break has occurred on line: "
-                    LINAGE-COUNTER
+           DISPLAY asterisk
+                   "Line break has occurred on line: ["
+                    LINAGE-COUNTER "]."
+                   asterisk
            DISPLAY asterisk
 
            MOVE SPACES                TO ws-f-rec-myFilex

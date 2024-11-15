@@ -20,15 +20,17 @@
        DATA DIVISION.
        FILE SECTION.
        FD  idxfile
-           BLOCK  CONTAINS 10 RECORDS
+           BLOCK  CONTAINS 05 TO 15 RECORDS
            DATA   RECORD   IS f-idxfile-rec
            LABEL  RECORD   IS STANDARD
-           RECORD CONTAINS 13 CHARACTERS
+           RECORD CONTAINS 14 CHARACTERS
            RECORDING MODE  IS F.
 
        01  f-idxfile-rec.
            03  f-idxfile-rec-cod-employee       PIC 9(05)  VALUE ZEROES.
-           03  f-idxfile-rec-salary-employee    PIC 9(06)V9(02)
+           03  f-idxfile-rec-salary-employee    PIC S9(06)V9(02)
+                                                SIGN  IS LEADING
+                                                SEPARATE CHARACTER
                                                            VALUE ZEROES.
 
        WORKING-STORAGE SECTION.
@@ -47,14 +49,18 @@
                05  ws-idxfile-record-found      PIC A(01)  VALUE SPACE.
                    88  sw-idxfile-recrd-found-N            VALUE 'N'.
                    88  sw-idxfile-recrd-found-Y            VALUE 'Y'.
-               05  ws-f-idxfile-rec-salary-employee-ed PIC $Z,ZZZ,ZZ9.99
+               05  ws-f-idxfile-rec-salary-employee-ed
+                                                    PIC  $++,+++,++9.99
                                                            VALUE ZEROES.
 
            03  ws-f-idxfile-rec.
                05  ws-f-idxfile-rec-cod-employee           PIC 9(05)
                                                            VALUE ZEROES.
-               05  ws-f-idxfile-rec-salary-employee    PIC 9(06)V9(02)
+               05  ws-f-idxfile-rec-salary-employee    PIC S9(06)V9(02)
+                                                      SIGN  IS LEADING
+                                                      SEPARATE CHARACTER
                                                            VALUE ZEROES.
+
            03  ws-menu-option                   PIC 9(01)  VALUE ZERO.
                88  sw-menu-option-add                      VALUE 1.
                88  sw-menu-option-delete                   VALUE 2.
@@ -65,13 +71,14 @@
 
            03  ws-menu-mode-read-option         PIC 9(01)  VALUE ZERO.
                88  sw-menu-mode-read-option-start          VALUE 1.
-               88  sw-menu-mode-read-option-givenkey       VALUE 2.
-               88  sw-menu-mode-read-option-finish         VALUE 3.
-               88  sw-menu-mode-read-option-r-forward      VALUE 4.
+               88  sw-menu-mode-read-option-givenkey-eq    VALUE 2.
+               88  sw-menu-mode-read-option-givenkey-gteq  VALUE 3.
+               88  sw-menu-mode-read-option-finish         VALUE 4.
                88  sw-menu-mode-read-option-r-backward     VALUE 5.
-               88  sw-menu-mode-read-option-next-rcrd      VALUE 6.
+               88  sw-menu-mode-read-option-r-forward      VALUE 6.
                88  sw-menu-mode-read-option-prev-rcrd      VALUE 7.
-               88  sw-menu-mode-read-option-exit           VALUE 8.
+               88  sw-menu-mode-read-option-next-rcrd      VALUE 8.
+               88  sw-menu-mode-read-option-exit           VALUE 9.
 
            03  ws-operation-class               PIC A(13)  VALUE SPACES.
                88  sw-operation-class-CLOSE     VALUE "CLOSE".
@@ -81,8 +88,9 @@
                88  sw-operation-class-READNEXT  VALUE "READ NEXT".
                88  sw-operation-class-READPREV  VALUE "READ PREVIOUS".
                88  sw-operation-class-REWRITE   VALUE "REWRITE".
-               88  sw-operation-class-START     VALUE "START".
+               88  sw-operation-class-STARTEQ   VALUE "START EQUAL".
                88  sw-operation-class-STARTFRST VALUE "START FIRST".
+               88  sw-operation-class-STARTGTEQ VALUE "START GTEQ".
                88  sw-operation-class-STARTLST  VALUE "START LAST".
                88  sw-operation-class-WRITE     VALUE "WRITE".
 
@@ -102,15 +110,16 @@
            DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY "|   File status information.   |"
            DISPLAY "+---+----+---+----+---+----+---+"
-           DISPLAY "| File Name   : [" ws-idxfile-name "]."
-           DISPLAY "| Operation   : [" ws-operation-class "]."
-           DISPLAY "| Status Code : [" fs-idxfile "]."
+           DISPLAY "| " asterisk " File Name   : [" 
+                                   ws-idxfile-name "]."
+           DISPLAY "| " asterisk " Operation   : ["
+                                   ws-operation-class "]."
+           DISPLAY "| " asterisk " Status Code : ["
+                                   fs-idxfile "]."
            DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY "Press the ENTER key to continue..."
               WITH NO ADVANCING
-           ACCEPT OMITTED
-
-           GOBACK.
+           ACCEPT OMITTED.
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
@@ -406,14 +415,24 @@
             DISPLAY "+===+====+===+====+===+====+===+===+"
             DISPLAY "|       Record Reading Menu.       |"
             DISPLAY "+===+====+===+====+===+====+===+===+"
-            DISPLAY "| [1]. Positioning at the start.   |"
-            DISPLAY "| [2]. Positioning on a given key. |"
-            DISPLAY "| [3]. Positioning at the finish.  |"
-            DISPLAY "| [4]. Read the records forward.   |"
+            DISPLAY "| Input/Output Pointer Positioning.|"
+            DISPLAY "+---+----+---+----+---+----+---+---+"
+            DISPLAY "| [1]. At the start.               |"
+            DISPLAY "| [2]. At on a exact & given key.  |"
+            DISPLAY "| [3]. At on a aproximate key.     |"
+            DISPLAY "| [4]. At the finish.              |"
+            DISPLAY "+---+----+---+----+---+----+---+---+"
+            DISPLAY "| Sequential traversal of records. |"
+            DISPLAY "+---+----+---+----+---+----+---+---+"
             DISPLAY "| [5]. Read the records backward.  |"
-            DISPLAY "| [6]. Read next record.           |"
+            DISPLAY "| [6]. Read the records forward.   |"
+            DISPLAY "+---+----+---+----+---+----+---+---+"
+            DISPLAY "|     Record by record reading.    |"
+            DISPLAY "+---+----+---+----+---+----+---+---+"
             DISPLAY "| [7]. Read previous record.       |"
-            DISPLAY "| [8]. Return to main menu.        |"
+            DISPLAY "| [8]. Read next record.           |"
+            DISPLAY "+---+----+---+----+---+----+---+---+"
+            DISPLAY "| [9]. Return to main menu.        |"
             DISPLAY "+===+====+===+====+===+====+===+===+"
             DISPLAY "Enter your choice: " WITH NO ADVANCING
             ACCEPT ws-menu-mode-read-option
@@ -428,37 +447,42 @@
 
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-option-start
-                     PERFORM 225210-start-menu-mode-start-positioning
-                        THRU 225210-finish-menu-mode-start-positioning
+                     PERFORM 225210-start-menu-mode-start-position
+                        THRU 225210-finish-menu-mode-start-position
 
-                WHEN sw-menu-mode-read-option-givenkey
+                WHEN sw-menu-mode-read-option-givenkey-eq
                      PERFORM 221100-start-capture-key-field
                         THRU 221100-finish-capture-key-field
+                     PERFORM 225220-start-menu-mode-read-position-eq
+                        THRU 225220-finish-menu-mode-read-position-eq
 
-                     PERFORM 225220-start-menu-mode-read-positioning
-                        THRU 225220-finish-menu-mode-read-positioning
+                WHEN sw-menu-mode-read-option-givenkey-gteq
+                     PERFORM 221100-start-capture-key-field
+                        THRU 221100-finish-capture-key-field
+                     PERFORM 225230-start-menu-mode-read-position-gteq
+                        THRU 225230-finish-menu-mode-read-position-gteq
 
                 WHEN sw-menu-mode-read-option-finish
-                     PERFORM 225230-start-menu-mode-finish-positioning
-                        THRU 225230-finish-menu-mode-finish-positioning
-
-                WHEN sw-menu-mode-read-option-r-forward
-                     PERFORM 225240-start-menu-mode-read-forwarding
-                        THRU 225240-finish-menu-mode-read-forwarding
-                       UNTIL sw-idxfile-EOF-Y
+                     PERFORM 225240-start-menu-mode-finish-position
+                        THRU 225240-finish-menu-mode-finish-position
 
                 WHEN sw-menu-mode-read-option-r-backward
                      PERFORM 225250-start-menu-mode-read-backwarding
                         THRU 225250-finish-menu-mode-read-backwarding
                        UNTIL sw-idxfile-EOF-Y
 
-                WHEN sw-menu-mode-read-option-next-rcrd
-                     PERFORM 225240-start-menu-mode-read-forwarding
-                        THRU 225240-finish-menu-mode-read-forwarding
+                WHEN sw-menu-mode-read-option-r-forward
+                     PERFORM 225260-start-menu-mode-read-forwarding
+                        THRU 225260-finish-menu-mode-read-forwarding
+                       UNTIL sw-idxfile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-prev-rcrd
                      PERFORM 225250-start-menu-mode-read-backwarding
                         THRU 225250-finish-menu-mode-read-backwarding
+
+                WHEN sw-menu-mode-read-option-next-rcrd
+                     PERFORM 225260-start-menu-mode-read-forwarding
+                        THRU 225260-finish-menu-mode-read-forwarding
 
                 WHEN sw-menu-mode-read-option-exit 
                      DISPLAY "Returning to main menu..."
@@ -470,72 +494,86 @@
           225200-finish-validate-option-menu-reading-offset.
             EXIT.
 
-          225210-start-menu-mode-start-positioning.
+          225210-start-menu-mode-start-position.
             SET sw-operation-class-STARTFRST  TO TRUE
 
             START idxfile FIRST
                   INVALID KEY
-                          DISPLAY "Error positioning at begin."
+                          DISPLAY "Error positioning at begin!"
 
               NOT INVALID KEY
-                          DISPLAY "Positioning at the begin."
                           ADD  cte-01      TO ws-repositioning-records
+                          DISPLAY asterisk
+                                  "Positioning at the begin."
+                                  asterisk
 
             END-START.
-          225210-finish-menu-mode-start-positioning.
+          225210-finish-menu-mode-start-position.
             EXIT.
 
-          225220-start-menu-mode-read-positioning.
-            SET sw-operation-class-START   TO TRUE
+          225220-start-menu-mode-read-position-eq.
+            SET sw-operation-class-STARTEQ    TO TRUE
 
             START idxfile
-              KEY IS GREATER OR EQUAL      TO f-idxfile-rec-cod-employee
+              KEY IS EQUAL TO f-idxfile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
-                  PERFORM 225210-start-menu-mode-start-positioning
-                     THRU 225210-finish-menu-mode-start-positioning
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
-                  DISPLAY "Positioning done correctly!"
+                  DISPLAY asterisk
+                          "Exact key to locate: ["
+                           f-idxfile-rec-cod-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning exact key done correctly!"
+                          asterisk
 
             END-START.
-          225220-finish-menu-mode-read-positioning.
+          225220-finish-menu-mode-read-position-eq.
             EXIT.
 
-          225230-start-menu-mode-finish-positioning.
+          225230-start-menu-mode-read-position-gteq.
+            SET sw-operation-class-STARTGTEQ  TO TRUE
+
+            START idxfile
+              KEY IS GREATER THAN OR EQUAL TO f-idxfile-rec-cod-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD  cte-01              TO ws-repositioning-records
+                  DISPLAY asterisk
+                          "Approximate key to locate: ["
+                           f-idxfile-rec-cod-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning approximate key done correctly!"
+                          asterisk
+
+            END-START.
+          225230-finish-menu-mode-read-position-gteq.
+            EXIT.
+
+          225240-start-menu-mode-finish-position.
             SET sw-operation-class-STARTLST   TO TRUE
 
             START idxfile LAST
                   INVALID KEY
-                          DISPLAY "Error positioning at end."
+                          DISPLAY "Error positioning at end!"
 
               NOT INVALID KEY
-                          DISPLAY "Positioning at the end."
                           ADD  cte-01      TO ws-repositioning-records
+                          DISPLAY asterisk
+                                  "Positioning at the end."
+                                  asterisk
 
             END-START.
-          225230-finish-menu-mode-finish-positioning.
-            EXIT.
-
-          225240-start-menu-mode-read-forwarding.
-            SET sw-operation-class-READNEXT   TO TRUE
-
-            READ idxfile NEXT RECORD        INTO ws-f-idxfile-rec
-              AT END
-                 SET sw-idxfile-EOF-Y         TO TRUE
-                 DISPLAY "End of file!"
-                 PERFORM 225210-start-menu-mode-start-positioning
-                    THRU 225210-finish-menu-mode-start-positioning
-
-             NOT AT END
-                 ADD cte-01                   TO ws-reading-records
-
-                 PERFORM 221210-start-show-file-info
-                    THRU 221210-finish-show-file-info
-
-            END-READ.
-          225240-finish-menu-mode-read-forwarding.
+          225240-finish-menu-mode-finish-position.
             EXIT.
 
           225250-start-menu-mode-read-backwarding.
@@ -545,8 +583,8 @@
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
-                 PERFORM 225230-start-menu-mode-finish-positioning
-                    THRU 225230-finish-menu-mode-finish-positioning
+                 PERFORM 225240-start-menu-mode-finish-position
+                    THRU 225240-finish-menu-mode-finish-position
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
@@ -556,6 +594,26 @@
 
             END-READ.
           225250-finish-menu-mode-read-backwarding.
+            EXIT.
+
+          225260-start-menu-mode-read-forwarding.
+            SET sw-operation-class-READNEXT   TO TRUE
+
+            READ idxfile NEXT RECORD        INTO ws-f-idxfile-rec
+              AT END
+                 SET sw-idxfile-EOF-Y         TO TRUE
+                 DISPLAY "End of file!"
+                 PERFORM 225210-start-menu-mode-start-position
+                    THRU 225210-finish-menu-mode-start-position
+
+             NOT AT END
+                 ADD cte-01                   TO ws-reading-records
+
+                 PERFORM 221210-start-show-file-info
+                    THRU 221210-finish-show-file-info
+
+            END-READ.
+          225260-finish-menu-mode-read-forwarding.
             EXIT.
 
        300000-start-end-program.
