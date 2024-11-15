@@ -462,6 +462,8 @@
             EXIT.
 
           225210-start-menu-mode-start-positioning.
+            SET sw-operation-class-START  TO TRUE
+
             START idxfile FIRST
                   INVALID KEY
                           DISPLAY "Error positioning at begin."
@@ -493,6 +495,8 @@
             EXIT.
 
           225230-start-menu-mode-finish-positioning.
+            SET sw-operation-class-START  TO TRUE
+
             START idxfile LAST
                   INVALID KEY
                           DISPLAY "Error positioning at end."
