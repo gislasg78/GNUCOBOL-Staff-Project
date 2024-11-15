@@ -287,7 +287,10 @@
                     ws-f-idxfile-rec-salary-employee-ed "]"
             DISPLAY "+---+----+---+----+---+----+"
             DISPLAY "Press the ENTER key to continue..."
-            ACCEPT OMITTED.
+               WITH NO ADVANCING
+            ACCEPT OMITTED
+
+            DISPLAY SPACE.
          221210-finish-show-file-info.
             EXIT.
 
