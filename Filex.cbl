@@ -20,7 +20,7 @@
        DATA DIVISION.
        FILE SECTION.
        FD  myFilex
-           BLOCK CONTAINS  10 RECORDS
+           BLOCK CONTAINS  05 TO 10 RECORDS
            DATA RECORD     IS f-rec-myFilex
            LABEL RECORD    IS OMITTED
            RECORD CONTAINS 20 CHARACTERS
@@ -117,7 +117,6 @@
 
         110000-begin-keep-a-record.
            DISPLAY "Recording log in progress..."
-           ADD ws-cte-01                    TO ws-cnt-ins-rows
 
            WRITE f-rec-myFilex            FROM ws-f-rec-myFilex
               AT END-OF-PAGE
@@ -125,6 +124,7 @@
                     THRU 111000-end-add-page-break
 
              NOT AT EOP
+                 ADD ws-cte-01              TO ws-cnt-ins-rows
                  DISPLAY asterisk
                          " Inserted line: [" LINAGE-COUNTER "]. "
                          asterisk
@@ -139,7 +139,7 @@
            DISPLAY asterisk
            DISPLAY asterisk
                    "Line break has occurred on line: ["
-                    LINAGE-COUNTER "]."
+                   LINAGE-COUNTER "]."
                    asterisk
            DISPLAY asterisk
 

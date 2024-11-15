@@ -286,7 +286,8 @@
             DISPLAY "| Salary : ["
                     ws-f-idxfile-rec-salary-employee-ed "]"
             DISPLAY "+---+----+---+----+---+----+"
-            DISPLAY SPACE.
+            DISPLAY "Press the ENTER key to continue..."
+            ACCEPT OMITTED.
          221210-finish-show-file-info.
             EXIT.
 
