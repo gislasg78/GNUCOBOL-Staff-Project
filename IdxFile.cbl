@@ -26,8 +26,6 @@
 
        WORKING-STORAGE SECTION.
        77  fs-idxfile                           PIC 9(02)  VALUE ZEROES.
-           88  sw-fs-idxfile-success-completion            VALUE ZEROES.
-
        77  ws-idxfile-name                      PIC X(12)  VALUE SPACES.
 
        78  cte-01                                          VALUE 01.
@@ -42,6 +40,8 @@
                05  ws-idxfile-record-found      PIC A(01)  VALUE SPACE.
                    88  sw-idxfile-recrd-found-N            VALUE 'N'.
                    88  sw-idxfile-recrd-found-Y            VALUE 'Y'.
+               05  ws-f-idxfile-rec-salary-employee-ed PIC $Z,ZZZ,ZZ9.99
+                                                           VALUE ZEROES.
 
            03  ws-f-idxfile-rec.
                05  ws-f-idxfile-rec-cod-employee           PIC 9(05)
@@ -52,8 +52,8 @@
                88  sw-menu-option-add                      VALUE 1.
                88  sw-menu-option-delete                   VALUE 2.
                88  sw-menu-option-modify                   VALUE 3.
-               88  sw-menu-option-view-one                 VALUE 4.
-               88  sw-menu-option-view-all                 VALUE 5.
+               88  sw-menu-option-look-for-one                 VALUE 4.
+               88  sw-menu-option-look-for-all                 VALUE 5.
                88  sw-menu-option-exit                     VALUE 6.
 
            03  ws-menu-mode-read-option         PIC 9(01)  VALUE ZERO.
@@ -86,15 +86,18 @@
            USE AFTER ERROR PROCEDURE ON idxfile.
        000000-status-check.
            DISPLAY SPACE
-           DISPLAY "+---+----+---+----+---+----+"
-           DISPLAY "| File status information. |"
-           DISPLAY "+---+----+---+----+---+----+"
+           DISPLAY "+---+----+---+----+---+----+---+"
+           DISPLAY "|   File status information.   |"
+           DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY "| File Name   : [" ws-idxfile-name "]."
            DISPLAY "| Operation   : [" ws-operation-class "]."
            DISPLAY "| Status Code : [" fs-idxfile "]."
-           DISPLAY "+---+----+---+----+---+----+"
+           DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY "Press the ENTER key to continue..."
-           ACCEPT OMITTED.
+              WITH NO ADVANCING
+           ACCEPT OMITTED
+
+           GOBACK.
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
@@ -103,8 +106,7 @@
 
            PERFORM 200000-start-process-menu
               THRU 200000-finish-process-menu
-             UNTIL NOT (sw-fs-idxfile-success-completion)
-                OR sw-menu-option-exit
+             UNTIL sw-menu-option-exit
 
            PERFORM 300000-start-end-program
               THRU 300000-finish-end-program
@@ -128,8 +130,8 @@
            EXIT.
 
        200000-start-process-menu.
-           INITIALIZE ws-environmental-variables
-                      f-idxfile-rec
+           INITIALIZE f-idxfile-rec
+                      ws-environmental-variables
 
            PERFORM 210000-start-option-menu-display
               THRU 210000-finish-option-menu-display
@@ -141,17 +143,17 @@
 
         210000-start-option-menu-display.
            DISPLAY SPACE
-           DISPLAY "+===+====+===+====+===+====+="
-           DISPLAY "|   Indexed maintenance.    |"
-           DISPLAY "+===+====+===+====+===+====+="
-           DISPLAY "| [1]. Add a record.        |"
-           DISPLAY "| [2]. Delete a record.     |"
-           DISPLAY "| [3]. Modify a record.     |"
-           DISPLAY "| [4]. Look for a record.   |"
-           DISPLAY "| [5]. Look for all records.|"
-           DISPLAY "| [6]. Exit this program.   |"
-           DISPLAY "+===+====+===+====+===+====+="
-           DISPLAY "Enter your choice: " WITH NO ADVANCING
+           DISPLAY "+===+====+===+====+===+====+=="
+           DISPLAY "|    Indexed maintenance.    |"
+           DISPLAY "+===+====+===+====+===+====+=="
+           DISPLAY "| [1]. Add a record.         |"
+           DISPLAY "| [2]. Delete a record.      |"
+           DISPLAY "| [3]. Modify a record.      |"
+           DISPLAY "| [4]. Look for a record.    |"
+           DISPLAY "| [5]. Look for all records. |"
+           DISPLAY "| [6]. Exit this program.    |"
+           DISPLAY "+===+====+===+====+===+====+=="
+           DISPLAY "Enter your own choice: " WITH NO ADVANCING
            ACCEPT ws-menu-option
 
            DISPLAY "The chosen option was: " ws-menu-option.
@@ -163,32 +165,27 @@
                WHEN sw-menu-option-add
                     PERFORM 221000-start-add-a-record
                        THRU 221000-finish-add-a-record
-                      UNTIL NOT (sw-fs-idxfile-success-completion)
-                         OR sw-continue-response-N
+                      UNTIL sw-continue-response-N
 
                WHEN sw-menu-option-delete
                     PERFORM 222000-start-delete-a-record
                        THRU 222000-finish-delete-a-record
-                      UNTIL NOT (sw-fs-idxfile-success-completion)
-                         OR sw-continue-response-N
+                      UNTIL sw-continue-response-N
 
                WHEN sw-menu-option-modify
                     PERFORM 223000-start-modify-a-record
                        THRU 223000-finish-modify-a-record
-                      UNTIL NOT (sw-fs-idxfile-success-completion)
-                         OR sw-continue-response-N
+                      UNTIL sw-continue-response-N
 
-               WHEN sw-menu-option-view-one
+               WHEN sw-menu-option-look-for-one
                     PERFORM 224000-start-look-for-any-record
                        THRU 224000-finish-look-for-any-record
-                      UNTIL NOT (sw-fs-idxfile-success-completion)
-                         OR sw-continue-response-N
+                      UNTIL sw-continue-response-N
 
-               WHEN sw-menu-option-view-all
+               WHEN sw-menu-option-look-for-all
                     PERFORM 225000-start-look-for-all-records
                        THRU 225000-finish-look-for-all-records
-                      UNTIL NOT (sw-fs-idxfile-success-completion)
-                         OR sw-continue-response-N
+                      UNTIL sw-menu-mode-read-option-exit
                         
                WHEN sw-menu-option-exit
                     DISPLAY "Leaving this program..."
@@ -232,16 +229,16 @@
             EXIT.
 
           221200-start-look-for-a-record.
-           SET sw-operation-class-READ  TO TRUE
+            SET sw-operation-class-READ    TO TRUE
 
-            READ idxfile              INTO ws-f-idxfile-rec
+            READ idxfile                 INTO ws-f-idxfile-rec
              KEY IS f-idxfile-rec-cod-employee
                  INVALID KEY
                          SET sw-idxfile-recrd-found-N TO TRUE
                          DISPLAY "Record Not Found!"
 
              NOT INVALID KEY
-                         ADD cte-01     TO ws-reading-records
+                         ADD cte-01        TO ws-reading-records
                          SET sw-idxfile-recrd-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
 
@@ -250,8 +247,12 @@
 
             END-READ.
          221200-finish-look-for-a-record.
+            EXIT.
 
          221210-start-show-file-info.
+            MOVE ws-f-idxfile-rec-salary-employee
+              TO ws-f-idxfile-rec-salary-employee-ed
+
             DISPLAY SPACE
             DISPLAY "+---+----+---+----+---+----+"
             DISPLAY "|  Employee Information.   |"
@@ -259,7 +260,7 @@
             DISPLAY "| Code   : ["
                     ws-f-idxfile-rec-cod-employee "]."
             DISPLAY "| Salary : ["
-                    ws-f-idxfile-rec-salary-employee "]"
+                    ws-f-idxfile-rec-salary-employee-ed "]"
             DISPLAY "+---+----+---+----+---+----+"
             DISPLAY SPACE.
          221210-finish-show-file-info.
@@ -275,14 +276,14 @@
             EXIT.
 
          221400-start-store-a-record.
-            SET sw-operation-class-WRITE TO TRUE
+            SET sw-operation-class-WRITE   TO TRUE
 
-            WRITE f-idxfile-rec        FROM ws-f-idxfile-rec
+            WRITE f-idxfile-rec          FROM ws-f-idxfile-rec
                   INVALID KEY
                           DISPLAY "Duplicate Key!"
 
               NOT INVALID KEY
-                          ADD cte-01     TO ws-written-records
+                          ADD cte-01       TO ws-written-records
                           DISPLAY "Record saved successfully!"
 
             END-WRITE.
@@ -293,7 +294,7 @@
             DISPLAY "Do you want to continue doing the same "
                     "operation? (y/n) : " WITH NO ADVANCING
 
-           ACCEPT ws-continue-response.
+            ACCEPT ws-continue-response.
          221500-finish-continue-operation.
             EXIT.
 
@@ -315,14 +316,14 @@
             EXIT.
 
          222100-start-eliminate-a-record.
-           SET sw-operation-class-DELETE      TO TRUE
+           SET sw-operation-class-DELETE   TO TRUE
 
            DELETE idxfile RECORD
                   INVALID KEY
                           DISPLAY "Invalid Key!"
 
               NOT INVALID KEY
-                          ADD cte-01          TO ws-eliminated-records
+                          ADD cte-01       TO ws-eliminated-records
                           DISPLAY "Record deleted successfully!"
 
             END-DELETE.
@@ -337,8 +338,8 @@
                THRU 221200-finish-look-for-a-record
 
             IF (sw-idxfile-recrd-found-Y) THEN
-               PERFORM 221300-start-capture-other-fields
-                  THRU 221300-finish-capture-other-fields
+                PERFORM 221300-start-capture-other-fields
+                   THRU 221300-finish-capture-other-fields
 
                 PERFORM 223100-start-change-a-record
                    THRU 223100-finish-change-a-record
@@ -350,14 +351,14 @@
             EXIT.
 
          223100-start-change-a-record.
-             SET sw-operation-class-REWRITE TO TRUE
+            SET sw-operation-class-REWRITE TO TRUE
 
-             REWRITE f-idxfile-rec        FROM ws-f-idxfile-rec
+            REWRITE f-idxfile-rec        FROM ws-f-idxfile-rec
                     INVALID KEY
                             DISPLAY "Invalid Key!"
 
                 NOT INVALID KEY
-                            ADD cte-01      TO ws-rewritten-records
+                            ADD cte-01     TO ws-rewritten-records
                             DISPLAY "Record changed successfully!"
 
             END-REWRITE.
@@ -419,14 +420,12 @@
                 WHEN sw-menu-mode-read-option-forward
                      PERFORM 225220-start-menu-mode-read-forwarding
                         THRU 225220-finish-menu-mode-read-forwarding
-                       UNTIL NOT (sw-fs-idxfile-success-completion)
-                         OR sw-idxfile-EOF-Y
+                       UNTIL sw-idxfile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-backward
                      PERFORM 225230-start-menu-mode-read-backwarding
                         THRU 225230-finish-menu-mode-read-backwarding
-                       UNTIL NOT (sw-fs-idxfile-success-completion)
-                         OR sw-idxfile-EOF-Y
+                       UNTIL sw-idxfile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-exit
                      DISPLAY "Returning to main menu..."
@@ -439,15 +438,15 @@
              EXIT.
 
           225210-start-menu-mode-read-positioning.
-             SET sw-operation-class-START TO TRUE
+             SET sw-operation-class-START  TO TRUE
 
              START idxfile
-               KEY IS GREATER OR EQUAL    TO f-idxfile-rec-cod-employee
+               KEY IS GREATER OR EQUAL     TO f-idxfile-rec-cod-employee
                    INVALID KEY
                            DISPLAY "Invalid Key!"
 
                NOT INVALID KEY
-                           ADD  cte-01    TO ws-repositioning-records
+                           ADD  cte-01     TO ws-repositioning-records
                            DISPLAY "Positioning done correctly!"
 
              END-START.
@@ -473,7 +472,7 @@
              EXIT.
 
           225230-start-menu-mode-read-backwarding.
-             SET sw-operation-class-READNEXT  TO TRUE
+             SET sw-operation-class-READPREV  TO TRUE
 
              READ idxfile PREVIOUS RECORD   INTO ws-f-idxfile-rec
                AT END
@@ -491,8 +490,10 @@
              EXIT.
 
        300000-start-end-program.
-           SET sw-operation-class-CLOSE  TO TRUE
+           SET sw-operation-class-CLOSE       TO TRUE
            CLOSE idxfile
+
+           MOVE fs-idxfile                    TO RETURN-CODE
 
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+"
