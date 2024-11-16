@@ -103,7 +103,8 @@
               PERFORM 110000-begin-keep-a-record
                  THRU 110000-end-keep-a-record
            ELSE
-              DISPLAY "Input line contains other characters: "
+              DISPLAY "Operation not performed. File unchanged."
+              DISPLAY "Input line contains other invalid characters."
            END-IF
 
            DISPLAY "[-> " ws-f-rec-myfilex " <-]"

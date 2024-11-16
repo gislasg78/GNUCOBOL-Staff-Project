@@ -40,8 +40,11 @@
        78  cte-01                                          VALUE 01.
 
        01  ws-environmental-variables.
-           03  ws-continue-response             PIC A(01)  VALUE SPACE.
-               88  sw-continue-response-N       VALUES ARE 'N', 'n'.
+           03  ws-realization-questions.
+               05  ws-carry-out-sure            PIC A(01)  VALUE SPACE.
+                   88  sw-carry-out-sure-Y      VALUES ARE 'Y', 'y'.
+               05  ws-continue-response         PIC A(01)  VALUE SPACE.
+                   88  sw-continue-response-N   VALUES ARE 'N', 'n'.
 
            03  ws-f-idxfile-indicators.
                05  ws-idxfile-EOF               PIC A(01)  VALUE SPACE.
@@ -50,7 +53,7 @@
                    88  sw-idxfile-recrd-found-N            VALUE 'N'.
                    88  sw-idxfile-recrd-found-Y            VALUE 'Y'.
                05  ws-f-idxfile-rec-salary-employee-ed
-                                                    PIC  $++,+++,++9.99
+                                                    PIC  $--,---,--9.99
                                                            VALUE ZEROES.
 
            03  ws-f-idxfile-rec.
@@ -229,17 +232,24 @@
               THRU 221200-finish-look-for-a-record
 
            IF (sw-idxfile-recrd-found-N) THEN
-               PERFORM 221300-start-capture-other-fields
-                  THRU 221300-finish-capture-other-fields
+               PERFORM 221300-start-continue-carry-out-oper
+                  THRU 221300-finish-continue-carry-out-oper
 
-               PERFORM 221400-start-store-a-record
-                  THRU 221400-finish-store-a-record
+               IF (sw-carry-out-sure-Y)  THEN
+                   PERFORM 221400-start-capture-other-fields
+                      THRU 221400-finish-capture-other-fields
+
+                   PERFORM 221500-start-store-a-record
+                      THRU 221500-finish-store-a-record
+               ELSE
+                   DISPLAY "Operation not performed. File unchanged."
+               END-IF
            ELSE
                DISPLAY "Cannot add a record that already exists!"
            END-IF
 
-           PERFORM 221500-start-continue-operation
-              THRU 221500-finish-continue-operation.
+           PERFORM 221600-start-continue-operation
+              THRU 221600-finish-continue-operation.
          221000-finish-add-a-record.
            EXIT.
 
@@ -279,12 +289,12 @@
 
             DISPLAY SPACE
             DISPLAY "+---+----+---+----+---+----+"
-            DISPLAY "|  Employee Information.   |"
+            DISPLAY "|   Employee Information.  |"
             DISPLAY "+---+----+---+----+---+----+"
             DISPLAY "| Code   : ["
                     ws-f-idxfile-rec-cod-employee "]."
             DISPLAY "| Salary : ["
-                    ws-f-idxfile-rec-salary-employee-ed "]"
+                    ws-f-idxfile-rec-salary-employee-ed "]."
             DISPLAY "+---+----+---+----+---+----+"
             DISPLAY "Press the ENTER key to continue..."
                WITH NO ADVANCING
@@ -294,16 +304,25 @@
          221210-finish-show-file-info.
             EXIT.
 
-         221300-start-capture-other-fields.
+         221300-start-continue-carry-out-oper.
+            DISPLAY asterisk
+                    "Are you really sure you want to carry out this "
+                    "operation? (y/n) : "
+               WITH NO ADVANCING
+             ACCEPT ws-carry-out-sure.
+         221300-finish-continue-carry-out-oper.
+            EXIT.
+
+         221400-start-capture-other-fields.
            DISPLAY asterisk " Employee Salary : " WITH NO ADVANCING
            ACCEPT ws-f-idxfile-rec-salary-employee
 
            MOVE ws-f-idxfile-rec-salary-employee
              TO f-idxfile-rec-salary-employee.
-         221300-finish-capture-other-fields.
+         221400-finish-capture-other-fields.
             EXIT.
 
-         221400-start-store-a-record.
+         221500-start-store-a-record.
             SET sw-operation-class-WRITE   TO TRUE
 
             WRITE f-idxfile-rec          FROM ws-f-idxfile-rec
@@ -315,15 +334,16 @@
                           DISPLAY "Record saved successfully!"
 
             END-WRITE.
-         221400-finish-store-a-record.
+         221500-finish-store-a-record.
             EXIT.
 
-         221500-start-continue-operation.
-            DISPLAY "Do you want to continue doing the same "
-                    "operation? (y/n) : " WITH NO ADVANCING
+         221600-start-continue-operation.
+            DISPLAY asterisk
+                    "Do you want to continue doing the same operation? "
+                    "(y/n) : " WITH NO ADVANCING
 
             ACCEPT ws-continue-response.
-         221500-finish-continue-operation.
+         221600-finish-continue-operation.
             EXIT.
 
          222000-start-delete-a-record.
@@ -334,12 +354,19 @@
               THRU 221200-finish-look-for-a-record
 
            IF (sw-idxfile-recrd-found-Y) THEN
-               PERFORM 222100-start-eliminate-a-record
-                  THRU 222100-finish-eliminate-a-record
+               PERFORM 221300-start-continue-carry-out-oper
+                  THRU 221300-finish-continue-carry-out-oper
+
+               IF (sw-carry-out-sure-Y)  THEN
+                   PERFORM 222100-start-eliminate-a-record
+                      THRU 222100-finish-eliminate-a-record
+               ELSE
+                   DISPLAY "Operation not performed. File unchanged."
+               END-IF
            END-IF
 
-           PERFORM 221500-start-continue-operation
-              THRU 221500-finish-continue-operation.
+           PERFORM 221600-start-continue-operation
+              THRU 221600-finish-continue-operation.
          222000-finish-delete-a-record.
             EXIT.
 
@@ -366,15 +393,22 @@
                THRU 221200-finish-look-for-a-record
 
             IF (sw-idxfile-recrd-found-Y) THEN
-                PERFORM 221300-start-capture-other-fields
-                   THRU 221300-finish-capture-other-fields
+               PERFORM 221300-start-continue-carry-out-oper
+                  THRU 221300-finish-continue-carry-out-oper
 
-                PERFORM 223100-start-change-a-record
-                   THRU 223100-finish-change-a-record
+               IF (sw-carry-out-sure-Y)   THEN
+                   PERFORM 221400-start-capture-other-fields
+                      THRU 221400-finish-capture-other-fields
+
+                   PERFORM 223100-start-change-a-record
+                      THRU 223100-finish-change-a-record
+               ELSE
+                   DISPLAY "Operation not performed. File unchanged."
+               END-IF
             END-IF
 
-            PERFORM 221500-start-continue-operation
-               THRU 221500-finish-continue-operation.
+            PERFORM 221600-start-continue-operation
+               THRU 221600-finish-continue-operation.
          223000-finish-modify-a-record.
             EXIT.
 
@@ -400,13 +434,13 @@
            PERFORM 221200-start-look-for-a-record
               THRU 221200-finish-look-for-a-record
 
-           PERFORM 221500-start-continue-operation
-              THRU 221500-finish-continue-operation.
+           PERFORM 221600-start-continue-operation
+              THRU 221600-finish-continue-operation.
          224000-finish-look-for-any-record.
            EXIT.
 
          225000-start-look-for-all-records.
-           INITIALIZE ws-continue-response
+           INITIALIZE ws-realization-questions
 
            PERFORM 225100-start-menu-reading-offset
               THRU 225100-finish-option-menu-reading-offset
