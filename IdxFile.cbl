@@ -72,6 +72,11 @@
                88  sw-menu-option-look-for-all             VALUE 5.
                88  sw-menu-option-exit                     VALUE 6.
 
+           03  ws-menu-mode-read-direct-option  PIC 9(01)  VALUE ZERO.
+               88  sw-menu-mode-read-direct-read           VALUE 1.
+               88  sw-menu-mode-read-dir-and-seq           VALUE 2.
+               88  sw-menu-mode-read-dir-exitmenu          VALUE 3.
+
            03  ws-menu-mode-read-option         PIC 9(02)  VALUE ZEROES.
                88  sw-menu-mode-read-option-start          VALUE 01.
                88  sw-menu-mode-read-option-givenkey-eq    VALUE 02.
@@ -142,9 +147,9 @@
            STOP RUN.
 
        100000-start-begin-program.
-           DISPLAY "+---+----+---+----+---+----+"
-           DISPLAY "| Indexed Sequential Files.|"
-           DISPLAY "+---+----+---+----+---+----+"
+           DISPLAY "+---+----+---+----+---+----+---+"
+           DISPLAY "|   Indexed Sequential Files.  |"
+           DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY asterisk " Enter the file name: " WITH NO ADVANCING
            ACCEPT ws-idxfile-name
 
@@ -170,16 +175,16 @@
 
         210000-start-option-menu-display.
            DISPLAY SPACE
-           DISPLAY "+===+====+===+====+===+====+=="
-           DISPLAY "|    Indexed maintenance.    |"
-           DISPLAY "+===+====+===+====+===+====+=="
-           DISPLAY "| [1]. Add a record.         |"
-           DISPLAY "| [2]. Delete a record.      |"
-           DISPLAY "| [3]. Modify a record.      |"
-           DISPLAY "| [4]. Look for a record.    |"
-           DISPLAY "| [5]. Look for all records. |"
-           DISPLAY "| [6]. Exit this program.    |"
-           DISPLAY "+===+====+===+====+===+====+=="
+           DISPLAY "+===+====+===+====+===+====+===+"
+           DISPLAY "|   Main Indexed Maintenance.  |"
+           DISPLAY "+===+====+===+====+===+====+===+"
+           DISPLAY "| [1]. Add a record.           |"
+           DISPLAY "| [2]. Delete a record.        |"
+           DISPLAY "| [3]. Modify a record.        |"
+           DISPLAY "| [4]. Look for a record...    |"
+           DISPLAY "| [5]. Look for all records... |"
+           DISPLAY "| [6]. Exit this program.      |"
+           DISPLAY "+===+====+===+====+===+====+===+"
            DISPLAY "Enter your own choice: " WITH NO ADVANCING
            ACCEPT ws-menu-option
 
@@ -207,7 +212,7 @@
                WHEN sw-menu-option-look-for-one
                     PERFORM 224000-start-look-for-any-record
                        THRU 224000-finish-look-for-any-record
-                      UNTIL sw-continue-response-N
+                      UNTIL sw-menu-mode-read-dir-exitmenu
 
                WHEN sw-menu-option-look-for-all
                     PERFORM 225000-start-look-for-all-records
@@ -265,6 +270,10 @@
           221200-start-look-for-a-record.
             SET sw-operation-class-READ    TO TRUE
 
+            DISPLAY asterisk " Employee Code: [" 
+                    ws-f-idxfile-rec-cod-employee "]. "
+                    asterisk
+
             READ idxfile                 INTO ws-f-idxfile-rec
              KEY IS f-idxfile-rec-cod-employee
                  INVALID KEY
@@ -288,14 +297,14 @@
               TO ws-f-idxfile-rec-salary-employee-ed
 
             DISPLAY SPACE
-            DISPLAY "+---+----+---+----+---+----+"
-            DISPLAY "|   Employee Information.  |"
-            DISPLAY "+---+----+---+----+---+----+"
+            DISPLAY "+---+----+---+----+---+----+---+"
+            DISPLAY "|     Employee Information.    |"
+            DISPLAY "+---+----+---+----+---+----+---+"
             DISPLAY "| Code   : ["
                     ws-f-idxfile-rec-cod-employee "]."
             DISPLAY "| Salary : ["
                     ws-f-idxfile-rec-salary-employee-ed "]."
-            DISPLAY "+---+----+---+----+---+----+"
+            DISPLAY "+---+----+---+----+---+----+---+"
             DISPLAY "Press the ENTER key to continue..."
                WITH NO ADVANCING
             ACCEPT OMITTED
@@ -309,6 +318,7 @@
                     "Are you really sure you want to carry out this "
                     "operation? (y/n) : "
                WITH NO ADVANCING
+
              ACCEPT ws-carry-out-sure.
          221300-finish-continue-carry-out-oper.
             EXIT.
@@ -324,6 +334,10 @@
 
          221500-start-store-a-record.
             SET sw-operation-class-WRITE   TO TRUE
+
+            DISPLAY asterisk " Employee Code: [" 
+                    ws-f-idxfile-rec-cod-employee "]. "
+                    asterisk
 
             WRITE f-idxfile-rec          FROM ws-f-idxfile-rec
                   INVALID KEY
@@ -342,7 +356,7 @@
                     "Do you want to continue doing the same operation? "
                     "(y/n) : " WITH NO ADVANCING
 
-            ACCEPT ws-continue-response.
+             ACCEPT ws-continue-response.
          221600-finish-continue-operation.
             EXIT.
 
@@ -372,6 +386,10 @@
 
          222100-start-eliminate-a-record.
             SET sw-operation-class-DELETE  TO TRUE
+
+            DISPLAY asterisk " Employee Code: [" 
+                    ws-f-idxfile-rec-cod-employee "]. "
+                    asterisk
 
             DELETE idxfile RECORD
                    INVALID KEY
@@ -415,6 +433,10 @@
          223100-start-change-a-record.
             SET sw-operation-class-REWRITE TO TRUE
 
+            DISPLAY asterisk " Employee Code: [" 
+                    ws-f-idxfile-rec-cod-employee "]. "
+                    asterisk
+
             REWRITE f-idxfile-rec        FROM ws-f-idxfile-rec
                     INVALID KEY
                             DISPLAY "Invalid Key!"
@@ -428,16 +450,60 @@
             EXIT.
 
          224000-start-look-for-any-record.
-           PERFORM 221100-start-capture-key-field
-              THRU 221100-finish-capture-key-field
+           PERFORM 224100-start-show-reading-direct-menu
+              THRU 224100-finish-show-reading-direct-menu
 
-           PERFORM 221200-start-look-for-a-record
-              THRU 221200-finish-look-for-a-record
-
-           PERFORM 221600-start-continue-operation
-              THRU 221600-finish-continue-operation.
+           PERFORM 224200-start-validate-reading-direct-menu
+              THRU 224200-finish-validate-reading-direct-menu.
          224000-finish-look-for-any-record.
            EXIT.
+
+          224100-start-show-reading-direct-menu.
+            DISPLAY SPACE
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "|    Direct Reading Menu       |"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "| [1]. Locate direcly.         |"
+            DISPLAY "| [2]. Locate sequentially.    |"
+            DISPLAY "| [3]. Return to main menu.    |"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "Enter your choice: " WITH NO ADVANCING
+            ACCEPT ws-menu-mode-read-direct-option
+
+            DISPLAY "The chosen option was: "
+                   ws-menu-mode-read-direct-option.
+          224100-finish-show-reading-direct-menu.
+            EXIT.
+
+          224200-start-validate-reading-direct-menu.
+            EVALUATE TRUE
+                WHEN sw-menu-mode-read-direct-read
+                     PERFORM 221100-start-capture-key-field
+                        THRU 221100-finish-capture-key-field
+
+                     PERFORM 221200-start-look-for-a-record
+                        THRU 221200-finish-look-for-a-record
+
+                WHEN sw-menu-mode-read-dir-and-seq
+                     PERFORM 221100-start-capture-key-field
+                        THRU 221100-finish-capture-key-field
+
+                     PERFORM 225220-start-menu-mode-read-position-eq
+                        THRU 225220-finish-menu-mode-read-position-eq
+
+                     PERFORM 225260-start-menu-mode-read-forwarding
+                        THRU 225260-finish-menu-mode-read-forwarding
+
+                WHEN sw-menu-mode-read-dir-exitmenu
+                     DISPLAY "Exiting this menu..." 
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. "
+                             "Please correct your choice."
+
+            END-EVALUATE.
+          224200-finish-validate-reading-direct-menu.
+            EXIT.
 
          225000-start-look-for-all-records.
            INITIALIZE ws-realization-questions
@@ -571,6 +637,10 @@
           225220-start-menu-mode-read-position-eq.
             SET sw-operation-class-STARTEQ    TO TRUE
 
+            DISPLAY asterisk " Employee Code: [" 
+                    ws-f-idxfile-rec-cod-employee "]. "
+                    asterisk
+
             START idxfile
               KEY IS EQUAL TO f-idxfile-rec-cod-employee
                   INVALID KEY
@@ -594,6 +664,10 @@
 
           225230-start-menu-mode-read-position-gteq.
             SET sw-operation-class-STARTGTEQ  TO TRUE
+
+            DISPLAY asterisk " Employee Code: [" 
+                    ws-f-idxfile-rec-cod-employee "]. "
+                    asterisk
 
             START idxfile
               KEY IS GREATER THAN OR EQUAL TO f-idxfile-rec-cod-employee
@@ -646,6 +720,10 @@
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
 
+                 DISPLAY asterisk " Employee Code: [" 
+                         ws-f-idxfile-rec-cod-employee "]. "
+                         asterisk
+
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
 
@@ -665,6 +743,10 @@
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
+
+                 DISPLAY asterisk " Employee Code: [" 
+                         ws-f-idxfile-rec-cod-employee "]. "
+                         asterisk
 
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
