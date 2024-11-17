@@ -461,9 +461,9 @@
           224100-start-show-reading-direct-menu.
             DISPLAY SPACE
             DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "|    Direct Reading Menu       |"
+            DISPLAY "|     Direct Reading Menu.     |"
             DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "| [1]. Locate direcly.         |"
+            DISPLAY "| [1]. Locate directly.        |"
             DISPLAY "| [2]. Locate sequentially.    |"
             DISPLAY "| [3]. Return to main menu.    |"
             DISPLAY "+===+====+===+====+===+====+===+"
