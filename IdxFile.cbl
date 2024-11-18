@@ -49,9 +49,10 @@
            03  ws-f-idxfile-indicators.
                05  ws-idxfile-EOF               PIC A(01)  VALUE SPACE.
                    88  sw-idxfile-EOF-Y                    VALUE 'Y'.
+                   88  sw-idxfile-EOF-N                    VALUE 'N'.
                05  ws-idxfile-record-found      PIC A(01)  VALUE SPACE.
-                   88  sw-idxfile-recrd-found-N            VALUE 'N'.
-                   88  sw-idxfile-recrd-found-Y            VALUE 'Y'.
+                   88  sw-idxfile-record-found-N           VALUE 'N'.
+                   88  sw-idxfile-record-found-Y           VALUE 'Y'.
                05  ws-f-idxfile-rec-salary-employee-ed
                                                     PIC  $--,---,--9.99
                                                            VALUE ZEROES.
@@ -80,7 +81,7 @@
            03  ws-menu-mode-read-option         PIC 9(02)  VALUE ZEROES.
                88  sw-menu-mode-read-option-start          VALUE 01.
                88  sw-menu-mode-read-option-givenkey-eq    VALUE 02.
-               88  sw-menu-mode-read-option-givenkey-gteq  VALUE 03.
+               88  sw-menu-mode-read-option-givenkey-apprx VALUE 03.
                88  sw-menu-mode-read-option-finish         VALUE 04.
                88  sw-menu-mode-read-option-r-first-rcrd   VALUE 05.
                88  sw-menu-mode-read-option-r-last-rcrd    VALUE 06.
@@ -89,6 +90,11 @@
                88  sw-menu-mode-read-option-prev-rcrd      VALUE 09.
                88  sw-menu-mode-read-option-next-rcrd      VALUE 10.
                88  sw-menu-mode-read-option-exit           VALUE 11.
+
+           03  ws-menu-mode-read-option-givenkey PIC 9(01) VALUE ZEROES.
+               88  sw-menu-mode-read-option-givenkey-gteq  VALUE 1.
+               88  sw-menu-mode-read-option-givenkey-lteq  VALUE 2.
+               88  sw-menu-mode-read-option-givenkey-quit  VALUE 3.
 
            03  ws-operation-class               PIC A(13)  VALUE SPACES.
                88  sw-operation-class-CLOSE     VALUE "CLOSE".
@@ -101,6 +107,7 @@
                88  sw-operation-class-STARTEQ   VALUE "START EQUAL".
                88  sw-operation-class-STARTFRST VALUE "START FIRST".
                88  sw-operation-class-STARTGTEQ VALUE "START GTEQ".
+               88  sw-operation-class-STARTLTEQ VALUE "START LTEQ".
                88  sw-operation-class-STARTLST  VALUE "START LAST".
                88  sw-operation-class-WRITE     VALUE "WRITE".
 
@@ -117,19 +124,19 @@
            USE AFTER ERROR PROCEDURE ON idxfile.
        000000-status-check.
            DISPLAY SPACE
-           DISPLAY "+---+----+---+----+---+----+---+"
-           DISPLAY "|   File status information.   |"
-           DISPLAY "+---+----+---+----+---+----+---+"
+           DISPLAY "+---+----+---+----+---+----+---+--"
+           DISPLAY "|    File status information.    |"
+           DISPLAY "+---+----+---+----+---+----+---+--"
            DISPLAY "| " asterisk " File Name   : [" 
                                    ws-idxfile-name "]."
            DISPLAY "| " asterisk " Operation   : ["
                                    ws-operation-class "]."
            DISPLAY "| " asterisk " Status Code : ["
                                    fs-idxfile "]."
-           DISPLAY "+---+----+---+----+---+----+---+"
+           DISPLAY "+---+----+---+----+---+----+---+--"
            DISPLAY "Press the ENTER key to continue..."
               WITH NO ADVANCING
-           ACCEPT OMITTED.
+            ACCEPT OMITTED.
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
@@ -151,10 +158,9 @@
            DISPLAY "|   Indexed Sequential Files.  |"
            DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY asterisk " Enter the file name: " WITH NO ADVANCING
-           ACCEPT ws-idxfile-name
+            ACCEPT ws-idxfile-name
 
-           DISPLAY "Idx File to work on: ["
-                   ws-idxfile-name "].".
+           DISPLAY "Idx File to work on: [" ws-idxfile-name "]."
 
            SET sw-operation-class-OPEN  TO TRUE
            OPEN I-O idxfile.
@@ -186,7 +192,7 @@
            DISPLAY "| [6]. Exit this program.      |"
            DISPLAY "+===+====+===+====+===+====+===+"
            DISPLAY "Enter your own choice: " WITH NO ADVANCING
-           ACCEPT ws-menu-option
+            ACCEPT ws-menu-option
 
            DISPLAY "The chosen option was: " ws-menu-option.
         210000-finish-option-menu-display.
@@ -236,7 +242,7 @@
            PERFORM 221200-start-look-for-a-record
               THRU 221200-finish-look-for-a-record
 
-           IF (sw-idxfile-recrd-found-N) THEN
+           IF (sw-idxfile-record-found-N) THEN
                PERFORM 221300-start-continue-carry-out-oper
                   THRU 221300-finish-continue-carry-out-oper
 
@@ -277,12 +283,12 @@
             READ idxfile                 INTO ws-f-idxfile-rec
              KEY IS f-idxfile-rec-cod-employee
                  INVALID KEY
-                         SET sw-idxfile-recrd-found-N TO TRUE
+                         SET sw-idxfile-record-found-N TO TRUE
                          DISPLAY "Record Not Found!"
 
              NOT INVALID KEY
                          ADD cte-01        TO ws-reading-records
-                         SET sw-idxfile-recrd-found-Y TO TRUE
+                         SET sw-idxfile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
 
                          PERFORM 221210-start-show-file-info
@@ -307,7 +313,7 @@
             DISPLAY "+---+----+---+----+---+----+---+"
             DISPLAY "Press the ENTER key to continue..."
                WITH NO ADVANCING
-            ACCEPT OMITTED
+             ACCEPT OMITTED
 
             DISPLAY SPACE.
          221210-finish-show-file-info.
@@ -367,7 +373,7 @@
            PERFORM 221200-start-look-for-a-record
               THRU 221200-finish-look-for-a-record
 
-           IF (sw-idxfile-recrd-found-Y) THEN
+           IF (sw-idxfile-record-found-Y) THEN
                PERFORM 221300-start-continue-carry-out-oper
                   THRU 221300-finish-continue-carry-out-oper
 
@@ -410,7 +416,7 @@
             PERFORM 221200-start-look-for-a-record
                THRU 221200-finish-look-for-a-record
 
-            IF (sw-idxfile-recrd-found-Y) THEN
+            IF (sw-idxfile-record-found-Y) THEN
                PERFORM 221300-start-continue-carry-out-oper
                   THRU 221300-finish-continue-carry-out-oper
 
@@ -468,7 +474,7 @@
             DISPLAY "| [3]. Return to main menu.    |"
             DISPLAY "+===+====+===+====+===+====+===+"
             DISPLAY "Enter your choice: " WITH NO ADVANCING
-            ACCEPT ws-menu-mode-read-direct-option
+             ACCEPT ws-menu-mode-read-direct-option
 
             DISPLAY "The chosen option was: "
                    ws-menu-mode-read-direct-option.
@@ -480,19 +486,19 @@
                 WHEN sw-menu-mode-read-direct-read
                      PERFORM 221100-start-capture-key-field
                         THRU 221100-finish-capture-key-field
-
                      PERFORM 221200-start-look-for-a-record
                         THRU 221200-finish-look-for-a-record
 
                 WHEN sw-menu-mode-read-dir-and-seq
                      PERFORM 221100-start-capture-key-field
                         THRU 221100-finish-capture-key-field
-
                      PERFORM 225220-start-menu-mode-read-position-eq
                         THRU 225220-finish-menu-mode-read-position-eq
 
-                     PERFORM 225260-start-menu-mode-read-forwarding
-                        THRU 225260-finish-menu-mode-read-forwarding
+                     IF (sw-idxfile-record-found-Y)
+                         PERFORM 225260-start-menu-mode-read-forwarding
+                            THRU 225260-finish-menu-mode-read-forwarding
+                     END-IF
 
                 WHEN sw-menu-mode-read-dir-exitmenu
                      DISPLAY "Exiting this menu..." 
@@ -507,6 +513,7 @@
 
          225000-start-look-for-all-records.
            INITIALIZE ws-realization-questions
+                      ws-idxfile-record-found
 
            PERFORM 225100-start-menu-reading-offset
               THRU 225100-finish-option-menu-reading-offset
@@ -525,7 +532,7 @@
             DISPLAY "+---+----+---+----+---+----+---+---+-"
             DISPLAY "| [01]. At the start.               |"
             DISPLAY "| [02]. At on a exact & given key.  |"
-            DISPLAY "| [03]. At on a aproximate key.     |"
+            DISPLAY "| [03]. At on a aproximate key...   |"
             DISPLAY "| [04]. At the finish.              |"
             DISPLAY "+---+----+---+----+---+----+---+---+-"
             DISPLAY "|      Reading extreme records.     |"
@@ -546,7 +553,7 @@
             DISPLAY "| [11]. Return to main menu.        |"
             DISPLAY "+===+====+===+====+===+====+===+===+="
             DISPLAY "Enter your choice: " WITH NO ADVANCING
-            ACCEPT ws-menu-mode-read-option
+             ACCEPT ws-menu-mode-read-option
 
             DISPLAY "The chosen option has been: "
                    ws-menu-mode-read-option.
@@ -554,7 +561,8 @@
             EXIT.
 
           225200-start-validate-option-menu-reading-offset.
-            INITIALIZE ws-idxfile-EOF
+            INITIALIZE ws-menu-mode-read-option-givenkey
+                       ws-idxfile-EOF
 
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-option-start
@@ -567,11 +575,10 @@
                      PERFORM 225220-start-menu-mode-read-position-eq
                         THRU 225220-finish-menu-mode-read-position-eq
 
-                WHEN sw-menu-mode-read-option-givenkey-gteq
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 225230-start-menu-mode-read-position-gteq
-                        THRU 225230-finish-menu-mode-read-position-gteq
+                WHEN sw-menu-mode-read-option-givenkey-apprx
+                     PERFORM 225230-start-menu-read-position-apprx
+                        THRU 225230-start-menu-read-position-apprx
+                       UNTIL sw-menu-mode-read-option-givenkey-quit
 
                 WHEN sw-menu-mode-read-option-finish
                      PERFORM 225240-start-menu-mode-finish-position
@@ -644,12 +651,15 @@
             START idxfile
               KEY IS EQUAL TO f-idxfile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY "Invalid Key!"
+                  DISPLAY "Invalid EQ Key!"
+                  SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
-                  ADD  cte-01              TO ws-repositioning-records
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
                   DISPLAY asterisk
                           "Exact key to locate: ["
                            f-idxfile-rec-cod-employee "]."
@@ -662,7 +672,57 @@
           225220-finish-menu-mode-read-position-eq.
             EXIT.
 
-          225230-start-menu-mode-read-position-gteq.
+          225230-start-menu-read-position-apprx.
+            PERFORM 225231-start-show-approximate-offset-menu
+               THRU 225231-finish-show-approximate-offset-menu
+
+            PERFORM 225232-start-validate-approximate-offset-menu
+               THRU 225232-finish-validate-approximate-offset-menu.
+          225230-finish-menu-read-position-apprx.
+            EXIT.
+
+          225231-start-show-approximate-offset-menu.
+            DISPLAY SPACE
+            DISPLAY "+===+====+===+====+===+====+===+===+===+"
+            DISPLAY "|       Approximate Key Locator.       |"
+            DISPLAY "+===+====+===+====+===+====+===+===+===+"
+            DISPLAY "| [1]. Key greater than or equal to.   |"
+            DISPLAY "| [2]. Key less than or equal to value.|"
+            DISPLAY "| [3]. Exit this menu.                 |"
+            DISPLAY "+===+====+===+====+===+====+===+===+===+"
+            DISPLAY "Enter your choice: " WITH NO ADVANCING
+             ACCEPT ws-menu-mode-read-option-givenkey
+
+            DISPLAY "The chosen option was: "
+                    ws-menu-mode-read-option-givenkey.
+          225231-finish-show-approximate-offset-menu.
+            EXIT.
+
+          225232-start-validate-approximate-offset-menu.
+            EVALUATE TRUE
+                WHEN sw-menu-mode-read-option-givenkey-gteq
+                     PERFORM 221100-start-capture-key-field
+                        THRU 221100-finish-capture-key-field
+                     PERFORM 2252321-start-menu-mode-read-position-gteq
+                        THRU 2252321-finish-menu-mode-read-position-gteq
+
+                WHEN sw-menu-mode-read-option-givenkey-lteq
+                     PERFORM 221100-start-capture-key-field
+                        THRU 221100-finish-capture-key-field
+                     PERFORM 2252322-start-menu-mode-read-position-lteq
+                        THRU 2252322-finish-menu-mode-read-position-lteq
+
+                WHEN sw-menu-mode-read-option-givenkey-quit
+                     DISPLAY "Quitting this menu..."
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. "
+                             "Please change your option."
+            END-EVALUATE.
+          225232-finish-validate-approximate-offset-menu.
+            EXIT.
+
+          2252321-start-menu-mode-read-position-gteq.
             SET sw-operation-class-STARTGTEQ  TO TRUE
 
             DISPLAY asterisk " Employee Code: [" 
@@ -672,22 +732,50 @@
             START idxfile
               KEY IS GREATER THAN OR EQUAL TO f-idxfile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY "Invalid Key!"
+                  DISPLAY "Invalid GTEQ Key!"
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
                   DISPLAY asterisk
-                          "Approximate key to locate: ["
+                          "Nearest key to given top value: ["
                            f-idxfile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
-                          "Positioning approximate key done correctly!"
+                          "Correct positioning on nearest upper key!"
                           asterisk
 
             END-START.
-          225230-finish-menu-mode-read-position-gteq.
+          2252321-finish-menu-mode-read-position-gteq.
+            EXIT.
+
+          2252322-start-menu-mode-read-position-lteq.
+            SET sw-operation-class-STARTLTEQ  TO TRUE
+
+            DISPLAY asterisk " Employee Code: [" 
+                    ws-f-idxfile-rec-cod-employee "]. "
+                    asterisk
+
+            START idxfile
+              KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-cod-employee
+                  INVALID KEY
+                  DISPLAY "Invalid LTEQ Key!"
+                  PERFORM 225240-start-menu-mode-finish-position
+                     THRU 225240-finish-menu-mode-finish-position
+
+              NOT INVALID KEY
+                  ADD  cte-01              TO ws-repositioning-records
+                  DISPLAY asterisk
+                          "Nearest key to given bottom value: ["
+                           f-idxfile-rec-cod-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Correct positioning on nearest lower key!"
+                          asterisk
+
+            END-START.
+          2252322-finish-menu-mode-read-position-lteq.
             EXIT.
 
           225240-start-menu-mode-finish-position.
@@ -719,6 +807,7 @@
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
+                 SET sw-idxfile-EOF-N         TO TRUE
 
                  DISPLAY asterisk " Employee Code: [" 
                          ws-f-idxfile-rec-cod-employee "]. "
@@ -743,6 +832,7 @@
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
+                 SET sw-idxfile-EOF-N         TO TRUE
 
                  DISPLAY asterisk " Employee Code: [" 
                          ws-f-idxfile-rec-cod-employee "]. "
