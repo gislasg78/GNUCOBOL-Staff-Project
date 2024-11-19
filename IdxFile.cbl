@@ -119,9 +119,9 @@
                88  sw-operation-class-STARTFRST VALUE "START FIRST".
                88  sw-operation-class-STARTGT   VALUE "START GREATER".
                88  sw-operation-class-STARTGTEQ VALUE "START GTEQ".
+               88  sw-operation-class-STARTLST  VALUE "START LAST".
                88  sw-operation-class-STARTLT   VALUE "START LESS".
                88  sw-operation-class-STARTLTEQ VALUE "START LTEQ".
-               88  sw-operation-class-STARTLST  VALUE "START LAST".
                88  sw-operation-class-WRITE     VALUE "WRITE".
 
        01  ws-statistics-processed-records.
@@ -248,31 +248,10 @@
        File-Handler SECTION.
            USE AFTER ERROR PROCEDURE ON idxfile.
 
-       000100-status-check.
-           PERFORM 000200-search-for-error-and-description-codes
+       000100-search-for-error-and-description-codes.
+            MOVE fs-idxfile TO ws-error-status-code-table-code-error-aux
 
-           DISPLAY SPACE
-           DISPLAY "+---+----+---+----+---+----+---+----+"
-           DISPLAY "|      File status information.     |"
-           DISPLAY "+---+----+---+----+---+----+---+----+"
-           DISPLAY "| " asterisk " File Name   : [" 
-                                   ws-idxfile-name "]."
-           DISPLAY "| " asterisk " Operation   : ["
-                                   ws-operation-class "]."
-           DISPLAY "| " asterisk " Status Code : ["
-                                   fs-idxfile "]."
-           DISPLAY "| " asterisk " Description : "
-           DISPLAY "| -> ["
-                   ws-error-status-code-table-desc-error-aux
-                   "] <-"
-           DISPLAY "+---+----+---+----+---+----+---+----+"
-           DISPLAY "Press the ENTER key to continue..."
-              WITH NO ADVANCING
-            ACCEPT OMITTED.
-
-       000200-search-for-error-and-description-codes.
-            SET idx-error-status-code-table TO cte-01
-
+            SET idx-error-status-code-table              TO cte-01
             SEARCH ALL ws-error-status-code-table-OC
                 AT END
                    MOVE ZEROES
@@ -281,19 +260,43 @@
                      TO ws-error-status-code-table-desc-error-aux
                    
               WHEN ws-error-status-code-table-code-error
-                  (idx-error-status-code-table) IS EQUAL TO fs-idxfile
+                  (idx-error-status-code-table) IS EQUAL TO
+                   ws-error-status-code-table-code-error-aux
                    MOVE ws-error-status-code-table-OC
                        (idx-error-status-code-table)
                      TO ws-error-status-code-table-aux
 
             END-SEARCH.
 
+       000200-check-file-status-code.
+           DISPLAY SPACE
+           DISPLAY "+---+----+---+----+---+----+---+----+"
+           DISPLAY "|      File status information.     |"
+           DISPLAY "+---+----+---+----+---+----+---+----+"
+           DISPLAY "| " asterisk " File Name      : [" 
+                                   ws-idxfile-name "]."
+           DISPLAY "| " asterisk " Operation      : ["
+                                   ws-operation-class "]."
+           DISPLAY "| " asterisk " Position Index : ["
+                   idx-error-status-code-table "]."
+           DISPLAY "| " asterisk " Status Code    : ["
+                   ws-error-status-code-table-code-error-aux "]."
+           DISPLAY "| " asterisk " Description    : "
+           DISPLAY "| -> ["
+                   ws-error-status-code-table-desc-error-aux
+                   "] <-"
+           DISPLAY "+---+----+---+----+---+----+---+----+"
+           DISPLAY "Press the ENTER key to continue..."
+              WITH NO ADVANCING
+            ACCEPT OMITTED.
+
        000300-preliminary-review-employee-code-content.
-            DISPLAY "-> " asterisk asterisk
+            DISPLAY SPACE
+            DISPLAY "|-> " asterisk asterisk asterisk
                     " Last processed Employee Code: "
                     "[" ws-f-idxfile-rec-cod-employee
                     "] = [" f-idxfile-rec-cod-employee "]. "
-                    asterisk asterisk " <-".
+                    asterisk asterisk asterisk " <-|".
 
        END DECLARATIVES.
 
