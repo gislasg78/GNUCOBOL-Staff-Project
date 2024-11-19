@@ -249,6 +249,7 @@
            USE AFTER ERROR PROCEDURE ON idxfile.
 
        000100-search-for-error-and-description-codes.
+            INITIALIZE ws-error-status-code-table-aux
             MOVE fs-idxfile TO ws-error-status-code-table-code-error-aux
 
             SET idx-error-status-code-table              TO cte-01
@@ -611,6 +612,8 @@
             EXIT.
 
          224000-start-look-for-any-record.
+           INITIALIZE ws-continue-response
+
            PERFORM 224100-start-show-reading-direct-menu
               THRU 224100-finish-show-reading-direct-menu
 
@@ -639,21 +642,14 @@
           224200-start-validate-reading-direct-menu.
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-direct-read
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 221200-start-look-for-a-record
-                        THRU 221200-finish-look-for-a-record
+                     PERFORM 224210-start-routine-mode-read-direct-read
+                        THRU 224210-finish-routine-mode-read-direct-read
+                       UNTIL sw-continue-response-N
 
                 WHEN sw-menu-mode-read-dir-and-seq
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 225220-start-menu-mode-read-position-eq
-                        THRU 225220-finish-menu-mode-read-position-eq
-
-                     IF (sw-idxfile-record-found-Y)
-                         PERFORM 225260-start-menu-mode-read-forwarding
-                            THRU 225260-finish-menu-mode-read-forwarding
-                     END-IF
+                     PERFORM 224220-start-routine-mode-read-dir-and-seq
+                        THRU 224220-finish-routine-mode-read-dir-and-seq
+                       UNTIL sw-continue-response-N
 
                 WHEN sw-menu-mode-read-dir-exitmenu
                      DISPLAY "Exiting this menu..." 
@@ -664,6 +660,35 @@
 
             END-EVALUATE.
           224200-finish-validate-reading-direct-menu.
+            EXIT.
+
+          224210-start-routine-mode-read-direct-read.
+            PERFORM 221100-start-capture-key-field
+               THRU 221100-finish-capture-key-field
+
+            PERFORM 221200-start-look-for-a-record
+               THRU 221200-finish-look-for-a-record
+
+            PERFORM 221600-start-continue-operation
+               THRU 221600-finish-continue-operation.
+          224210-finish-routine-mode-read-direct-read.
+            EXIT.
+
+          224220-start-routine-mode-read-dir-and-seq.
+            PERFORM 221100-start-capture-key-field
+               THRU 221100-finish-capture-key-field
+
+            PERFORM 225220-start-menu-mode-read-position-eq
+               THRU 225220-finish-menu-mode-read-position-eq
+
+            IF (sw-idxfile-record-found-Y)
+                PERFORM 225260-start-menu-mode-read-forwarding
+                   THRU 225260-finish-menu-mode-read-forwarding
+            END-IF
+
+            PERFORM 221600-start-continue-operation
+               THRU 221600-finish-continue-operation.
+          224220-finish-routine-mode-read-dir-and-seq.
             EXIT.
 
          225000-start-look-for-all-records.
