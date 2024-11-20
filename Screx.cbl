@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. screx.
+       PROGRAM-ID. Screx.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -113,4 +113,4 @@
        000000-end-build-corners.
            EXIT.
 
-       END PROGRAM screx.
+       END PROGRAM Screx.
