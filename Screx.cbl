@@ -48,79 +48,15 @@
        MAIN-PARAGRAPH.
            DISPLAY SPACE WITH BLANK SCREEN
 
-           PERFORM 000100-start-build-main-screen
-              THRU 000100-finish-build-main-screen
-
-           PERFORM 000200-start-put-field-labels
-              THRU 000200-finish-put-field-labels
-
-           STOP RUN.
-
-       000100-start-build-main-screen.
            SET sw-bottom-row-01             TO TRUE
            SET sw-top-row-24                TO TRUE
            SET sw-left-col-01               TO TRUE
            SET sw-right-col-80              TO TRUE
+
            PERFORM 100000-start-construct-text-window
               THRU 100000-finish-construct-text-windows
 
-           MOVE 01                          TO ws-bottom-row
-           MOVE 01                          TO ws-left-col
-           MOVE 03                          TO ws-top-row
-           MOVE 80                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
-
-           MOVE 05                          TO ws-bottom-row
-           MOVE 04                          TO ws-left-col
-           MOVE 08                          TO ws-top-row
-           MOVE 41                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
-
-           MOVE 10                          TO ws-bottom-row
-           MOVE 04                          TO ws-left-col
-           MOVE 15                          TO ws-top-row
-           MOVE 41                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
-
-           MOVE 15                          TO ws-bottom-row
-           MOVE 04                          TO ws-left-col
-           MOVE 20                          TO ws-top-row
-           MOVE 41                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
-
-           MOVE 05                          TO ws-bottom-row
-           MOVE 44                          TO ws-left-col
-           MOVE 08                          TO ws-top-row
-           MOVE 76                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
-
-           MOVE 10                          TO ws-bottom-row
-           MOVE 44                          TO ws-left-col
-           MOVE 15                          TO ws-top-row
-           MOVE 76                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
-
-           MOVE 15                          TO ws-bottom-row
-           MOVE 44                          TO ws-left-col
-           MOVE 20                          TO ws-top-row
-           MOVE 76                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
-
-           MOVE 22                          TO ws-bottom-row
-           MOVE 01                          TO ws-left-col
-           MOVE 24                          TO ws-top-row
-           MOVE 80                          TO ws-right-col
-           PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows.
-       000100-finish-build-main-screen.
-           EXIT.
+           STOP RUN.
 
        100000-start-construct-text-window.
            INITIALIZE ws-screen-initiators
@@ -218,50 +154,6 @@
            DISPLAY ws-char AT LINE ws-top-row    COLUMN ws-left-col
            DISPLAY ws-char AT LINE ws-top-row    COLUMN ws-right-col.
         140000-finish-set-window-frame-corners.           
-           EXIT.
-
-       000200-start-put-field-labels.
-           DISPLAY "Product registrations."
-                AT LINE 02 COLUMN 30
-
-           DISPLAY "Code Key:" AT LINE 06 COLUMN 06
-           DISPLAY "Status:"   AT LINE 06 COLUMN 25
-           DISPLAY "Store:"    AT LINE 07 COLUMN 09
-           DISPLAY "Sequence:" AT LINE 07 COLUMN 23
-
-           DISPLAY "Manufacturing information."
-                AT LINE 09 COLUMN 10
-
-           DISPLAY "Class:"    AT LINE 11 COLUMN 09
-           DISPLAY "Name:"     AT LINE 12 COLUMN 10
-           DISPLAY "Type:"     AT LINE 13 COLUMN 10
-           DISPLAY "Unit:"     AT LINE 14 COLUMN 10
-
-           DISPLAY "Changed:"  AT LINE 16 COLUMN 07
-           DISPLAY "Creation:" AT LINE 17 COLUMN 06
-           DISPLAY "Cost:"     AT LINE 18 COLUMN 10
-           DISPLAY "Stock:"    AT LINE 19 COLUMN 09
-
-           DISPLAY "Inventory Cost:"
-                AT LINE 06 COLUMN 46
-           DISPLAY "Total:"    AT LINE 07 COLUMN 53
-
-           DISPLAY "Latest Outcomes."
-                AT LINE 09 COLUMN 53
-
-           DISPLAY "Posts:"    AT LINE 11 COLUMN 46
-           DISPLAY "Amount:"   AT LINE 12 COLUMN 52
-           DISPLAY "Cost:"     AT LINE 13 COLUMN 54
-           DISPLAY "Date:"     AT LINE 14 COLUMN 54
-
-           DISPLAY "Departures:"
-                AT LINE 16 COLUMN 46
-           DISPLAY "Amount:"   AT LINE 17 COLUMN 52
-           DISPLAY "Cost:"     AT LINE 18 COLUMN 54
-           DISPLAY "Date:"     AT LINE 19 COLUMN 54
-
-           DISPLAY SPACE       AT LINE 25 COLUMN 01.
-       000200-finish-put-field-labels.
            EXIT.
 
        END PROGRAM Screx.
