@@ -82,6 +82,10 @@
                88  sw-menu-option-look-for-all             VALUE 5.
                88  sw-menu-option-exit                     VALUE 6.
 
+           03  ws-menu-mode-modify-option       PIC 9(01)  VALUE ZERO.
+               88  sw-menu-mode-modify-emp-salary          VALUE 1.
+               88  sw-menu-mode-modify-emp-exitmenu        VALUE 2.
+
            03  ws-menu-mode-read-direct-option  PIC 9(01)  VALUE ZERO.
                88  sw-menu-mode-read-direct-read           VALUE 1.
                88  sw-menu-mode-read-dir-and-seq           VALUE 2.
@@ -352,7 +356,7 @@
            DISPLAY "+===+====+===+====+===+====+===+"
            DISPLAY "| [1]. Add a record.           |"
            DISPLAY "| [2]. Delete a record.        |"
-           DISPLAY "| [3]. Modify a record.        |"
+           DISPLAY "| [3]. Modify a record...      |"
            DISPLAY "| [4]. Look for a record...    |"
            DISPLAY "| [5]. Look for all records... |"
            DISPLAY "| [6]. Exit this program.      |"
@@ -379,7 +383,7 @@
                WHEN sw-menu-option-modify
                     PERFORM 223000-start-modify-a-record
                        THRU 223000-finish-modify-a-record
-                      UNTIL sw-continue-response-N
+                      UNTIL sw-menu-mode-modify-emp-exitmenu
 
                WHEN sw-menu-option-look-for-one
                     PERFORM 224000-start-look-for-any-record
@@ -566,41 +570,77 @@
 
                NOT INVALID KEY
                            ADD cte-01      TO ws-eliminated-records
-                           PERFORM 000400-press-enter-key-to-continue
                            DISPLAY "Record deleted successfully!"
+                           PERFORM 000400-press-enter-key-to-continue
 
             END-DELETE.
          222100-finish-eliminate-a-record.
             EXIT.
 
          223000-start-modify-a-record.
-            PERFORM 221100-start-capture-key-field
-               THRU 221100-finish-capture-key-field
+            PERFORM 223100-start-show-menu-modify-fields
+               THRU 223100-finish-show-menu-modify-fields
 
-            PERFORM 221200-start-look-for-a-record
-               THRU 221200-finish-look-for-a-record
-
-            IF (sw-idxfile-record-found-Y) THEN
-               PERFORM 221300-start-continue-carry-out-oper
-                  THRU 221300-finish-continue-carry-out-oper
-
-               IF (sw-carry-out-sure-Y)   THEN
-                   PERFORM 221400-start-capture-other-fields
-                      THRU 221400-finish-capture-other-fields
-
-                   PERFORM 223100-start-change-a-record
-                      THRU 223100-finish-change-a-record
-               ELSE
-                   DISPLAY "Operation not performed. File unchanged."
-               END-IF
-            END-IF
-
-            PERFORM 221600-start-continue-operation
-               THRU 221600-finish-continue-operation.
+            PERFORM 223200-start-validate-menu-modify-fields
+               THRU 223200-finish-validate-menu-modify-fields.
          223000-finish-modify-a-record.
             EXIT.
 
-         223100-start-change-a-record.
+         223100-start-show-menu-modify-fields.
+            DISPLAY SPACE
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "|   Modifying record fields.   |"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "| [1]. Salary.                 |"
+            DISPLAY "| [2]. Return to main menu.    |"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "Enter your choice: " WITH NO ADVANCING
+             ACCEPT ws-menu-mode-modify-option
+
+            DISPLAY "The chosen option was: "
+                    ws-menu-mode-modify-option.
+         223100-finish-show-menu-modify-fields.
+            EXIT.
+
+         223200-start-validate-menu-modify-fields.
+            IF NOT(sw-menu-mode-modify-emp-exitmenu)
+               PERFORM 221100-start-capture-key-field
+                  THRU 221100-finish-capture-key-field
+
+               PERFORM 221200-start-look-for-a-record
+                  THRU 221200-finish-look-for-a-record
+            END-IF
+
+            EVALUATE TRUE
+                WHEN sw-menu-mode-modify-emp-salary
+                     IF (sw-idxfile-record-found-Y) THEN
+                         PERFORM 221300-start-continue-carry-out-oper
+                            THRU 221300-finish-continue-carry-out-oper
+
+                         IF (sw-carry-out-sure-Y)   THEN
+                             PERFORM 221400-start-capture-other-fields
+                                THRU 221400-finish-capture-other-fields
+
+                             PERFORM 223210-start-change-a-record
+                                THRU 223210-finish-change-a-record
+                         ELSE
+                             DISPLAY "Operation not performed. "
+                                     "File unchanged."
+                         END-IF
+                     END-IF
+
+                WHEN sw-menu-mode-modify-emp-exitmenu
+                     DISPLAY "Exiting this menu..."
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. Please change your "
+                             "option."
+
+            END-EVALUATE.
+         223200-finish-validate-menu-modify-fields.
+            EXIT.
+
+          223210-start-change-a-record.
             SET sw-operation-class-REWRITE TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-content
@@ -616,7 +656,7 @@
                             PERFORM 000400-press-enter-key-to-continue
 
             END-REWRITE.
-         223100-finish-change-a-record.
+          223210-finish-change-a-record.
             EXIT.
 
          224000-start-look-for-any-record.
