@@ -286,10 +286,7 @@
            DISPLAY "| -> ["
                    ws-error-status-code-table-desc-error-aux
                    "] <-"
-           DISPLAY "+---+----+---+----+---+----+---+----+"
-           DISPLAY "Press the ENTER key to continue..."
-              WITH NO ADVANCING
-            ACCEPT OMITTED.
+           DISPLAY "+---+----+---+----+---+----+---+----+".
 
        000300-preliminary-review-employee-code-content.
             DISPLAY SPACE
@@ -298,6 +295,11 @@
                     "[" ws-f-idxfile-rec-cod-employee
                     "] = [" f-idxfile-rec-cod-employee "]. "
                     asterisk asterisk asterisk " <-|".
+
+       000400-press-enter-key-to-continue.
+           DISPLAY "Press the ENTER key to continue..."
+              WITH NO ADVANCING
+            ACCEPT OMITTED.
 
        END DECLARATIVES.
 
@@ -447,12 +449,13 @@
                  INVALID KEY
                          SET sw-idxfile-record-found-N TO TRUE
                          DISPLAY "Record Not Found!"
+                         PERFORM 000400-press-enter-key-to-continue
 
              NOT INVALID KEY
                          ADD cte-01        TO ws-reading-records
                          SET sw-idxfile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
-
+                         PERFORM 000400-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
 
@@ -473,9 +476,8 @@
             DISPLAY "| Salary : ["
                     ws-f-idxfile-rec-salary-employee-ed "]."
             DISPLAY "+---+----+---+----+---+----+---+"
-            DISPLAY "Press the ENTER key to continue..."
-               WITH NO ADVANCING
-             ACCEPT OMITTED
+
+            PERFORM 000400-press-enter-key-to-continue
 
             DISPLAY SPACE.
          221210-finish-show-file-info.
@@ -508,10 +510,12 @@
             WRITE f-idxfile-rec          FROM ws-f-idxfile-rec
                   INVALID KEY
                           DISPLAY "Duplicate Key!"
+                          PERFORM 000400-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD cte-01       TO ws-written-records
                           DISPLAY "Record saved successfully!"
+                          PERFORM 000400-press-enter-key-to-continue
 
             END-WRITE.
          221500-finish-store-a-record.
@@ -558,9 +562,11 @@
             DELETE idxfile RECORD
                    INVALID KEY
                            DISPLAY "Invalid Key!"
+                           PERFORM 000400-press-enter-key-to-continue
 
                NOT INVALID KEY
                            ADD cte-01      TO ws-eliminated-records
+                           PERFORM 000400-press-enter-key-to-continue
                            DISPLAY "Record deleted successfully!"
 
             END-DELETE.
@@ -602,10 +608,12 @@
             REWRITE f-idxfile-rec        FROM ws-f-idxfile-rec
                     INVALID KEY
                             DISPLAY "Invalid Key!"
+                            PERFORM 000400-press-enter-key-to-continue
 
                 NOT INVALID KEY
                             ADD cte-01     TO ws-rewritten-records
                             DISPLAY "Record changed successfully!"
+                            PERFORM 000400-press-enter-key-to-continue
 
             END-REWRITE.
          223100-finish-change-a-record.
@@ -810,12 +818,14 @@
             START idxfile FIRST
                   INVALID KEY
                           DISPLAY "Error positioning at begin!"
+                          PERFORM 000400-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
                           DISPLAY asterisk
                                   "Positioning at the begin."
                                   asterisk
+                          PERFORM 000400-press-enter-key-to-continue
 
             END-START.
           225210-finish-menu-mode-start-position.
@@ -834,6 +844,7 @@
                           "exactly equal or identical key from the "
                           "existing ones."
                   SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000400-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -850,6 +861,7 @@
                   DISPLAY asterisk
                           "Positioning exact key done correctly!"
                           asterisk
+                  PERFORM 000400-press-enter-key-to-continue
 
             END-START.
           225220-finish-menu-mode-read-position-eq.
@@ -930,7 +942,8 @@
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
-                          "greater than those existing."
+                          "greater than one of those existing."
+                  PERFORM 000400-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -946,6 +959,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
                           asterisk
+                  PERFORM 000400-press-enter-key-to-continue
 
             END-START.
           2252321-finish-menu-mode-read-position-gt.
@@ -962,6 +976,7 @@
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
                           "greater than or equal to those existing."
+                  PERFORM 000400-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -976,6 +991,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
                           asterisk
+                  PERFORM 000400-press-enter-key-to-continue
 
             END-START.
           2252322-finish-menu-mode-read-position-gteq.
@@ -992,6 +1008,7 @@
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
                           "less than one of those existing."
+                  PERFORM 000400-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
@@ -1005,6 +1022,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
                           asterisk
+                  PERFORM 000400-press-enter-key-to-continue
 
             END-START.
           2252323-finish-menu-mode-read-position-lt.
@@ -1021,6 +1039,7 @@
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
                           "less than or equal to those existing."
+                  PERFORM 000400-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
@@ -1035,6 +1054,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
                           asterisk
+                  PERFORM 000400-press-enter-key-to-continue
 
             END-START.
           2252324-finish-menu-mode-read-position-lteq.
@@ -1046,12 +1066,14 @@
             START idxfile LAST
                   INVALID KEY
                           DISPLAY "Error positioning at end!"
+                          PERFORM 000400-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
                           DISPLAY asterisk
                                   "Positioning at the end."
                                   asterisk
+                          PERFORM 000400-press-enter-key-to-continue
 
             END-START.
           225240-finish-menu-mode-finish-position.
@@ -1066,6 +1088,7 @@
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
+                 PERFORM 000400-press-enter-key-to-continue
                  PERFORM 225240-start-menu-mode-finish-position
                     THRU 225240-finish-menu-mode-finish-position
 
@@ -1088,6 +1111,7 @@
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
+                 PERFORM 000400-press-enter-key-to-continue
                  PERFORM 225210-start-menu-mode-start-position
                     THRU 225210-finish-menu-mode-start-position
 
