@@ -259,8 +259,6 @@
             SET idx-error-status-code-table              TO cte-01
             SEARCH ALL ws-error-status-code-table-OC
                 AT END
-                   MOVE ZEROES
-                     TO ws-error-status-code-table-code-error-aux
                    MOVE ws-error-status-code-table-desc-error-tag
                      TO ws-error-status-code-table-desc-error-aux
                    
@@ -448,7 +446,7 @@
 
             PERFORM 000300-preliminary-review-employee-code-content
 
-            READ idxfile                 INTO ws-f-idxfile-rec
+            READ idxfile RECORD          INTO ws-f-idxfile-rec
              KEY IS f-idxfile-rec-cod-employee
                  INVALID KEY
                          SET sw-idxfile-record-found-N TO TRUE
