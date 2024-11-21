@@ -54,7 +54,7 @@
            SET sw-right-col-80              TO TRUE
 
            PERFORM 100000-start-construct-text-window
-              THRU 100000-finish-construct-text-windows
+              THRU 100000-finish-construct-text-window
 
            STOP RUN.
 
@@ -72,7 +72,7 @@
 
            PERFORM 140000-start-set-window-frame-corners
               THRU 140000-finish-set-window-frame-corners.           
-       100000-finish-construct-text-windows.
+       100000-finish-construct-text-window.
            EXIT.
 
         110000-start-cleaning-window-frame-area.
