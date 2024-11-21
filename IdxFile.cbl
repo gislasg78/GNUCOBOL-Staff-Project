@@ -63,7 +63,7 @@
                    88  sw-idxfile-record-found-N           VALUE 'N'.
                    88  sw-idxfile-record-found-Y           VALUE 'Y'.
                05  ws-f-idxfile-rec-salary-employee-ed
-                                                    PIC  $--,---,--9.99
+                                                    PIC   $-,---,--9.99
                                                            VALUE ZEROES.
 
            03  ws-f-idxfile-rec.
@@ -90,6 +90,12 @@
                88  sw-menu-mode-read-direct-read           VALUE 1.
                88  sw-menu-mode-read-dir-and-seq           VALUE 2.
                88  sw-menu-mode-read-dir-exitmenu          VALUE 3.
+
+           03  ws-menu-mode-read-direct-keyaccess 
+                                                 PIC 9(01) VALUE ZERO.
+               88  sw-menu-mode-read-dir-keyacc-code       VALUE 1.
+               88  sw-menu-mode-read-dir-keyacc-salary     VALUE 2.
+               88  sw-menu-mode-read-dir-keyacc-exitmenu   VALUE 3.
 
            03  ws-menu-mode-read-option         PIC 9(02)  VALUE ZEROES.
                88  sw-menu-mode-read-option-start          VALUE 01.
@@ -290,15 +296,42 @@
                    "] <-"
            DISPLAY "+---+----+---+----+---+----+---+----+".
 
-       000300-preliminary-review-employee-code-content.
+       000300-preliminary-review-employee-code-contents.
             DISPLAY SPACE
-            DISPLAY "|-> " asterisk asterisk asterisk
-                    " Last processed Employee Code: "
-                    "[" ws-f-idxfile-rec-cod-employee
-                    "] = [" f-idxfile-rec-cod-employee "]. "
-                    asterisk asterisk asterisk " <-|".
+            DISPLAY "|-> "
+                    asterisk asterisk asterisk
+                    "Information on the last record processed "
+                    "and reached... "
+                    asterisk asterisk asterisk
+                    " <-|"         
+            DISPLAY asterisk asterisk asterisk
+                    " Code   Employee: ["
+                    ws-f-idxfile-rec-cod-employee
+                    "] = ["
+                    f-idxfile-rec-cod-employee
+                    "]. "
+                    asterisk asterisk asterisk.
 
-       000400-press-enter-key-to-continue.
+       000400-preliminary-review-employee-salary-contents.
+            MOVE ws-f-idxfile-rec-salary-employee
+              TO ws-f-idxfile-rec-salary-employee-ed
+
+            DISPLAY SPACE
+            DISPLAY "|-> "
+                    asterisk asterisk asterisk
+                    "Information on the last record processed "
+                    "and reached... "
+                    asterisk asterisk asterisk
+                    " <-|"         
+            DISPLAY asterisk asterisk asterisk
+                    " Salary Employee: ["
+                    ws-f-idxfile-rec-salary-employee-ed
+                    "] = ["
+                    f-idxfile-rec-salary-employee
+                    "]. "
+                    asterisk asterisk asterisk.
+
+       000500-press-enter-key-to-continue.
            DISPLAY "Press the ENTER key to continue..."
               WITH NO ADVANCING
             ACCEPT OMITTED.
@@ -386,7 +419,7 @@
                WHEN sw-menu-option-look-for-one
                     PERFORM 224000-start-look-for-any-record
                        THRU 224000-finish-look-for-any-record
-                      UNTIL sw-menu-mode-read-dir-exitmenu
+                      UNTIL sw-menu-mode-read-dir-keyacc-exitmenu
 
                WHEN sw-menu-option-look-for-all
                     PERFORM 225000-start-look-for-all-records
@@ -415,8 +448,8 @@
                   THRU 221300-finish-continue-carry-out-oper
 
                IF (sw-carry-out-sure-Y)  THEN
-                   PERFORM 221400-start-capture-other-fields
-                      THRU 221400-finish-capture-other-fields
+                   PERFORM 221400-start-capture-salary-employee
+                      THRU 221400-finish-capture-salary-employee
 
                    PERFORM 221500-start-store-a-record
                       THRU 221500-finish-store-a-record
@@ -444,20 +477,20 @@
           221200-start-look-for-a-record.
             SET sw-operation-class-READ    TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             READ idxfile RECORD          INTO ws-f-idxfile-rec
              KEY IS f-idxfile-rec-cod-employee
                  INVALID KEY
                          SET sw-idxfile-record-found-N TO TRUE
                          DISPLAY "Record Not Found!"
-                         PERFORM 000400-press-enter-key-to-continue
+                         PERFORM 000500-press-enter-key-to-continue
 
              NOT INVALID KEY
                          ADD cte-01        TO ws-reading-records
                          SET sw-idxfile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
-                         PERFORM 000400-press-enter-key-to-continue
+                         PERFORM 000500-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
 
@@ -479,7 +512,7 @@
                     ws-f-idxfile-rec-salary-employee-ed "]."
             DISPLAY "+---+----+---+----+---+----+---+"
 
-            PERFORM 000400-press-enter-key-to-continue
+            PERFORM 000500-press-enter-key-to-continue
 
             DISPLAY SPACE.
          221210-finish-show-file-info.
@@ -495,29 +528,29 @@
          221300-finish-continue-carry-out-oper.
             EXIT.
 
-         221400-start-capture-other-fields.
+         221400-start-capture-salary-employee.
            DISPLAY asterisk " Employee Salary : " WITH NO ADVANCING
            ACCEPT ws-f-idxfile-rec-salary-employee
 
            MOVE ws-f-idxfile-rec-salary-employee
              TO f-idxfile-rec-salary-employee.
-         221400-finish-capture-other-fields.
+         221400-finish-capture-salary-employee.
             EXIT.
 
          221500-start-store-a-record.
             SET sw-operation-class-WRITE   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             WRITE f-idxfile-rec          FROM ws-f-idxfile-rec
                   INVALID KEY
                           DISPLAY "Duplicate Key!"
-                          PERFORM 000400-press-enter-key-to-continue
+                          PERFORM 000500-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD cte-01       TO ws-written-records
                           DISPLAY "Record saved successfully!"
-                          PERFORM 000400-press-enter-key-to-continue
+                          PERFORM 000500-press-enter-key-to-continue
 
             END-WRITE.
          221500-finish-store-a-record.
@@ -559,17 +592,17 @@
          222100-start-eliminate-a-record.
             SET sw-operation-class-DELETE  TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             DELETE idxfile RECORD
                    INVALID KEY
                            DISPLAY "Invalid Key!"
-                           PERFORM 000400-press-enter-key-to-continue
+                           PERFORM 000500-press-enter-key-to-continue
 
                NOT INVALID KEY
                            ADD cte-01      TO ws-eliminated-records
                            DISPLAY "Record deleted successfully!"
-                           PERFORM 000400-press-enter-key-to-continue
+                           PERFORM 000500-press-enter-key-to-continue
 
             END-DELETE.
          222100-finish-eliminate-a-record.
@@ -589,7 +622,7 @@
             DISPLAY "+===+====+===+====+===+====+===+"
             DISPLAY "|   Modifying record fields.   |"
             DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "| [1]. Salary.                 |"
+            DISPLAY "| [1]. Salary Employee.        |"
             DISPLAY "| [2]. Return to main menu.    |"
             DISPLAY "+===+====+===+====+===+====+===+"
             DISPLAY "Enter your choice: " WITH NO ADVANCING
@@ -611,21 +644,8 @@
 
             EVALUATE TRUE
                 WHEN sw-menu-mode-modify-emp-salary
-                     IF (sw-idxfile-record-found-Y) THEN
-                         PERFORM 221300-start-continue-carry-out-oper
-                            THRU 221300-finish-continue-carry-out-oper
-
-                         IF (sw-carry-out-sure-Y)   THEN
-                             PERFORM 221400-start-capture-other-fields
-                                THRU 221400-finish-capture-other-fields
-
-                             PERFORM 223210-start-change-a-record
-                                THRU 223210-finish-change-a-record
-                         ELSE
-                             DISPLAY "Operation not performed. "
-                                     "File unchanged."
-                         END-IF
-                     END-IF
+                     PERFORM 223210-start-modify-salary-employee
+                        THRU 223210-finish-modify-salary-employee
 
                 WHEN sw-menu-mode-modify-emp-exitmenu
                      DISPLAY "Exiting this menu..."
@@ -638,63 +658,133 @@
          223200-finish-validate-menu-modify-fields.
             EXIT.
 
-          223210-start-change-a-record.
+          223210-start-modify-salary-employee.
+            IF (sw-idxfile-record-found-Y) THEN
+                PERFORM 221300-start-continue-carry-out-oper
+                   THRU 221300-finish-continue-carry-out-oper
+
+                IF (sw-carry-out-sure-Y)   THEN
+                    PERFORM 221400-start-capture-salary-employee
+                       THRU 221400-finish-capture-salary-employee
+
+                    PERFORM 223211-start-change-a-record
+                       THRU 223211-finish-change-a-record
+                ELSE
+                    DISPLAY "Operation not performed. "
+                            "File unchanged."
+                END-IF
+            END-IF.
+          223210-finish-modify-salary-employee.
+            EXIT.
+
+          223211-start-change-a-record.
             SET sw-operation-class-REWRITE TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             REWRITE f-idxfile-rec        FROM ws-f-idxfile-rec
                     INVALID KEY
                             DISPLAY "Invalid Key!"
-                            PERFORM 000400-press-enter-key-to-continue
+                            PERFORM 000500-press-enter-key-to-continue
 
                 NOT INVALID KEY
                             ADD cte-01     TO ws-rewritten-records
                             DISPLAY "Record changed successfully!"
-                            PERFORM 000400-press-enter-key-to-continue
+                            PERFORM 000500-press-enter-key-to-continue
 
             END-REWRITE.
-          223210-finish-change-a-record.
+          223211-finish-change-a-record.
             EXIT.
 
          224000-start-look-for-any-record.
-           INITIALIZE ws-continue-response
+           INITIALIZE ws-menu-mode-read-direct-option
 
-           PERFORM 224100-start-show-reading-direct-menu
-              THRU 224100-finish-show-reading-direct-menu
+           PERFORM 224100-start-show-menu-look-for-keyaccess
+              THRU 224100-finish-show-menu-look-for-keyaccess
 
-           PERFORM 224200-start-validate-reading-direct-menu
-              THRU 224200-finish-validate-reading-direct-menu.
+           PERFORM 224200-start-show-validate-menu-look-for-keyaccess
+              THRU 224200-finish-show-validate-menu-look-for-keyaccess.
          224000-finish-look-for-any-record.
            EXIT.
 
-          224100-start-show-reading-direct-menu.
+          224100-start-show-menu-look-for-keyaccess.
+           DISPLAY SPACE
+           DISPLAY "+===+====+===+====+===+====+===+"
+           DISPLAY "|     Look for any record.     |"
+           DISPLAY "+===+====+===+====+===+====+===+"
+           DISPLAY "| [1]. For Code Employee...    |"
+           DISPLAY "| [2]. For Salary Employee...  |"
+           DISPLAY "| [3]. Return to main menu.    |"
+           DISPLAY "+===+====+===+====+===+====+===+"
+           DISPLAY "Enter your choice: " WITH NO ADVANCING
+            ACCEPT ws-menu-mode-read-direct-keyaccess
+
+           DISPLAY "The chosen option was: "
+                   ws-menu-mode-read-direct-keyaccess.
+          224100-finish-show-menu-look-for-keyaccess.
+            EXIT.
+
+          224200-start-show-validate-menu-look-for-keyaccess.
+            EVALUATE TRUE
+                WHEN sw-menu-mode-read-dir-keyacc-code
+                     PERFORM 224210-start-show-mode-look-for-code
+                        THRU 224210-finish-show-mode-look-for-code
+                       UNTIL sw-menu-mode-read-dir-exitmenu
+ 
+                WHEN sw-menu-mode-read-dir-keyacc-salary
+                     PERFORM 224220-start-show-mode-look-for-rc-sal
+                        THRU 224220-finish-show-mode-look-for-rc-sal
+                       UNTIL sw-menu-mode-read-dir-exitmenu
+
+                WHEN sw-menu-mode-read-dir-keyacc-exitmenu
+                     DISPLAY "Quitting this menu..."
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. "
+                             "Please correct your choice."
+
+           END-EVALUATE.
+          224200-finish-show-validate-menu-look-for-keyaccess.
+            EXIT.
+
+          224210-start-show-mode-look-for-code.
+            INITIALIZE ws-continue-response
+
+            PERFORM 224211-start-show-reading-direct-menu
+               THRU 224211-finish-show-reading-direct-menu
+
+            PERFORM 224212-start-validate-reading-direct-menu
+               THRU 224212-finish-validate-reading-direct-menu.
+          224210-finish-show-mode-look-for-code.
+            EXIT.
+
+          224211-start-show-reading-direct-menu.
             DISPLAY SPACE
             DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "|     Direct Reading Menu.     |"
+            DISPLAY "| +Code Direct Reading Menu.+  |"
             DISPLAY "+===+====+===+====+===+====+===+"
             DISPLAY "| [1]. Locate directly.        |"
             DISPLAY "| [2]. Locate sequentially.    |"
-            DISPLAY "| [3]. Return to main menu.    |"
+            DISPLAY "| [3]. Exit this menu.         |"
             DISPLAY "+===+====+===+====+===+====+===+"
             DISPLAY "Enter your choice: " WITH NO ADVANCING
              ACCEPT ws-menu-mode-read-direct-option
 
             DISPLAY "The chosen option was: "
                    ws-menu-mode-read-direct-option.
-          224100-finish-show-reading-direct-menu.
+          224211-finish-show-reading-direct-menu.
             EXIT.
 
-          224200-start-validate-reading-direct-menu.
+          224212-start-validate-reading-direct-menu.
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-direct-read
-                     PERFORM 224210-start-routine-mode-read-direct-read
-                        THRU 224210-finish-routine-mode-read-direct-read
+                     PERFORM 2242121-start-routine-mode-read-direct-rd
+                        THRU 2242121-finish-routine-mode-read-direct-rd
                        UNTIL sw-continue-response-N
 
                 WHEN sw-menu-mode-read-dir-and-seq
-                     PERFORM 224220-start-routine-mode-read-dir-and-seq
-                        THRU 224220-finish-routine-mode-read-dir-and-seq
+                     PERFORM 2242122-start-routine-mode-read-dir-seq
+                        THRU 2242122-finish-routine-mode-read-dir-seq
                        UNTIL sw-continue-response-N
 
                 WHEN sw-menu-mode-read-dir-exitmenu
@@ -705,10 +795,10 @@
                              "Please correct your choice."
 
             END-EVALUATE.
-          224200-finish-validate-reading-direct-menu.
+          224212-finish-validate-reading-direct-menu.
             EXIT.
 
-          224210-start-routine-mode-read-direct-read.
+          2242121-start-routine-mode-read-direct-rd.
             PERFORM 221100-start-capture-key-field
                THRU 221100-finish-capture-key-field
 
@@ -717,10 +807,10 @@
 
             PERFORM 221600-start-continue-operation
                THRU 221600-finish-continue-operation.
-          224210-finish-routine-mode-read-direct-read.
+          2242121-finish-routine-mode-read-direct-rd.
             EXIT.
 
-          224220-start-routine-mode-read-dir-and-seq.
+          2242122-start-routine-mode-read-dir-seq.
             PERFORM 221100-start-capture-key-field
                THRU 221100-finish-capture-key-field
 
@@ -734,7 +824,148 @@
 
             PERFORM 221600-start-continue-operation
                THRU 221600-finish-continue-operation.
-          224220-finish-routine-mode-read-dir-and-seq.
+          2242122-finish-routine-mode-read-dir-seq.
+            EXIT.
+
+          224220-start-show-mode-look-for-rc-sal.
+            INITIALIZE ws-continue-response
+                       ws-idxfile-record-found
+
+            PERFORM 224221-start-show-mode-look-for-rcsal
+               THRU 224221-finish-show-mode-look-for-rcsal
+
+            PERFORM 224222-start-validate-mode-look-for-rcsal
+               THRU 224222-finish-validate-mode-look-for-rcsal.
+          224220-finish-show-mode-look-for-rc-sal.
+            EXIT.
+
+          224221-start-show-mode-look-for-rcsal.
+            DISPLAY SPACE
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "| +Salary Direct Reading Menu.+|"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "| [1]. Locate directly.        |"
+            DISPLAY "| [2]. Locate sequentially.    |"
+            DISPLAY "| [3]. Exit this menu.         |"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "Enter your choice: " WITH NO ADVANCING
+             ACCEPT ws-menu-mode-read-direct-option
+
+            DISPLAY "The chosen option was: "
+                   ws-menu-mode-read-direct-option.
+          224221-finish-show-mode-look-for-rcsal.
+            EXIT.
+
+          224222-start-validate-mode-look-for-rcsal.
+            EVALUATE TRUE
+                WHEN sw-menu-mode-read-direct-read
+                     PERFORM 2242221-start-routine-mode-read-direct-sal
+                        THRU 2242221-finish-routine-mode-read-direct-sal
+                       UNTIL sw-continue-response-N
+
+                WHEN sw-menu-mode-read-dir-and-seq
+                     PERFORM 2242222-start-routine-mode-read-dirseq-sal
+                        THRU 2242222-finish-routine-mode-read-dirseq-sal
+                       UNTIL sw-continue-response-N
+
+                WHEN sw-menu-mode-read-dir-exitmenu
+                     DISPLAY "Exiting this menu..."
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. "
+                             "Please correct your choice."
+
+            END-EVALUATE.
+          224222-finish-validate-mode-look-for-rcsal.
+            EXIT.
+
+          2242221-start-routine-mode-read-direct-sal.
+            PERFORM 221400-start-capture-salary-employee
+               THRU 221400-finish-capture-salary-employee
+
+            PERFORM 22422211-start-read-record-salary-employee
+               THRU 22422211-finish-read-record-salary-employee
+
+            PERFORM 221600-start-continue-operation
+               THRU 221600-finish-continue-operation.
+          2242221-finish-routine-mode-read-direct-sal.
+            EXIT.
+
+          22422211-start-read-record-salary-employee.
+            SET sw-operation-class-READ    TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            READ idxfile RECORD          INTO ws-f-idxfile-rec
+             KEY IS f-idxfile-rec-salary-employee
+                 INVALID KEY
+                         SET sw-idxfile-record-found-N TO TRUE
+                         DISPLAY "Record Not Found!"
+                         PERFORM 000500-press-enter-key-to-continue
+
+             NOT INVALID KEY
+                         ADD cte-01        TO ws-reading-records
+                         SET sw-idxfile-record-found-Y TO TRUE
+                         DISPLAY "Record found successfully!"
+                         PERFORM 000500-press-enter-key-to-continue
+                         PERFORM 221210-start-show-file-info
+                            THRU 221210-finish-show-file-info
+
+            END-READ.
+          22422211-finish-read-record-salary-employee.
+            EXIT.
+
+          2242222-start-routine-mode-read-dirseq-sal.
+            PERFORM 221400-start-capture-salary-employee
+               THRU 221400-finish-capture-salary-employee
+
+            PERFORM 22422221-start-routine-mode-locate-for-sal
+               THRU 22422221-finish-routine-mode-locate-for-sal
+
+            IF (sw-idxfile-record-found-Y)
+                PERFORM 225260-start-menu-mode-read-forwarding
+                   THRU 225260-finish-menu-mode-read-forwarding
+            END-IF
+
+            PERFORM 221600-start-continue-operation
+               THRU 221600-finish-continue-operation.
+          2242222-finish-routine-mode-read-dirseq-sal.
+            EXIT.
+
+          22422221-start-routine-mode-locate-for-sal.
+            SET sw-operation-class-STARTEQ       TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            START idxfile
+              KEY IS EQUAL TO f-idxfile-rec-salary-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY "The salary could not be located for an "
+                          "exactly equal or identical value from the "
+                          "existing ones."
+                  SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
+                  DISPLAY asterisk
+                          "The salary: ["
+                           ws-f-idxfile-rec-salary-employee
+                          "] was found for a value that was exactly the"
+                          " same or identical to the existing ones: "
+                          "[" f-idxfile-rec-salary-employee "]."
+                  DISPLAY asterisk
+                          "Positioning exact salary done correctly!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          22422221-finish-routine-mode-locate-for-sal.
             EXIT.
 
          225000-start-look-for-all-records.
@@ -856,23 +1087,23 @@
             START idxfile FIRST
                   INVALID KEY
                           DISPLAY "Error positioning at begin!"
-                          PERFORM 000400-press-enter-key-to-continue
+                          PERFORM 000500-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
                           DISPLAY asterisk
                                   "Positioning at the begin."
                                   asterisk
-                          PERFORM 000400-press-enter-key-to-continue
+                          PERFORM 000500-press-enter-key-to-continue
 
             END-START.
           225210-finish-menu-mode-start-position.
             EXIT.
 
           225220-start-menu-mode-read-position-eq.
-            SET sw-operation-class-STARTEQ    TO TRUE
+            SET sw-operation-class-STARTEQ       TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             START idxfile
               KEY IS EQUAL TO f-idxfile-rec-cod-employee
@@ -882,7 +1113,7 @@
                           "exactly equal or identical key from the "
                           "existing ones."
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -899,7 +1130,7 @@
                   DISPLAY asterisk
                           "Positioning exact key done correctly!"
                           asterisk
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
 
             END-START.
           225220-finish-menu-mode-read-position-eq.
@@ -973,7 +1204,7 @@
           2252321-start-menu-mode-read-position-gt.
             SET sw-operation-class-STARTGT TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content.
+            PERFORM 000300-preliminary-review-employee-code-contents.
 
             START idxfile
               KEY IS GREATER THAN f-idxfile-rec-cod-employee
@@ -981,7 +1212,7 @@
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
                           "greater than one of those existing."
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -997,7 +1228,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
                           asterisk
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
 
             END-START.
           2252321-finish-menu-mode-read-position-gt.
@@ -1006,7 +1237,7 @@
           2252322-start-menu-mode-read-position-gteq.
             SET sw-operation-class-STARTGTEQ  TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content.
+            PERFORM 000300-preliminary-review-employee-code-contents.
 
             START idxfile
               KEY IS GREATER THAN OR EQUAL TO f-idxfile-rec-cod-employee
@@ -1014,7 +1245,7 @@
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
                           "greater than or equal to those existing."
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1029,7 +1260,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
                           asterisk
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
 
             END-START.
           2252322-finish-menu-mode-read-position-gteq.
@@ -1038,7 +1269,7 @@
           2252323-start-menu-mode-read-position-lt.
             SET sw-operation-class-STARTLT    TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             START idxfile
               KEY IS LESS THAN f-idxfile-rec-cod-employee
@@ -1046,7 +1277,7 @@
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
                           "less than one of those existing."
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
@@ -1060,7 +1291,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
                           asterisk
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
 
             END-START.
           2252323-finish-menu-mode-read-position-lt.
@@ -1069,7 +1300,7 @@
           2252324-start-menu-mode-read-position-lteq.
             SET sw-operation-class-STARTLTEQ  TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             START idxfile
               KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-cod-employee
@@ -1077,7 +1308,7 @@
                   DISPLAY "Invalid Key!"
                   DISPLAY "The value could not be located for a key "
                           "less than or equal to those existing."
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
@@ -1092,7 +1323,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
                           asterisk
-                  PERFORM 000400-press-enter-key-to-continue
+                  PERFORM 000500-press-enter-key-to-continue
 
             END-START.
           2252324-finish-menu-mode-read-position-lteq.
@@ -1104,14 +1335,14 @@
             START idxfile LAST
                   INVALID KEY
                           DISPLAY "Error positioning at end!"
-                          PERFORM 000400-press-enter-key-to-continue
+                          PERFORM 000500-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
                           DISPLAY asterisk
                                   "Positioning at the end."
                                   asterisk
-                          PERFORM 000400-press-enter-key-to-continue
+                          PERFORM 000500-press-enter-key-to-continue
 
             END-START.
           225240-finish-menu-mode-finish-position.
@@ -1120,13 +1351,13 @@
           225250-start-menu-mode-read-backwarding.
             SET sw-operation-class-READPREV   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             READ idxfile PREVIOUS RECORD    INTO ws-f-idxfile-rec
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
-                 PERFORM 000400-press-enter-key-to-continue
+                 PERFORM 000500-press-enter-key-to-continue
                  PERFORM 225240-start-menu-mode-finish-position
                     THRU 225240-finish-menu-mode-finish-position
 
@@ -1143,13 +1374,13 @@
           225260-start-menu-mode-read-forwarding.
             SET sw-operation-class-READNEXT   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-content
+            PERFORM 000300-preliminary-review-employee-code-contents
 
             READ idxfile NEXT RECORD        INTO ws-f-idxfile-rec
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
-                 PERFORM 000400-press-enter-key-to-continue
+                 PERFORM 000500-press-enter-key-to-continue
                  PERFORM 225210-start-menu-mode-start-position
                     THRU 225210-finish-menu-mode-start-position
 
