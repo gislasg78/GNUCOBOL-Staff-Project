@@ -101,14 +101,14 @@
            MOVE ws-cte-01                   TO ws-interval-pos
 
            PERFORM 121000-start-build-text-window-bricks
-              THRU 121000-finish-build-text-windows-bricks
+              THRU 121000-finish-build-text-window-bricks
            VARYING ws-pos FROM ws-start-pos BY ws-interval-pos
              UNTIL ws-pos IS GREATER THAN ws-finish-pos
 
            MOVE ws-right-col                TO ws-fixed-col
 
            PERFORM 121000-start-build-text-window-bricks
-              THRU 121000-finish-build-text-windows-bricks
+              THRU 121000-finish-build-text-window-bricks
            VARYING ws-pos FROM ws-start-pos BY ws-interval-pos
              UNTIL ws-pos IS GREATER THAN ws-finish-pos.
         120000-finish-build-vertical-edges-frame.
@@ -120,7 +120,7 @@
             ELSE
                 IF (sw-switch-row-column-column)
                     DISPLAY ws-char AT LINE ws-fixed-row COLUMN ws-pos.
-         121000-finish-build-text-windows-bricks.
+         121000-finish-build-text-window-bricks.
             EXIT.
 
         130000-start-build-horizontal-edges-frame.
@@ -132,14 +132,14 @@
            MOVE ws-cte-01                   TO ws-interval-pos
 
            PERFORM 121000-start-build-text-window-bricks
-              THRU 121000-finish-build-text-windows-bricks
+              THRU 121000-finish-build-text-window-bricks
            VARYING ws-pos FROM ws-start-pos BY ws-interval-pos
              UNTIL ws-pos IS GREATER THAN ws-finish-pos
 
            MOVE ws-bottom-row               TO ws-fixed-row
 
            PERFORM 121000-start-build-text-window-bricks
-              THRU 121000-finish-build-text-windows-bricks
+              THRU 121000-finish-build-text-window-bricks
            VARYING ws-pos FROM ws-start-pos BY ws-interval-pos
              UNTIL ws-pos IS GREATER THAN ws-finish-pos.
         130000-finish-build-horizontal-edges-frame.           
