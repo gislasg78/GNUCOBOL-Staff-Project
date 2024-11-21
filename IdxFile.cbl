@@ -300,7 +300,7 @@
             DISPLAY SPACE
             DISPLAY "|-> "
                     asterisk asterisk asterisk
-                    "Information on the last record processed "
+                    " Information on the last record processed "
                     "and reached... "
                     asterisk asterisk asterisk
                     " <-|"         
@@ -313,13 +313,10 @@
                     asterisk asterisk asterisk.
 
        000400-preliminary-review-employee-salary-contents.
-            MOVE ws-f-idxfile-rec-salary-employee
-              TO ws-f-idxfile-rec-salary-employee-ed
-
             DISPLAY SPACE
             DISPLAY "|-> "
                     asterisk asterisk asterisk
-                    "Information on the last record processed "
+                    " Information on the last record processed "
                     "and reached... "
                     asterisk asterisk asterisk
                     " <-|"         
@@ -533,7 +530,8 @@
            ACCEPT ws-f-idxfile-rec-salary-employee
 
            MOVE ws-f-idxfile-rec-salary-employee
-             TO f-idxfile-rec-salary-employee.
+             TO ws-f-idxfile-rec-salary-employee-ed
+                f-idxfile-rec-salary-employee.
          221400-finish-capture-salary-employee.
             EXIT.
 
@@ -959,6 +957,7 @@
                           "] was found for a value that was exactly the"
                           " same or identical to the existing ones: "
                           "[" f-idxfile-rec-salary-employee "]."
+                          asterisk
                   DISPLAY asterisk
                           "Positioning exact salary done correctly!"
                           asterisk
