@@ -35,104 +35,124 @@
 
        WORKING-STORAGE SECTION.
        77  fs-idxfile                           PIC 9(02)  VALUE ZEROES.
-       77  ws-error-status-code-table-desc-error-tag       PIC X(25)
-                                         VALUE "Unknown File Status".
        77  ws-idxfile-name                      PIC X(12)  VALUE SPACES.
 
        78  cte-01                                          VALUE 01.
        78  cte-34                                          VALUE 34.
 
        01  ws-environmental-variables.
-           03  ws-realization-questions.
-               05  ws-carry-out-sure            PIC A(01)  VALUE SPACE.
-                   88  sw-carry-out-sure-Y      VALUES ARE 'Y', 'y'.
-               05  ws-continue-response         PIC A(01)  VALUE SPACE.
-                   88  sw-continue-response-N   VALUES ARE 'N', 'n'.
-
            03  ws-f-idxfile-indicators.
-               05  ws-error-status-code-table-aux.
-                   07  ws-error-status-code-table-code-error-aux
+               05  ws-f-error-status-code-table-aux.
+                       07  ws-f-error-status-code-table-code-error-aux
                                                 PIC 9(02)  VALUE ZEROES.
-                   07  ws-error-status-code-table-desc-error-aux
+                       07  ws-f-error-status-code-table-desc-error-aux
                                                 PIC X(25)  VALUE SPACES.
-
+               05  ws-f-idxfile-rec-salary-employee-ed
+                                                    PIC   $-,---,--9.99
+                                                           VALUE ZEROES.
                05  ws-idxfile-EOF               PIC A(01)  VALUE SPACE.
                    88  sw-idxfile-EOF-Y                    VALUE 'Y'.
                    88  sw-idxfile-EOF-N                    VALUE 'N'.
                05  ws-idxfile-record-found      PIC A(01)  VALUE SPACE.
                    88  sw-idxfile-record-found-N           VALUE 'N'.
                    88  sw-idxfile-record-found-Y           VALUE 'Y'.
-               05  ws-f-idxfile-rec-salary-employee-ed
-                                                    PIC   $-,---,--9.99
-                                                           VALUE ZEROES.
 
            03  ws-f-idxfile-rec.
                05  ws-f-idxfile-rec-cod-employee           PIC 9(05)
                                                            VALUE ZEROES.
-               05  ws-f-idxfile-rec-salary-employee    PIC S9(06)V9(02)
-                                                      SIGN  IS LEADING
-                                                      SEPARATE CHARACTER
+               05  ws-f-idxfile-rec-salary-employee
+                                                PIC S9(06)V9(02)
+                                                SIGN  IS LEADING
+                                                SEPARATE CHARACTER
                                                            VALUE ZEROES.
 
-           03  ws-menu-option                   PIC 9(01)  VALUE ZERO.
-               88  sw-menu-option-add                      VALUE 1.
-               88  sw-menu-option-delete                   VALUE 2.
-               88  sw-menu-option-modify                   VALUE 3.
-               88  sw-menu-option-look-for-one             VALUE 4.
-               88  sw-menu-option-look-for-all             VALUE 5.
-               88  sw-menu-option-exit                     VALUE 6.
+           03  ws-menu-standard-options-performance.
+               05  ws-menu-option               PIC 9(01)
+                                                           VALUE ZERO.
+                   88  sw-menu-option-add                  VALUE 1.
+                   88  sw-menu-option-delete               VALUE 2.
+                   88  sw-menu-option-modify               VALUE 3.
+                   88  sw-menu-option-look-for-one         VALUE 4.
+                   88  sw-menu-option-look-for-all         VALUE 5.
+                   88  sw-menu-option-exit                 VALUE 6.
+               05  ws-menu-mode-modify-option   PIC 9(01)
+                                                           VALUE ZERO.
+                   88  sw-menu-mode-modify-emp-salary      VALUE 1.
+                   88  sw-menu-mode-modify-emp-exitmenu    VALUE 2.
+               05  ws-menu-mode-read-direct-option
+                                                PIC 9(01)  VALUE ZERO.
+                   88  sw-menu-mode-read-direct-read       VALUE 1.
+                   88  sw-menu-mode-read-dir-and-seq       VALUE 2.
+                   88  sw-menu-mode-read-dir-exitmenu      VALUE 3.
 
-           03  ws-menu-mode-modify-option       PIC 9(01)  VALUE ZERO.
-               88  sw-menu-mode-modify-emp-salary          VALUE 1.
-               88  sw-menu-mode-modify-emp-exitmenu        VALUE 2.
-
-           03  ws-menu-mode-read-direct-option  PIC 9(01)  VALUE ZERO.
-               88  sw-menu-mode-read-direct-read           VALUE 1.
-               88  sw-menu-mode-read-dir-and-seq           VALUE 2.
-               88  sw-menu-mode-read-dir-exitmenu          VALUE 3.
-
-           03  ws-menu-mode-read-direct-keyaccess 
-                                                 PIC 9(01) VALUE ZERO.
-               88  sw-menu-mode-read-dir-keyacc-code       VALUE 1.
-               88  sw-menu-mode-read-dir-keyacc-salary     VALUE 2.
-               88  sw-menu-mode-read-dir-keyacc-exitmenu   VALUE 3.
-
-           03  ws-menu-mode-read-option         PIC 9(02)  VALUE ZEROES.
-               88  sw-menu-mode-read-option-start          VALUE 01.
-               88  sw-menu-mode-read-option-givenkey-eq    VALUE 02.
-               88  sw-menu-mode-read-option-givenkey-apprx VALUE 03.
-               88  sw-menu-mode-read-option-finish         VALUE 04.
-               88  sw-menu-mode-read-option-r-first-rcrd   VALUE 05.
-               88  sw-menu-mode-read-option-r-last-rcrd    VALUE 06.
-               88  sw-menu-mode-read-option-r-backward     VALUE 07.
-               88  sw-menu-mode-read-option-r-forward      VALUE 08.
-               88  sw-menu-mode-read-option-prev-rcrd      VALUE 09.
-               88  sw-menu-mode-read-option-next-rcrd      VALUE 10.
-               88  sw-menu-mode-read-option-exitmenu       VALUE 11.
-
-           03  ws-menu-mode-read-option-givenkey PIC 9(01) VALUE ZEROES.
-               88  sw-menu-mode-read-option-givenkey-gt    VALUE 1.
-               88  sw-menu-mode-read-option-givenkey-gteq  VALUE 2.
-               88  sw-menu-mode-read-option-givenkey-lt    VALUE 3.
-               88  sw-menu-mode-read-option-givenkey-lteq  VALUE 4.
-               88  sw-menu-mode-read-option-givenkey-exit  VALUE 5.
-
-           03  ws-operation-class               PIC A(13)  VALUE SPACES.
-               88  sw-operation-class-CLOSE     VALUE "CLOSE".
-               88  sw-operation-class-DELETE    VALUE "DELETE".
-               88  sw-operation-class-OPEN      VALUE "OPEN".
-               88  sw-operation-class-READ      VALUE "READ".
-               88  sw-operation-class-READNEXT  VALUE "READ NEXT".
-               88  sw-operation-class-READPREV  VALUE "READ PREVIOUS".
-               88  sw-operation-class-REWRITE   VALUE "REWRITE".
-               88  sw-operation-class-STARTEQ   VALUE "START EQUAL".
-               88  sw-operation-class-STARTFRST VALUE "START FIRST".
-               88  sw-operation-class-STARTGT   VALUE "START GREATER".
-               88  sw-operation-class-STARTGTEQ VALUE "START GTEQ".
-               88  sw-operation-class-STARTLST  VALUE "START LAST".
-               88  sw-operation-class-STARTLT   VALUE "START LESS".
-               88  sw-operation-class-STARTLTEQ VALUE "START LTEQ".
-               88  sw-operation-class-WRITE     VALUE "WRITE".
+               05  ws-menu-mode-read-direct-keyaccess 
+                                                PIC 9(01)  VALUE ZERO.
+                   88  sw-menu-mode-read-dir-keyacc-code   VALUE 1.
+                   88  sw-menu-mode-read-dir-keyacc-salary VALUE 2.
+                   88  sw-menu-mode-read-dir-keyacc-exitmenu
+                                                           VALUE 3.
+               05  ws-menu-mode-read-option     PIC 9(02)  VALUE ZEROES.
+                   88  sw-menu-mode-read-option-start      VALUE 01.
+                   88  sw-menu-mode-read-option-givenkey-eq
+                                                           VALUE 02.
+                   88  sw-menu-mode-read-option-givenkey-apprx
+                                                           VALUE 03.
+                   88  sw-menu-mode-read-option-finish     VALUE 04.
+                   88  sw-menu-mode-read-option-r-first-rcrd
+                                                           VALUE 05.
+                   88  sw-menu-mode-read-option-r-last-rcrd
+                                                           VALUE 06.
+                   88  sw-menu-mode-read-option-r-backward VALUE 07.
+                   88  sw-menu-mode-read-option-r-forward  VALUE 08.
+                   88  sw-menu-mode-read-option-prev-rcrd  VALUE 09.
+                   88  sw-menu-mode-read-option-next-rcrd  VALUE 10.
+                   88  sw-menu-mode-read-option-exitmenu   VALUE 11.
+               05  ws-menu-mode-read-option-givenkey
+                                                PIC 9(01)  VALUE ZEROES.
+                   88  sw-menu-mode-read-option-givenkey-gt
+                                                           VALUE 1.
+                   88  sw-menu-mode-read-option-givenkey-gteq
+                                                           VALUE 2.
+                   88  sw-menu-mode-read-option-givenkey-lt
+                                                           VALUE 3.
+                   88  sw-menu-mode-read-option-givenkey-lteq
+                                                           VALUE 4.
+                   88  sw-menu-mode-read-option-givenkey-exit
+                                                           VALUE 5.
+               05  ws-operation-class           PIC A(13)  VALUE SPACES.
+                   88  sw-operation-class-CLOSE
+                                                VALUE "CLOSE".
+                   88  sw-operation-class-DELETE
+                                                VALUE "DELETE".
+                   88  sw-operation-class-OPEN  VALUE "OPEN".
+                   88  sw-operation-class-READ  VALUE "READ".
+                   88  sw-operation-class-READNEXT
+                                                VALUE "READ NEXT".
+                   88  sw-operation-class-READPREV
+                                                VALUE "READ PREVIOUS".
+                   88  sw-operation-class-REWRITE
+                                                VALUE "REWRITE".
+                   88  sw-operation-class-STARTEQ
+                                                VALUE "START EQUAL".
+                   88  sw-operation-class-STARTFRST
+                                                VALUE "START FIRST".
+                   88  sw-operation-class-STARTGT
+                                                VALUE "START GREATER".
+                   88  sw-operation-class-STARTGTEQ
+                                                VALUE "START GTEQ".
+                   88  sw-operation-class-STARTLST
+                                                VALUE "START LAST".
+                   88  sw-operation-class-STARTLT
+                                                VALUE "START LESS".
+                   88  sw-operation-class-STARTLTEQ
+                                                VALUE "START LTEQ".
+                   88  sw-operation-class-WRITE
+                                                VALUE "WRITE".
+           03  ws-realization-questions.
+               05  ws-carry-out-sure            PIC A(01)  VALUE SPACE.
+                   88  sw-carry-out-sure-Y      VALUES ARE 'Y', 'y'.
+               05  ws-continue-response         PIC A(01)  VALUE SPACE.
+                   88  sw-continue-response-N   VALUES ARE 'N', 'n'.
 
        01  ws-statistics-processed-records.
            03  ws-eliminated-records            PIC 9(04)  VALUE ZEROES.
@@ -141,139 +161,176 @@
            03  ws-rewritten-records             PIC 9(04)  VALUE ZEROES.
            03  ws-written-records               PIC 9(04)  VALUE ZEROES.
 
-       01  ws-error-status-code-table.
-           03  FILLER                       PIC 9(02)  VALUE ZEROES.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Success Completion".
-           03  FILLER                       PIC 9(02)  VALUE 02.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Success Duplicate".
-           03  FILLER                       PIC 9(02)  VALUE 04.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Success Incomplete".
-           03  FILLER                       PIC 9(02)  VALUE 05.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Success Optional, Missing".
-           03  FILLER                       PIC 9(02)  VALUE 06.
-           03  FILLER                       PIC X(25)  VALUE 
-                                            "Multiple Records LS".
-           03  FILLER                       PIC 9(02)  VALUE 07.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Success No Unit".
-           03  FILLER                       PIC 9(02)  VALUE 09.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Success LS Bad Data".
-           03  FILLER                       PIC 9(02)  VALUE 10.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "End Of File".
-           03  FILLER                       PIC 9(02)  VALUE 14.
-           03  FILLER                       PIC X(25)  VALUE 
-                                            "Out Of Key Range".
-           03  FILLER                       PIC 9(02)  VALUE 21.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Key Invalid".
-           03  FILLER                       PIC 9(02)  VALUE 22.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Key Exists".
-           03  FILLER                       PIC 9(02)  VALUE 23.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Key Not Exists".
-           03  FILLER                       PIC 9(02)  VALUE 24.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Key Boundary violation".
-           03  FILLER                       PIC 9(02)  VALUE 30.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Permanent Error".
-           03  FILLER                       PIC 9(02)  VALUE 31.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Inconsistent Filename".
-           03  FILLER                       PIC 9(02)  VALUE 34.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Boundary Violation".
-           03  FILLER                       PIC 9(02)  VALUE 35.
-           03  FILLER                       PIC X(25)  VALUE 
-                                            "File Not Found".
-           03  FILLER                       PIC 9(02)  VALUE 37.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Permission Denied".
-           03  FILLER                       PIC 9(02)  VALUE 38.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Closed With Lock".
-           03  FILLER                       PIC 9(02)  VALUE 39.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Conflict Attribute".
-           03  FILLER                       PIC 9(02)  VALUE 41.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Already Open".
-           03  FILLER                       PIC 9(02)  VALUE 42.
-           03  FILLER                       PIC X(25)  VALUE 
-                                            "Not Open".
-           03  FILLER                       PIC 9(02)  VALUE 43.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Read Not Done".
-           03  FILLER                       PIC 9(02)  VALUE 44.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Record Overflow".
-           03  FILLER                       PIC 9(02)  VALUE 46.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Read Error".
-           03  FILLER                       PIC 9(02)  VALUE 47.
-           03  FILLER                       PIC X(25)  VALUE 
-                                            "Input Denied".
-           03  FILLER                       PIC 9(02)  VALUE 48.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Output Denied".
-           03  FILLER                       PIC 9(02)  VALUE 49.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "I/O Denied".
-           03  FILLER                       PIC 9(02)  VALUE 51.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Record Locked".
-           03  FILLER                       PIC 9(02)  VALUE 52.
-           03  FILLER                       PIC X(25)  VALUE 
-                                            "End-Of-Page".
-           03  FILLER                       PIC 9(02)  VALUE 57.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "I/O Linage".
-           03  FILLER                       PIC 9(02)  VALUE 61.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "File Sharing Failure".
-           03  FILLER                       PIC 9(02)  VALUE 71.
-           03  FILLER                       PIC X(25)  VALUE
-                                            "Bad Character".
-           03  FILLER                       PIC 9(02)  VALUE 91.
-           03  FILLER                       PIC X(25)  VALUE 
-                                            "File Not Available".
-
-       01  ws-error-status-code-table-RED 
-           REDEFINES ws-error-status-code-table.
-           03  ws-error-status-code-table-OC   OCCURS cte-34 TIMES
-               ASCENDING KEY ws-error-status-code-table-code-error
+       01  ws-f-error-status-code-table.
+           03  ws-status-code-success-completion.
+               05  FILLER                       PIC 9(02)  VALUE ZEROES.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Success Completion".
+           03  ws-status-code-success-duplicate.
+               05  FILLER                       PIC 9(02)  VALUE 02.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Success Duplicate".
+           03  ws-status-code-success-incomplete.
+               05  FILLER                       PIC 9(02)  VALUE 04.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Success Incomplete".
+           03  ws-status-code-optional-missing.
+               05  FILLER                       PIC 9(02)  VALUE 05.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Success Optional, Missing".
+           03  ws-status-code-multiple-records-ls.
+               05  FILLER                       PIC 9(02)  VALUE 06.
+               05  FILLER                       PIC X(25)  VALUE 
+                   "Multiple Records LS".
+           03  ws-status-code-success-no-unit.
+               05  FILLER                       PIC 9(02)  VALUE 07.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Success No Unit".
+           03  ws-status-code-success-ls-bad-data.
+               05  FILLER                       PIC 9(02)  VALUE 09.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Success LS Bad Data".
+           03  ws-status-code-end-of-file.
+               05  FILLER                       PIC 9(02)  VALUE 10.
+               05  FILLER                       PIC X(25)  VALUE
+                   "End Of File".
+           03  ws-status-code-out-of-key-range.
+               05  FILLER                       PIC 9(02)  VALUE 14.
+               05  FILLER                       PIC X(25)  VALUE 
+                   "Out Of Key Range".
+           03  ws-status-code-key-invalid.
+               05  FILLER                       PIC 9(02)  VALUE 21.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Key Invalid".
+           03  ws-status-code-key-exists.
+               05  FILLER                       PIC 9(02)  VALUE 22.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Key Exists".
+           03  ws-status-code-key-not-exists.
+               05  FILLER                       PIC 9(02)  VALUE 23.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Key Not Exists".
+           03  ws-status-code-key-boundary-violation.
+               05  FILLER                       PIC 9(02)  VALUE 24.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Key Boundary violation".
+           03  ws-status-code-permanent-error.
+               05  FILLER                       PIC 9(02)  VALUE 30.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Permanent Error".
+           03  ws-status-code-inconsistent-filename.
+               05  FILLER                       PIC 9(02)  VALUE 31.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Inconsistent Filename".
+           03  ws-status-code-boundary-violation.
+               05  FILLER                       PIC 9(02)  VALUE 34.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Boundary Violation".
+           03  ws-status-code-file-not-found.
+               05  FILLER                       PIC 9(02)  VALUE 35.
+               05  FILLER                       PIC X(25)  VALUE 
+                   "File Not Found".
+           03  ws-status-code-permission-denied.
+               05  FILLER                       PIC 9(02)  VALUE 37.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Permission Denied".
+           03  ws-status-code-closed-with-lock.
+               05  FILLER                       PIC 9(02)  VALUE 38.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Closed With Lock".
+           03  ws-status-code-conflict-attribute.
+               05  FILLER                       PIC 9(02)  VALUE 39.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Conflict Attribute".
+           03  ws-status-code-already-open.
+               05  FILLER                       PIC 9(02)  VALUE 41.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Already Open".
+           03  ws-status-code-not-open.
+               05  FILLER                       PIC 9(02)  VALUE 42.
+               05  FILLER                       PIC X(25)  VALUE 
+                   "Not Open".
+           03  ws-status-code-read-not-done.
+               05  FILLER                       PIC 9(02)  VALUE 43.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Read Not Done".
+           03  ws-status-code-record-overflow.
+               05  FILLER                       PIC 9(02)  VALUE 44.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Record Overflow".
+           03  ws-status-code-read-error.
+               05  FILLER                       PIC 9(02)  VALUE 46.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Read Error".
+           03  ws-status-code-input-denied.
+               05  FILLER                       PIC 9(02)  VALUE 47.
+               05  FILLER                       PIC X(25)  VALUE 
+                   "Input Denied".
+           03  ws-status-code-output-denied.
+               05  FILLER                       PIC 9(02)  VALUE 48.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Output Denied".
+           03  ws-status-code-i-o-denied.
+               05  FILLER                       PIC 9(02)  VALUE 49.
+               05  FILLER                       PIC X(25)  VALUE
+                   "I/O Denied".
+           03  ws-status-code-record-locked.
+               05  FILLER                       PIC 9(02)  VALUE 51.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Record Locked".
+           03  ws-status-code-end-of-page.
+               05  FILLER                       PIC 9(02)  VALUE 52.
+               05  FILLER                       PIC X(25)  VALUE 
+                   "End-Of-Page".
+           03  ws-status-code-i-o-linage.
+               05  FILLER                       PIC 9(02)  VALUE 57.
+               05  FILLER                       PIC X(25)  VALUE
+                   "I/O Linage".
+           03  ws-status-code-file-sharing-failure.
+               05  FILLER                       PIC 9(02)  VALUE 61.
+               05  FILLER                       PIC X(25)  VALUE
+                   "File Sharing Failure".
+           03  ws-status-code-bad-character.
+               05  FILLER                       PIC 9(02)  VALUE 71.
+               05  FILLER                       PIC X(25)  VALUE
+                   "Bad Character".
+           03  ws-status-code-file-not-available.
+               05  FILLER                       PIC 9(02)  VALUE 91.
+               05  FILLER                       PIC X(25)  VALUE 
+                   "File Not Available".
+       01  ws-f-error-status-code-table-RED 
+           REDEFINES ws-f-error-status-code-table.
+           03  ws-f-error-status-code-table-OC  OCCURS cte-34 TIMES
+               ASCENDING KEY ws-f-error-status-code-table-code-error
                INDEXED BY idx-error-status-code-table.
-               05  ws-error-status-code-table-code-error PIC 9(02).
-               05  ws-error-status-code-table-desc-error PIC X(25).
- 
+               05  ws-f-error-status-code-table-code-error PIC 9(02).
+               05  ws-f-error-status-code-table-desc-error PIC X(25).
+
+       01  ws-f-error-status-code-table-desc-error-tag     PIC X(25)
+               VALUE "Unknown File Status".
+
        PROCEDURE DIVISION.
        DECLARATIVES.
        File-Handler SECTION.
            USE AFTER ERROR PROCEDURE ON idxfile.
 
        000100-search-for-error-and-description-codes.
-            INITIALIZE ws-error-status-code-table-aux
-            MOVE fs-idxfile TO ws-error-status-code-table-code-error-aux
+            INITIALIZE ws-f-error-status-code-table-aux
+            MOVE fs-idxfile
+              TO ws-f-error-status-code-table-code-error-aux
 
             SET idx-error-status-code-table              TO cte-01
-            SEARCH ALL ws-error-status-code-table-OC
+            SEARCH ALL ws-f-error-status-code-table-OC
                 AT END
-                   MOVE ws-error-status-code-table-desc-error-tag
-                     TO ws-error-status-code-table-desc-error-aux
+                   MOVE ws-f-error-status-code-table-desc-error-tag
+                     TO ws-f-error-status-code-table-desc-error-aux
                    
-              WHEN ws-error-status-code-table-code-error
+              WHEN ws-f-error-status-code-table-code-error
                   (idx-error-status-code-table) IS EQUAL TO
-                   ws-error-status-code-table-code-error-aux
-                   MOVE ws-error-status-code-table-OC
+                   ws-f-error-status-code-table-code-error-aux
+                   MOVE ws-f-error-status-code-table-OC
                        (idx-error-status-code-table)
-                     TO ws-error-status-code-table-aux
+                     TO ws-f-error-status-code-table-aux
 
             END-SEARCH.
 
@@ -289,10 +346,10 @@
            DISPLAY "| " asterisk " Position Index : ["
                    idx-error-status-code-table "]."
            DISPLAY "| " asterisk " Status Code    : ["
-                   ws-error-status-code-table-code-error-aux "]."
+                   ws-f-error-status-code-table-code-error-aux "]."
            DISPLAY "| " asterisk " Description    : "
            DISPLAY "| -> ["
-                   ws-error-status-code-table-desc-error-aux
+                   ws-f-error-status-code-table-desc-error-aux
                    "] <-"
            DISPLAY "+---+----+---+----+---+----+---+----+".
 
@@ -305,7 +362,7 @@
                     asterisk asterisk asterisk
                     " <-|"         
             DISPLAY asterisk asterisk asterisk
-                    " Code   Employee: ["
+                    " Code Employee: ["
                     ws-f-idxfile-rec-cod-employee
                     "] = ["
                     f-idxfile-rec-cod-employee
@@ -434,6 +491,10 @@
            EXIT.
 
          221000-start-add-a-record.
+           INITIALIZE ws-f-idxfile-indicators
+                      ws-menu-standard-options-performance
+                      ws-realization-questions
+
            PERFORM 221100-start-capture-key-field
               THRU 221100-finish-capture-key-field
 
@@ -564,6 +625,10 @@
             EXIT.
 
          222000-start-delete-a-record.
+           INITIALIZE ws-f-idxfile-indicators
+                      ws-menu-standard-options-performance
+                      ws-realization-questions
+
            PERFORM 221100-start-capture-key-field
               THRU 221100-finish-capture-key-field
 
@@ -607,6 +672,10 @@
             EXIT.
 
          223000-start-modify-a-record.
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
             PERFORM 223100-start-show-menu-modify-fields
                THRU 223100-finish-show-menu-modify-fields
 
@@ -695,7 +764,9 @@
             EXIT.
 
          224000-start-look-for-any-record.
-           INITIALIZE ws-menu-mode-read-direct-option
+           INITIALIZE ws-f-idxfile-indicators
+                      ws-menu-standard-options-performance
+                      ws-realization-questions
 
            PERFORM 224100-start-show-menu-look-for-keyaccess
               THRU 224100-finish-show-menu-look-for-keyaccess
@@ -746,7 +817,9 @@
             EXIT.
 
           224210-start-show-mode-look-for-code.
-            INITIALIZE ws-continue-response
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
 
             PERFORM 224211-start-show-reading-direct-menu
                THRU 224211-finish-show-reading-direct-menu
@@ -812,12 +885,12 @@
             PERFORM 221100-start-capture-key-field
                THRU 221100-finish-capture-key-field
 
-            PERFORM 225220-start-menu-mode-read-position-eq
-               THRU 225220-finish-menu-mode-read-position-eq
+            PERFORM 225223-start-menu-mode-read-position-eq
+               THRU 225223-finish-menu-mode-read-position-eq
 
             IF (sw-idxfile-record-found-Y)
-                PERFORM 225260-start-menu-mode-read-forwarding
-                   THRU 225260-finish-menu-mode-read-forwarding
+                PERFORM 225270-start-menu-mode-read-forwarding
+                   THRU 225270-finish-menu-mode-read-forwarding
             END-IF
 
             PERFORM 221600-start-continue-operation
@@ -826,8 +899,9 @@
             EXIT.
 
           224220-start-show-mode-look-for-rc-sal.
-            INITIALIZE ws-continue-response
-                       ws-idxfile-record-found
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
 
             PERFORM 224221-start-show-mode-look-for-rcsal
                THRU 224221-finish-show-mode-look-for-rcsal
@@ -840,7 +914,7 @@
           224221-start-show-mode-look-for-rcsal.
             DISPLAY SPACE
             DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "| +Salary Direct Reading Menu.+|"
+            DISPLAY "|+Salary Direct Reading Menu.+ |"
             DISPLAY "+===+====+===+====+===+====+===+"
             DISPLAY "| [1]. Locate directly.        |"
             DISPLAY "| [2]. Locate sequentially.    |"
@@ -921,8 +995,8 @@
                THRU 22422221-finish-routine-mode-locate-for-sal
 
             IF (sw-idxfile-record-found-Y)
-                PERFORM 225260-start-menu-mode-read-forwarding
-                   THRU 225260-finish-menu-mode-read-forwarding
+                PERFORM 225270-start-menu-mode-read-forwarding
+                   THRU 225270-finish-menu-mode-read-forwarding
             END-IF
 
             PERFORM 221600-start-continue-operation
@@ -968,8 +1042,9 @@
             EXIT.
 
          225000-start-look-for-all-records.
-           INITIALIZE ws-realization-questions
-                      ws-idxfile-record-found
+           INITIALIZE ws-f-idxfile-indicators
+                      ws-menu-standard-options-performance
+                      ws-realization-questions
 
            PERFORM 225100-start-menu-reading-offset
               THRU 225100-finish-option-menu-reading-offset
@@ -987,7 +1062,7 @@
             DISPLAY "| Input/Output Pointer Positioning. |"
             DISPLAY "+---+----+---+----+---+----+---+---+-"
             DISPLAY "| [01]. At the start.               |"
-            DISPLAY "| [02]. At on a exact & given key.  |"
+            DISPLAY "| [02]. At on a exact & given key...|"
             DISPLAY "| [03]. At on a aproximate key...   |"
             DISPLAY "| [04]. At the finish.              |"
             DISPLAY "+---+----+---+----+---+----+---+---+-"
@@ -1017,58 +1092,54 @@
             EXIT.
 
           225200-start-validate-option-menu-reading-offset.
-            INITIALIZE ws-menu-mode-read-option-givenkey
-                       ws-idxfile-EOF
-
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-option-start
                      PERFORM 225210-start-menu-mode-start-position
                         THRU 225210-finish-menu-mode-start-position
 
                 WHEN sw-menu-mode-read-option-givenkey-eq
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 225220-start-menu-mode-read-position-eq
-                        THRU 225220-finish-menu-mode-read-position-eq
+                     PERFORM 225220-start-locate-givenkey-code-salary
+                        THRU 225220-finish-locate-givenkey-code-salary
+                       UNTIL sw-menu-mode-read-dir-keyacc-exitmenu
 
                 WHEN sw-menu-mode-read-option-givenkey-apprx
-                     PERFORM 225230-start-menu-read-position-apprx
-                        THRU 225230-start-menu-read-position-apprx
+                     PERFORM 225240-start-menu-read-position-apprx
+                        THRU 225240-start-menu-read-position-apprx
                        UNTIL sw-menu-mode-read-option-givenkey-exit
 
                 WHEN sw-menu-mode-read-option-finish
-                     PERFORM 225240-start-menu-mode-finish-position
-                        THRU 225240-finish-menu-mode-finish-position
+                     PERFORM 225250-start-menu-mode-finish-position
+                        THRU 225250-finish-menu-mode-finish-position
 
                 WHEN sw-menu-mode-read-option-r-first-rcrd
                      PERFORM 225210-start-menu-mode-start-position
                         THRU 225210-finish-menu-mode-start-position
-                     PERFORM 225260-start-menu-mode-read-forwarding
-                        THRU 225260-finish-menu-mode-read-forwarding
+                     PERFORM 225270-start-menu-mode-read-forwarding
+                        THRU 225270-finish-menu-mode-read-forwarding
 
                 WHEN sw-menu-mode-read-option-r-last-rcrd
-                     PERFORM 225240-start-menu-mode-finish-position
-                        THRU 225240-finish-menu-mode-finish-position
-                     PERFORM 225250-start-menu-mode-read-backwarding
-                        THRU 225250-finish-menu-mode-read-backwarding
+                     PERFORM 225250-start-menu-mode-finish-position
+                        THRU 225250-finish-menu-mode-finish-position
+                     PERFORM 225260-start-menu-mode-read-backwarding
+                        THRU 225260-finish-menu-mode-read-backwarding
 
                 WHEN sw-menu-mode-read-option-r-backward
-                     PERFORM 225250-start-menu-mode-read-backwarding
-                        THRU 225250-finish-menu-mode-read-backwarding
+                     PERFORM 225260-start-menu-mode-read-backwarding
+                        THRU 225260-finish-menu-mode-read-backwarding
                        UNTIL sw-idxfile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-r-forward
-                     PERFORM 225260-start-menu-mode-read-forwarding
-                        THRU 225260-finish-menu-mode-read-forwarding
+                     PERFORM 225270-start-menu-mode-read-forwarding
+                        THRU 225270-finish-menu-mode-read-forwarding
                        UNTIL sw-idxfile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-prev-rcrd
-                     PERFORM 225250-start-menu-mode-read-backwarding
-                        THRU 225250-finish-menu-mode-read-backwarding
+                     PERFORM 225260-start-menu-mode-read-backwarding
+                        THRU 225260-finish-menu-mode-read-backwarding
 
                 WHEN sw-menu-mode-read-option-next-rcrd
-                     PERFORM 225260-start-menu-mode-read-forwarding
-                        THRU 225260-finish-menu-mode-read-forwarding
+                     PERFORM 225270-start-menu-mode-read-forwarding
+                        THRU 225270-finish-menu-mode-read-forwarding
 
                 WHEN sw-menu-mode-read-option-exitmenu 
                      DISPLAY "Returning to main menu..."
@@ -1085,7 +1156,9 @@
 
             START idxfile FIRST
                   INVALID KEY
-                          DISPLAY "Error positioning at begin!"
+                          DISPLAY asterisk asterisk
+                                  "Error positioning at begin!"
+                                  asterisk asterisk
                           PERFORM 000500-press-enter-key-to-continue
 
               NOT INVALID KEY
@@ -1099,7 +1172,64 @@
           225210-finish-menu-mode-start-position.
             EXIT.
 
-          225220-start-menu-mode-read-position-eq.
+          225220-start-locate-givenkey-code-salary.
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
+            PERFORM 225221-start-show-menu-locate-givenkey-code-sal
+               THRU 225221-finish-show-menu-locate-givenkey-code-sal
+
+            PERFORM 225222-start-validate-menu-locate-givenkey-code-sl
+               THRU 225222-finish-validate-menu-locate-givenkey-code-sl.
+          225220-finish-locate-givenkey-code-salary.
+            EXIT.
+
+          225221-start-show-menu-locate-givenkey-code-sal.
+            DISPLAY SPACE
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "|Locate givenkey code & salary.|"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "| [1]. For Code Employee.      |"
+            DISPLAY "| [2]. For Salary Employee.    |"
+            DISPLAY "| [3]. Exit this menu.         |"
+            DISPLAY "+===+====+===+====+===+====+===+"
+            DISPLAY "Enter your choice: " WITH NO ADVANCING
+             ACCEPT ws-menu-mode-read-direct-keyaccess
+
+            DISPLAY "The chosen option was: "
+                    ws-menu-mode-read-direct-keyaccess.
+          225221-finish-show-menu-locate-givenkey-code-sal.
+            EXIT.
+
+          225222-start-validate-menu-locate-givenkey-code-sl.
+            EVALUATE TRUE
+                WHEN sw-menu-mode-read-dir-keyacc-code
+                     PERFORM 221100-start-capture-key-field
+                        THRU 221100-finish-capture-key-field
+                     PERFORM 225223-start-menu-mode-read-position-eq
+                        THRU 225223-finish-menu-mode-read-position-eq
+
+                WHEN sw-menu-mode-read-dir-keyacc-salary
+                     DISPLAY "Implementation process of this routine "
+                             "in progress..."
+                     PERFORM 221400-start-capture-salary-employee
+                        THRU 221400-finish-capture-salary-employee
+                     PERFORM 22422221-start-routine-mode-locate-for-sal
+                        THRU 22422221-finish-routine-mode-locate-for-sal
+
+                WHEN sw-menu-mode-read-dir-keyacc-exitmenu
+                     DISPLAY "Quitting this menu..."
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. Please correct and change"
+                             "your option..."
+
+            END-EVALUATE.
+          225222-finish-validate-menu-locate-givenkey-code-sl.
+            EXIT.
+
+          225223-start-menu-mode-read-position-eq.
             SET sw-operation-class-STARTEQ       TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1108,9 +1238,11 @@
               KEY IS EQUAL TO f-idxfile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
-                  DISPLAY "The value could not be located for an "
+                  DISPLAY asterisk asterisk
+                          "The value could not be located for an "
                           "exactly equal or identical key from the "
                           "existing ones."
+                          asterisk asterisk
                   SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
@@ -1132,22 +1264,26 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225220-finish-menu-mode-read-position-eq.
+          225223-finish-menu-mode-read-position-eq.
             EXIT.
 
-          225230-start-menu-read-position-apprx.
+          225240-start-menu-read-position-apprx.
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
             PERFORM 225231-start-show-approximate-offset-menu
                THRU 225231-finish-show-approximate-offset-menu
 
             PERFORM 225232-start-validate-approximate-offset-menu
                THRU 225232-finish-validate-approximate-offset-menu.
-          225230-finish-menu-read-position-apprx.
+          225240-finish-menu-read-position-apprx.
             EXIT.
 
           225231-start-show-approximate-offset-menu.
             DISPLAY SPACE
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
-            DISPLAY "|       Approximate Key Locator.       |"
+            DISPLAY "|     Approximate Code Key Locator.    |"
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
             DISPLAY "| [1]. Key greater than value.         |"
             DISPLAY "| [2]. Key greater than or equal value.|"
@@ -1209,8 +1345,10 @@
               KEY IS GREATER THAN f-idxfile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
-                  DISPLAY "The value could not be located for a key "
+                  DISPLAY asterisk asterisk
+                          "The value could not be located for a key "
                           "greater than one of those existing."
+                          asterisk asterisk
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
@@ -1242,8 +1380,10 @@
               KEY IS GREATER THAN OR EQUAL TO f-idxfile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
-                  DISPLAY "The value could not be located for a key "
+                  DISPLAY asterisk asterisk
+                          "The value could not be located for a key "
                           "greater than or equal to those existing."
+                          asterisk asterisk
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
@@ -1274,11 +1414,13 @@
               KEY IS LESS THAN f-idxfile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
-                  DISPLAY "The value could not be located for a key "
+                  DISPLAY asterisk asterisk
+                          "The value could not be located for a key "
                           "less than one of those existing."
+                          asterisk asterisk
                   PERFORM 000500-press-enter-key-to-continue
-                  PERFORM 225240-start-menu-mode-finish-position
-                     THRU 225240-finish-menu-mode-finish-position
+                  PERFORM 225250-start-menu-mode-finish-position
+                     THRU 225250-finish-menu-mode-finish-position
 
              NOT INVALID KEY
                   DISPLAY asterisk
@@ -1305,11 +1447,13 @@
               KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
-                  DISPLAY "The value could not be located for a key "
+                  DISPLAY asterisk asterisk
+                          "The value could not be located for a key "
                           "less than or equal to those existing."
+                          asterisk asterisk
                   PERFORM 000500-press-enter-key-to-continue
-                  PERFORM 225240-start-menu-mode-finish-position
-                     THRU 225240-finish-menu-mode-finish-position
+                  PERFORM 225250-start-menu-mode-finish-position
+                     THRU 225250-finish-menu-mode-finish-position
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
@@ -1328,12 +1472,14 @@
           2252324-finish-menu-mode-read-position-lteq.
             EXIT.
 
-          225240-start-menu-mode-finish-position.
+          225250-start-menu-mode-finish-position.
             SET sw-operation-class-STARTLST   TO TRUE
 
             START idxfile LAST
                   INVALID KEY
-                          DISPLAY "Error positioning at end!"
+                          DISPLAY asterisk asterisk
+                                  "Error positioning at end!"
+                                  asterisk asterisk
                           PERFORM 000500-press-enter-key-to-continue
 
               NOT INVALID KEY
@@ -1344,10 +1490,10 @@
                           PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225240-finish-menu-mode-finish-position.
+          225250-finish-menu-mode-finish-position.
             EXIT.
 
-          225250-start-menu-mode-read-backwarding.
+          225260-start-menu-mode-read-backwarding.
             SET sw-operation-class-READPREV   TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1357,8 +1503,8 @@
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
                  PERFORM 000500-press-enter-key-to-continue
-                 PERFORM 225240-start-menu-mode-finish-position
-                    THRU 225240-finish-menu-mode-finish-position
+                 PERFORM 225250-start-menu-mode-finish-position
+                    THRU 225250-finish-menu-mode-finish-position
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
@@ -1367,10 +1513,10 @@
                     THRU 221210-finish-show-file-info
 
             END-READ.
-          225250-finish-menu-mode-read-backwarding.
+          225260-finish-menu-mode-read-backwarding.
             EXIT.
 
-          225260-start-menu-mode-read-forwarding.
+          225270-start-menu-mode-read-forwarding.
             SET sw-operation-class-READNEXT   TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1390,7 +1536,7 @@
                     THRU 221210-finish-show-file-info
 
             END-READ.
-          225260-finish-menu-mode-read-forwarding.
+          225270-finish-menu-mode-read-forwarding.
             EXIT.
 
        300000-start-end-program.
