@@ -889,8 +889,8 @@
                THRU 225223-finish-menu-mode-read-position-eq
 
             IF (sw-idxfile-record-found-Y)
-                PERFORM 225270-start-menu-mode-read-forwarding
-                   THRU 225270-finish-menu-mode-read-forwarding
+                PERFORM 225260-start-menu-mode-read-forwarding
+                   THRU 225260-finish-menu-mode-read-forwarding
             END-IF
 
             PERFORM 221600-start-continue-operation
@@ -995,8 +995,8 @@
                THRU 22422221-finish-routine-mode-locate-for-sal
 
             IF (sw-idxfile-record-found-Y)
-                PERFORM 225270-start-menu-mode-read-forwarding
-                   THRU 225270-finish-menu-mode-read-forwarding
+                PERFORM 225260-start-menu-mode-read-forwarding
+                   THRU 225260-finish-menu-mode-read-forwarding
             END-IF
 
             PERFORM 221600-start-continue-operation
@@ -1103,43 +1103,43 @@
                        UNTIL sw-menu-mode-read-dir-keyacc-exitmenu
 
                 WHEN sw-menu-mode-read-option-givenkey-apprx
-                     PERFORM 225240-start-menu-read-position-apprx
-                        THRU 225240-start-menu-read-position-apprx
+                     PERFORM 225230-start-menu-read-position-apprx
+                        THRU 225230-start-menu-read-position-apprx
                        UNTIL sw-menu-mode-read-option-givenkey-exit
 
                 WHEN sw-menu-mode-read-option-finish
-                     PERFORM 225250-start-menu-mode-finish-position
-                        THRU 225250-finish-menu-mode-finish-position
+                     PERFORM 225240-start-menu-mode-finish-position
+                        THRU 225240-finish-menu-mode-finish-position
 
                 WHEN sw-menu-mode-read-option-r-first-rcrd
                      PERFORM 225210-start-menu-mode-start-position
                         THRU 225210-finish-menu-mode-start-position
-                     PERFORM 225270-start-menu-mode-read-forwarding
-                        THRU 225270-finish-menu-mode-read-forwarding
+                     PERFORM 225260-start-menu-mode-read-forwarding
+                        THRU 225260-finish-menu-mode-read-forwarding
 
                 WHEN sw-menu-mode-read-option-r-last-rcrd
-                     PERFORM 225250-start-menu-mode-finish-position
-                        THRU 225250-finish-menu-mode-finish-position
-                     PERFORM 225260-start-menu-mode-read-backwarding
-                        THRU 225260-finish-menu-mode-read-backwarding
+                     PERFORM 225240-start-menu-mode-finish-position
+                        THRU 225240-finish-menu-mode-finish-position
+                     PERFORM 225250-start-menu-mode-read-backwarding
+                        THRU 225250-finish-menu-mode-read-backwarding
 
                 WHEN sw-menu-mode-read-option-r-backward
-                     PERFORM 225260-start-menu-mode-read-backwarding
-                        THRU 225260-finish-menu-mode-read-backwarding
+                     PERFORM 225250-start-menu-mode-read-backwarding
+                        THRU 225250-finish-menu-mode-read-backwarding
                        UNTIL sw-idxfile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-r-forward
-                     PERFORM 225270-start-menu-mode-read-forwarding
-                        THRU 225270-finish-menu-mode-read-forwarding
+                     PERFORM 225260-start-menu-mode-read-forwarding
+                        THRU 225260-finish-menu-mode-read-forwarding
                        UNTIL sw-idxfile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-prev-rcrd
-                     PERFORM 225260-start-menu-mode-read-backwarding
-                        THRU 225260-finish-menu-mode-read-backwarding
+                     PERFORM 225250-start-menu-mode-read-backwarding
+                        THRU 225250-finish-menu-mode-read-backwarding
 
                 WHEN sw-menu-mode-read-option-next-rcrd
-                     PERFORM 225270-start-menu-mode-read-forwarding
-                        THRU 225270-finish-menu-mode-read-forwarding
+                     PERFORM 225260-start-menu-mode-read-forwarding
+                        THRU 225260-finish-menu-mode-read-forwarding
 
                 WHEN sw-menu-mode-read-option-exitmenu 
                      DISPLAY "Returning to main menu..."
@@ -1265,6 +1265,19 @@
 
             END-START.
           225223-finish-menu-mode-read-position-eq.
+            EXIT.
+
+          225230-start-menu-read-position-apprx.
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
+            PERFORM 225231-start-show-approximate-offset-menu
+               THRU 225231-finish-show-approximate-offset-menu
+
+            PERFORM 225232-start-validate-approximate-offset-menu
+               THRU 225232-finish-validate-approximate-offset-menu.
+          225230-finish-menu-read-position-apprx.
             EXIT.
 
           225231-start-show-approximate-offset-menu.
@@ -1405,8 +1418,8 @@
                           "less than one of those existing."
                           asterisk asterisk
                   PERFORM 000500-press-enter-key-to-continue
-                  PERFORM 225250-start-menu-mode-finish-position
-                     THRU 225250-finish-menu-mode-finish-position
+                  PERFORM 225240-start-menu-mode-finish-position
+                     THRU 225240-finish-menu-mode-finish-position
 
              NOT INVALID KEY
                   DISPLAY asterisk
@@ -1438,8 +1451,8 @@
                           "less than or equal to those existing."
                           asterisk asterisk
                   PERFORM 000500-press-enter-key-to-continue
-                  PERFORM 225250-start-menu-mode-finish-position
-                     THRU 225250-finish-menu-mode-finish-position
+                  PERFORM 225240-start-menu-mode-finish-position
+                     THRU 225240-finish-menu-mode-finish-position
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
@@ -1458,20 +1471,7 @@
           2252324-finish-menu-mode-read-position-lteq.
             EXIT.
 
-          225240-start-menu-read-position-apprx.
-            INITIALIZE ws-f-idxfile-indicators
-                       ws-menu-standard-options-performance
-                       ws-realization-questions
-
-            PERFORM 225231-start-show-approximate-offset-menu
-               THRU 225231-finish-show-approximate-offset-menu
-
-            PERFORM 225232-start-validate-approximate-offset-menu
-               THRU 225232-finish-validate-approximate-offset-menu.
-          225240-finish-menu-read-position-apprx.
-            EXIT.
-
-          225250-start-menu-mode-finish-position.
+          225240-start-menu-mode-finish-position.
             SET sw-operation-class-STARTLST   TO TRUE
 
             START idxfile LAST
@@ -1489,10 +1489,10 @@
                           PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225250-finish-menu-mode-finish-position.
+          225240-finish-menu-mode-finish-position.
             EXIT.
 
-          225260-start-menu-mode-read-backwarding.
+          225250-start-menu-mode-read-backwarding.
             SET sw-operation-class-READPREV   TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1502,8 +1502,8 @@
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
                  PERFORM 000500-press-enter-key-to-continue
-                 PERFORM 225250-start-menu-mode-finish-position
-                    THRU 225250-finish-menu-mode-finish-position
+                 PERFORM 225240-start-menu-mode-finish-position
+                    THRU 225240-finish-menu-mode-finish-position
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
@@ -1512,10 +1512,10 @@
                     THRU 221210-finish-show-file-info
 
             END-READ.
-          225260-finish-menu-mode-read-backwarding.
+          225250-finish-menu-mode-read-backwarding.
             EXIT.
 
-          225270-start-menu-mode-read-forwarding.
+          225260-start-menu-mode-read-forwarding.
             SET sw-operation-class-READNEXT   TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1535,7 +1535,7 @@
                     THRU 221210-finish-show-file-info
 
             END-READ.
-          225270-finish-menu-mode-read-forwarding.
+          225260-finish-menu-mode-read-forwarding.
             EXIT.
 
        300000-start-end-program.
