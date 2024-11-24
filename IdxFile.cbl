@@ -1267,19 +1267,6 @@
           225223-finish-menu-mode-read-position-eq.
             EXIT.
 
-          225240-start-menu-read-position-apprx.
-            INITIALIZE ws-f-idxfile-indicators
-                       ws-menu-standard-options-performance
-                       ws-realization-questions
-
-            PERFORM 225231-start-show-approximate-offset-menu
-               THRU 225231-finish-show-approximate-offset-menu
-
-            PERFORM 225232-start-validate-approximate-offset-menu
-               THRU 225232-finish-validate-approximate-offset-menu.
-          225240-finish-menu-read-position-apprx.
-            EXIT.
-
           225231-start-show-approximate-offset-menu.
             DISPLAY SPACE
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
@@ -1355,7 +1342,6 @@
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
-
                   DISPLAY asterisk
                           "The value: [" ws-f-idxfile-rec-cod-employee
                           "] was found for a key that was "
@@ -1470,6 +1456,19 @@
 
             END-START.
           2252324-finish-menu-mode-read-position-lteq.
+            EXIT.
+
+          225240-start-menu-read-position-apprx.
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
+            PERFORM 225231-start-show-approximate-offset-menu
+               THRU 225231-finish-show-approximate-offset-menu
+
+            PERFORM 225232-start-validate-approximate-offset-menu
+               THRU 225232-finish-validate-approximate-offset-menu.
+          225240-finish-menu-read-position-apprx.
             EXIT.
 
           225250-start-menu-mode-finish-position.
