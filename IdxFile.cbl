@@ -885,8 +885,8 @@
             PERFORM 221100-start-capture-key-field
                THRU 221100-finish-capture-key-field
 
-            PERFORM 225223-start-menu-mode-read-position-eq
-               THRU 225223-finish-menu-mode-read-position-eq
+            PERFORM 225223-start-menu-mode-read-pos-eq
+               THRU 225223-finish-menu-mode-read-pos-eq
 
             IF (sw-idxfile-record-found-Y)
                 PERFORM 225260-start-menu-mode-read-forwarding
@@ -1103,9 +1103,9 @@
                        UNTIL sw-menu-mode-read-dir-keyacc-exitmenu
 
                 WHEN sw-menu-mode-read-option-givenkey-apprx
-                     PERFORM 225230-start-menu-read-position-apprx
-                        THRU 225230-start-menu-read-position-apprx
-                       UNTIL sw-menu-mode-read-option-givenkey-exit
+                     PERFORM 225230-start-menu-read-approx-code-salary
+                        THRU 225230-finish-menu-read-approx-code-salary
+                       UNTIL sw-menu-mode-read-dir-keyacc-exitmenu
 
                 WHEN sw-menu-mode-read-option-finish
                      PERFORM 225240-start-menu-mode-finish-position
@@ -1207,12 +1207,10 @@
                 WHEN sw-menu-mode-read-dir-keyacc-code
                      PERFORM 221100-start-capture-key-field
                         THRU 221100-finish-capture-key-field
-                     PERFORM 225223-start-menu-mode-read-position-eq
-                        THRU 225223-finish-menu-mode-read-position-eq
+                     PERFORM 225223-start-menu-mode-read-pos-eq
+                        THRU 225223-finish-menu-mode-read-pos-eq
 
                 WHEN sw-menu-mode-read-dir-keyacc-salary
-                     DISPLAY "Implementation process of this routine "
-                             "in progress..."
                      PERFORM 221400-start-capture-salary-employee
                         THRU 221400-finish-capture-salary-employee
                      PERFORM 22422221-start-routine-mode-locate-for-sal
@@ -1229,7 +1227,7 @@
           225222-finish-validate-menu-locate-givenkey-code-sl.
             EXIT.
 
-          225223-start-menu-mode-read-position-eq.
+          225223-start-menu-mode-read-pos-eq.
             SET sw-operation-class-STARTEQ       TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1264,26 +1262,62 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225223-finish-menu-mode-read-position-eq.
+          225223-finish-menu-mode-read-pos-eq.
             EXIT.
 
-          225230-start-menu-read-position-apprx.
+          225230-start-menu-read-approx-code-salary.
             INITIALIZE ws-f-idxfile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
-            PERFORM 225231-start-show-approximate-offset-menu
-               THRU 225231-finish-show-approximate-offset-menu
+            PERFORM 225221-start-show-menu-locate-givenkey-code-sal
+               THRU 225221-finish-show-menu-locate-givenkey-code-sal
 
-            PERFORM 225232-start-validate-approximate-offset-menu
-               THRU 225232-finish-validate-approximate-offset-menu.
-          225230-finish-menu-read-position-apprx.
+            PERFORM 225231-start-validate-menu-read-apprx-cod-sal
+               THRU 225231-finish-validate-menu-read-apprx-cod-sal.
+          225230-finish-menu-read-approx-code-salary.
             EXIT.
 
-          225231-start-show-approximate-offset-menu.
+          225231-start-validate-menu-read-apprx-cod-sal.
+            EVALUATE TRUE
+                WHEN sw-menu-mode-read-dir-keyacc-code
+                     PERFORM 2252311-start-menu-read-code-apprx
+                        THRU 2252311-finish-menu-read-code-apprx
+                       UNTIL sw-menu-mode-read-option-givenkey-exit
+
+                WHEN sw-menu-mode-read-dir-keyacc-salary
+                     PERFORM 2252312-start-menu-read-salary-apprx
+                        THRU 2252312-finish-menu-read-salary-apprx
+                       UNTIL sw-menu-mode-read-option-givenkey-exit
+
+                WHEN sw-menu-mode-read-dir-keyacc-exitmenu
+                     DISPLAY "Quitting this menu..."
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. Please correct and change"
+                             "your option..."
+
+            END-EVALUATE.
+          225231-finish-validate-menu-read-apprx-cod-sal.
+            EXIT.
+
+          2252311-start-menu-read-code-apprx.
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
+            PERFORM 22523111-start-show-approximate-offset-menu
+               THRU 22523111-finish-show-approximate-offset-menu
+
+            PERFORM 22523112-start-validate-approximate-offset-menu
+               THRU 22523112-finish-validate-approximate-offset-menu.
+          2252311-finish-menu-read-code-apprx.
+            EXIT.
+
+          22523111-start-show-approximate-offset-menu.
             DISPLAY SPACE
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
-            DISPLAY "|     Approximate Code Key Locator.    |"
+            DISPLAY "|       Approximate Key Locator.       |"
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
             DISPLAY "| [1]. Key greater than value.         |"
             DISPLAY "| [2]. Key greater than or equal value.|"
@@ -1296,34 +1330,31 @@
 
             DISPLAY "The chosen option was: "
                     ws-menu-mode-read-option-givenkey.
-          225231-finish-show-approximate-offset-menu.
+          22523111-finish-show-approximate-offset-menu.
             EXIT.
 
-          225232-start-validate-approximate-offset-menu.
+          22523112-start-validate-approximate-offset-menu.
+            IF NOT(sw-menu-mode-read-option-givenkey-exit)
+               PERFORM 221100-start-capture-key-field
+                  THRU 221100-finish-capture-key-field
+            END-IF
+
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-option-givenkey-gt
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 2252321-start-menu-mode-read-position-gt
-                        THRU 2252321-finish-menu-mode-read-position-gt
+                     PERFORM 225231121-start-menu-mode-read-pos-gt
+                        THRU 225231121-finish-menu-mode-read-pos-gt
 
                 WHEN sw-menu-mode-read-option-givenkey-gteq
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 2252322-start-menu-mode-read-position-gteq
-                        THRU 2252322-finish-menu-mode-read-position-gteq
+                     PERFORM 225231122-start-menu-mode-read-pos-gteq
+                        THRU 225231122-finish-menu-mode-read-pos-gteq
 
                 WHEN sw-menu-mode-read-option-givenkey-lt
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 2252323-start-menu-mode-read-position-lt
-                        THRU 2252323-finish-menu-mode-read-position-lt
+                     PERFORM 225231123-start-menu-mode-read-pos-lt
+                        THRU 225231123-finish-menu-mode-read-pos-lt
 
                 WHEN sw-menu-mode-read-option-givenkey-lteq
-                     PERFORM 221100-start-capture-key-field
-                        THRU 221100-finish-capture-key-field
-                     PERFORM 2252324-start-menu-mode-read-position-lteq
-                        THRU 2252324-finish-menu-mode-read-position-lteq
+                     PERFORM 225231124-start-menu-mode-read-pos-lteq
+                        THRU 225231124-finish-menu-mode-read-pos-lteq
 
                 WHEN sw-menu-mode-read-option-givenkey-exit
                      DISPLAY "Quitting this menu..."
@@ -1333,10 +1364,10 @@
                              "Please change your option."
 
             END-EVALUATE.
-          225232-finish-validate-approximate-offset-menu.
+          22523112-finish-validate-approximate-offset-menu.
             EXIT.
 
-          2252321-start-menu-mode-read-position-gt.
+          225231121-start-menu-mode-read-pos-gt.
             SET sw-operation-class-STARTGT TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents.
@@ -1367,10 +1398,10 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          2252321-finish-menu-mode-read-position-gt.
+          225231121-finish-menu-mode-read-pos-gt.
             EXIT.
 
-          2252322-start-menu-mode-read-position-gteq.
+          225231122-start-menu-mode-read-pos-gteq.
             SET sw-operation-class-STARTGTEQ  TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents.
@@ -1401,10 +1432,10 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          2252322-finish-menu-mode-read-position-gteq.
+          225231122-finish-menu-mode-read-pos-gteq.
             EXIT.
 
-          2252323-start-menu-mode-read-position-lt.
+          225231123-start-menu-mode-read-pos-lt.
             SET sw-operation-class-STARTLT    TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1434,10 +1465,10 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          2252323-finish-menu-mode-read-position-lt.
+          225231123-finish-menu-mode-read-pos-lt.
             EXIT.
 
-          2252324-start-menu-mode-read-position-lteq.
+          225231124-start-menu-mode-read-pos-lteq.
             SET sw-operation-class-STARTLTEQ  TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1468,7 +1499,202 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          2252324-finish-menu-mode-read-position-lteq.
+          225231124-finish-menu-mode-read-pos-lteq.
+            EXIT.
+
+          2252312-start-menu-read-salary-apprx.
+            INITIALIZE ws-f-idxfile-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
+            PERFORM 22523111-start-show-approximate-offset-menu
+               THRU 22523111-finish-show-approximate-offset-menu
+
+            PERFORM 22523121-start-validate-loc-opt-salary-employee
+               THRU 22523121-finish-validate-loc-opt-salary-employee.
+          2252312-finish-menu-read-salary-apprx.
+            EXIT.
+
+          22523121-start-validate-loc-opt-salary-employee.
+            IF NOT(sw-menu-mode-read-option-givenkey-exit)
+               PERFORM 221400-start-capture-salary-employee
+                  THRU 221400-finish-capture-salary-employee
+            END-IF
+
+            EVALUATE TRUE
+                WHEN sw-menu-mode-read-option-givenkey-gt
+                     PERFORM 225231211-start-locate-salary-key-gt
+                        THRU 225231211-finish-locate-salary-key-gt
+
+                WHEN sw-menu-mode-read-option-givenkey-gteq
+                     PERFORM 225231212-start-locate-salary-key-gteq
+                        THRU 225231212-finish-locate-salary-key-gteq
+
+                WHEN sw-menu-mode-read-option-givenkey-lt
+                     PERFORM 225231213-start-locate-salary-key-lt
+                        THRU 225231213-finish-locate-salary-key-lt
+
+                WHEN sw-menu-mode-read-option-givenkey-lteq
+                     PERFORM 225231214-start-locate-salary-key-lteq
+                        THRU 225231214-finish-locate-salary-key-lteq
+
+                WHEN sw-menu-mode-read-option-givenkey-exit
+                     DISPLAY "Exiting this menu..."
+
+                WHEN OTHER
+                     DISPLAY "Invalid option. "
+                             "Please change your option and correct it."
+
+            END-EVALUATE.
+          22523121-finish-validate-loc-opt-salary-employee.
+            EXIT.
+
+          225231211-start-locate-salary-key-gt.
+            SET sw-operation-class-STARTGT       TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            START idxfile
+              KEY IS GREATER THAN f-idxfile-rec-salary-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY "The salary cannot be allocated for a value "
+                          "greater than that of the existing ones."
+                  SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
+                  DISPLAY asterisk
+                          "The salary: ["
+                           ws-f-idxfile-rec-salary-employee
+                          "] was found for a value that was greater "
+                          "than the existing ones: "
+                          "[" f-idxfile-rec-salary-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning upper salary done correctly!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231211-finish-locate-salary-key-gt.
+            EXIT.
+
+          225231212-start-locate-salary-key-gteq.
+            SET sw-operation-class-STARTGTEQ     TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            START idxfile
+              KEY IS GREATER OR EQUAL TO f-idxfile-rec-salary-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY "The salary cannot be allocated for a value "
+                          "greater than or equal to that of the "
+                          "existing ones."
+                  SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
+                  DISPLAY asterisk
+                          "The salary: ["
+                           ws-f-idxfile-rec-salary-employee
+                          "] was found for a value that was greater "
+                          "than or equal to the existing ones: "
+                          "[" f-idxfile-rec-salary-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning upper or equal salary "
+                          "done correctly!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231212-finish-locate-salary-key-gteq.
+            EXIT.
+
+          225231213-start-locate-salary-key-lt.
+            SET sw-operation-class-STARTLT       TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            START idxfile
+              KEY IS LESS THAN f-idxfile-rec-salary-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY "The salary cannot be allocated for a value "
+                          "less than that of the existing ones."
+                  SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
+                  DISPLAY asterisk
+                          "The salary: ["
+                           ws-f-idxfile-rec-salary-employee
+                          "] was found for a value that was less "
+                          "than the existing ones: "
+                          "[" f-idxfile-rec-salary-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning lower salary done correctly!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231213-finish-locate-salary-key-lt.
+            EXIT.
+
+          225231214-start-locate-salary-key-lteq.
+            SET sw-operation-class-STARTLTEQ     TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            START idxfile
+              KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-salary-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY "The salary cannot be allocated for a value "
+                          "less than or equal to that of the "
+                          "existing ones."
+                  SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
+                  DISPLAY asterisk
+                          "The salary: ["
+                           ws-f-idxfile-rec-salary-employee
+                          "] was found for a value that was less "
+                          "than or equal to the existing ones: "
+                          "[" f-idxfile-rec-salary-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning lower or equal salary "
+                          "done correctly!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231214-finish-locate-salary-key-lteq.
             EXIT.
 
           225240-start-menu-mode-finish-position.
