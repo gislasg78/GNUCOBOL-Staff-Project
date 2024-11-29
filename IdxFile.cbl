@@ -832,7 +832,7 @@
           224211-start-show-reading-direct-menu.
             DISPLAY SPACE
             DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "| +Code Direct Reading Menu.+  |"
+            DISPLAY "| Direct & Sequential Reading. |"
             DISPLAY "+===+====+===+====+===+====+===+"
             DISPLAY "| [1]. Locate directly.        |"
             DISPLAY "| [2]. Locate sequentially.    |"
@@ -885,8 +885,8 @@
             PERFORM 221100-start-capture-key-field
                THRU 221100-finish-capture-key-field
 
-            PERFORM 225223-start-menu-mode-read-pos-eq
-               THRU 225223-finish-menu-mode-read-pos-eq
+            PERFORM 2252211-start-menu-mode-read-pos-eq
+               THRU 2252211-finish-menu-mode-read-pos-eq
 
             IF (sw-idxfile-record-found-Y)
                 PERFORM 225260-start-menu-mode-read-forwarding
@@ -903,41 +903,24 @@
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
-            PERFORM 224221-start-show-mode-look-for-rcsal
-               THRU 224221-finish-show-mode-look-for-rcsal
+            PERFORM 224211-start-show-reading-direct-menu
+               THRU 224211-finish-show-reading-direct-menu
 
-            PERFORM 224222-start-validate-mode-look-for-rcsal
-               THRU 224222-finish-validate-mode-look-for-rcsal.
+            PERFORM 224221-start-validate-mode-look-for-rcsal
+               THRU 224221-finish-validate-mode-look-for-rcsal.
           224220-finish-show-mode-look-for-rc-sal.
             EXIT.
 
-          224221-start-show-mode-look-for-rcsal.
-            DISPLAY SPACE
-            DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "|+Salary Direct Reading Menu.+ |"
-            DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "| [1]. Locate directly.        |"
-            DISPLAY "| [2]. Locate sequentially.    |"
-            DISPLAY "| [3]. Exit this menu.         |"
-            DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "Enter your choice: " WITH NO ADVANCING
-             ACCEPT ws-menu-mode-read-direct-option
-
-            DISPLAY "The chosen option was: "
-                   ws-menu-mode-read-direct-option.
-          224221-finish-show-mode-look-for-rcsal.
-            EXIT.
-
-          224222-start-validate-mode-look-for-rcsal.
+          224221-start-validate-mode-look-for-rcsal.
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-direct-read
-                     PERFORM 2242221-start-routine-mode-read-direct-sal
-                        THRU 2242221-finish-routine-mode-read-direct-sal
+                     PERFORM 2242211-start-routine-mode-read-direct-sal
+                        THRU 2242211-finish-routine-mode-read-direct-sal
                        UNTIL sw-continue-response-N
 
                 WHEN sw-menu-mode-read-dir-and-seq
-                     PERFORM 2242222-start-routine-mode-read-dirseq-sal
-                        THRU 2242222-finish-routine-mode-read-dirseq-sal
+                     PERFORM 2242212-start-routine-mode-read-dirseq-sal
+                        THRU 2242212-finish-routine-mode-read-dirseq-sal
                        UNTIL sw-continue-response-N
 
                 WHEN sw-menu-mode-read-dir-exitmenu
@@ -948,22 +931,22 @@
                              "Please correct your choice."
 
             END-EVALUATE.
-          224222-finish-validate-mode-look-for-rcsal.
+          224221-finish-validate-mode-look-for-rcsal.
             EXIT.
 
-          2242221-start-routine-mode-read-direct-sal.
+          2242211-start-routine-mode-read-direct-sal.
             PERFORM 221400-start-capture-salary-employee
                THRU 221400-finish-capture-salary-employee
 
-            PERFORM 22422211-start-read-record-salary-employee
-               THRU 22422211-finish-read-record-salary-employee
+            PERFORM 22422111-start-read-record-salary-employee
+               THRU 22422111-finish-read-record-salary-employee
 
             PERFORM 221600-start-continue-operation
                THRU 221600-finish-continue-operation.
-          2242221-finish-routine-mode-read-direct-sal.
+          2242211-finish-routine-mode-read-direct-sal.
             EXIT.
 
-          22422211-start-read-record-salary-employee.
+          22422111-start-read-record-salary-employee.
             SET sw-operation-class-READ    TO TRUE
 
             PERFORM 000400-preliminary-review-employee-salary-contents
@@ -984,15 +967,15 @@
                             THRU 221210-finish-show-file-info
 
             END-READ.
-          22422211-finish-read-record-salary-employee.
+          22422111-finish-read-record-salary-employee.
             EXIT.
 
-          2242222-start-routine-mode-read-dirseq-sal.
+          2242212-start-routine-mode-read-dirseq-sal.
             PERFORM 221400-start-capture-salary-employee
                THRU 221400-finish-capture-salary-employee
 
-            PERFORM 22422221-start-routine-mode-locate-for-sal
-               THRU 22422221-finish-routine-mode-locate-for-sal
+            PERFORM 22422121-start-routine-mode-locate-for-sal
+               THRU 22422121-finish-routine-mode-locate-for-sal
 
             IF (sw-idxfile-record-found-Y)
                 PERFORM 225260-start-menu-mode-read-forwarding
@@ -1001,10 +984,10 @@
 
             PERFORM 221600-start-continue-operation
                THRU 221600-finish-continue-operation.
-          2242222-finish-routine-mode-read-dirseq-sal.
+          2242212-finish-routine-mode-read-dirseq-sal.
             EXIT.
 
-          22422221-start-routine-mode-locate-for-sal.
+          22422121-start-routine-mode-locate-for-sal.
             SET sw-operation-class-STARTEQ       TO TRUE
 
             PERFORM 000400-preliminary-review-employee-salary-contents
@@ -1038,7 +1021,7 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          22422221-finish-routine-mode-locate-for-sal.
+          22422121-finish-routine-mode-locate-for-sal.
             EXIT.
 
          225000-start-look-for-all-records.
@@ -1177,44 +1160,27 @@
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
-            PERFORM 225221-start-show-menu-locate-givenkey-code-sal
-               THRU 225221-finish-show-menu-locate-givenkey-code-sal
+            PERFORM 224100-start-show-menu-look-for-keyaccess
+               THRU 224100-finish-show-menu-look-for-keyaccess
 
-            PERFORM 225222-start-validate-menu-locate-givenkey-code-sl
-               THRU 225222-finish-validate-menu-locate-givenkey-code-sl.
+            PERFORM 225221-start-validate-menu-locate-givenkey-code-sl
+               THRU 225221-finish-validate-menu-locate-givenkey-code-sl.
           225220-finish-locate-givenkey-code-salary.
             EXIT.
 
-          225221-start-show-menu-locate-givenkey-code-sal.
-            DISPLAY SPACE
-            DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "|Locate givenkey code & salary.|"
-            DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "| [1]. For Code Employee.      |"
-            DISPLAY "| [2]. For Salary Employee.    |"
-            DISPLAY "| [3]. Exit this menu.         |"
-            DISPLAY "+===+====+===+====+===+====+===+"
-            DISPLAY "Enter your choice: " WITH NO ADVANCING
-             ACCEPT ws-menu-mode-read-direct-keyaccess
-
-            DISPLAY "The chosen option was: "
-                    ws-menu-mode-read-direct-keyaccess.
-          225221-finish-show-menu-locate-givenkey-code-sal.
-            EXIT.
-
-          225222-start-validate-menu-locate-givenkey-code-sl.
+          225221-start-validate-menu-locate-givenkey-code-sl.
             EVALUATE TRUE
                 WHEN sw-menu-mode-read-dir-keyacc-code
                      PERFORM 221100-start-capture-key-field
                         THRU 221100-finish-capture-key-field
-                     PERFORM 225223-start-menu-mode-read-pos-eq
-                        THRU 225223-finish-menu-mode-read-pos-eq
+                     PERFORM 2252211-start-menu-mode-read-pos-eq
+                        THRU 2252211-finish-menu-mode-read-pos-eq
 
                 WHEN sw-menu-mode-read-dir-keyacc-salary
                      PERFORM 221400-start-capture-salary-employee
                         THRU 221400-finish-capture-salary-employee
-                     PERFORM 22422221-start-routine-mode-locate-for-sal
-                        THRU 22422221-finish-routine-mode-locate-for-sal
+                     PERFORM 22422121-start-routine-mode-locate-for-sal
+                        THRU 22422121-finish-routine-mode-locate-for-sal
 
                 WHEN sw-menu-mode-read-dir-keyacc-exitmenu
                      DISPLAY "Quitting this menu..."
@@ -1224,10 +1190,10 @@
                              "your option..."
 
             END-EVALUATE.
-          225222-finish-validate-menu-locate-givenkey-code-sl.
+          225221-finish-validate-menu-locate-givenkey-code-sl.
             EXIT.
 
-          225223-start-menu-mode-read-pos-eq.
+          2252211-start-menu-mode-read-pos-eq.
             SET sw-operation-class-STARTEQ       TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1262,7 +1228,7 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225223-finish-menu-mode-read-pos-eq.
+          2252211-finish-menu-mode-read-pos-eq.
             EXIT.
 
           225230-start-menu-read-approx-code-salary.
@@ -1270,8 +1236,8 @@
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
-            PERFORM 225221-start-show-menu-locate-givenkey-code-sal
-               THRU 225221-finish-show-menu-locate-givenkey-code-sal
+            PERFORM 224100-start-show-menu-look-for-keyaccess
+               THRU 224100-finish-show-menu-look-for-keyaccess
 
             PERFORM 225231-start-validate-menu-read-apprx-cod-sal
                THRU 225231-finish-validate-menu-read-apprx-cod-sal.
