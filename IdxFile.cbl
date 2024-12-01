@@ -109,16 +109,20 @@
                    88  sw-menu-mode-read-option-exitmenu   VALUE 11.
                05  ws-menu-mode-read-option-givenkey
                                                 PIC 9(01)  VALUE ZEROES.
-                   88  sw-menu-mode-read-option-givenkey-gt
+                   88  sw-menu-mode-read-option-givenkey-ngt
                                                            VALUE 1.
-                   88  sw-menu-mode-read-option-givenkey-gteq
+                   88  sw-menu-mode-read-option-givenkey-gt
                                                            VALUE 2.
-                   88  sw-menu-mode-read-option-givenkey-lt
+                   88  sw-menu-mode-read-option-givenkey-gteq
                                                            VALUE 3.
-                   88  sw-menu-mode-read-option-givenkey-lteq
+                   88  sw-menu-mode-read-option-givenkey-nlt
                                                            VALUE 4.
-                   88  sw-menu-mode-read-option-givenkey-exit
+                   88  sw-menu-mode-read-option-givenkey-lt
                                                            VALUE 5.
+                   88  sw-menu-mode-read-option-givenkey-lteq
+                                                           VALUE 6.
+                   88  sw-menu-mode-read-option-givenkey-exit
+                                                           VALUE 7.
                05  ws-operation-class           PIC A(13)  VALUE SPACES.
                    88  sw-operation-class-CLOSE
                                                 VALUE "CLOSE".
@@ -146,6 +150,10 @@
                                                 VALUE "START LESS".
                    88  sw-operation-class-STARTLTEQ
                                                 VALUE "START LTEQ".
+                   88  sw-operation-class-STARTNGT
+                                                VALUE "START NOT GT".
+                   88  sw-operation-class-STARTNLT
+                                                VALUE "START NOT LT".
                    88  sw-operation-class-WRITE
                                                 VALUE "WRITE".
            03  ws-realization-questions.
@@ -400,6 +408,8 @@
               PERFORM 200000-start-process-menu
                  THRU 200000-finish-process-menu
                 UNTIL sw-menu-option-exit
+           ELSE
+              DISPLAY "Opening. Status Code: [" fs-idxfile "]."
            END-IF
 
            PERFORM 300000-start-end-program
@@ -548,6 +558,7 @@
                          ADD cte-01        TO ws-reading-records
                          SET sw-idxfile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
+
                          PERFORM 000500-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
@@ -608,6 +619,7 @@
 
               NOT INVALID KEY
                           ADD cte-01       TO ws-written-records
+
                           DISPLAY "Record saved successfully!"
                           PERFORM 000500-press-enter-key-to-continue
 
@@ -664,6 +676,7 @@
 
                NOT INVALID KEY
                            ADD cte-01      TO ws-eliminated-records
+
                            DISPLAY "Record deleted successfully!"
                            PERFORM 000500-press-enter-key-to-continue
 
@@ -756,6 +769,7 @@
 
                 NOT INVALID KEY
                             ADD cte-01     TO ws-rewritten-records
+
                             DISPLAY "Record changed successfully!"
                             PERFORM 000500-press-enter-key-to-continue
 
@@ -885,8 +899,8 @@
             PERFORM 221100-start-capture-key-field
                THRU 221100-finish-capture-key-field
 
-            PERFORM 2252211-start-menu-mode-read-pos-eq
-               THRU 2252211-finish-menu-mode-read-pos-eq
+            PERFORM 2252211-start-menu-mode-code-pos-eq
+               THRU 2252211-finish-menu-mode-code-pos-eq
 
             IF (sw-idxfile-record-found-Y)
                 PERFORM 225260-start-menu-mode-read-forwarding
@@ -962,6 +976,7 @@
                          ADD cte-01        TO ws-reading-records
                          SET sw-idxfile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
+
                          PERFORM 000500-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
@@ -999,6 +1014,7 @@
                   DISPLAY "The salary could not be located for an "
                           "exactly equal or identical value from the "
                           "existing ones."
+
                   SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
@@ -1146,6 +1162,7 @@
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
+
                           DISPLAY asterisk
                                   "Positioning at the begin."
                                   asterisk
@@ -1173,8 +1190,8 @@
                 WHEN sw-menu-mode-read-dir-keyacc-code
                      PERFORM 221100-start-capture-key-field
                         THRU 221100-finish-capture-key-field
-                     PERFORM 2252211-start-menu-mode-read-pos-eq
-                        THRU 2252211-finish-menu-mode-read-pos-eq
+                     PERFORM 2252211-start-menu-mode-code-pos-eq
+                        THRU 2252211-finish-menu-mode-code-pos-eq
 
                 WHEN sw-menu-mode-read-dir-keyacc-salary
                      PERFORM 221400-start-capture-salary-employee
@@ -1193,7 +1210,7 @@
           225221-finish-validate-menu-locate-givenkey-code-sl.
             EXIT.
 
-          2252211-start-menu-mode-read-pos-eq.
+          2252211-start-menu-mode-code-pos-eq.
             SET sw-operation-class-STARTEQ       TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1207,6 +1224,7 @@
                           "exactly equal or identical key from the "
                           "existing ones."
                           asterisk asterisk
+
                   SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
@@ -1228,7 +1246,7 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          2252211-finish-menu-mode-read-pos-eq.
+          2252211-finish-menu-mode-code-pos-eq.
             EXIT.
 
           225230-start-menu-read-approx-code-salary.
@@ -1260,8 +1278,8 @@
                      DISPLAY "Quitting this menu..."
 
                 WHEN OTHER
-                     DISPLAY "Invalid option. Please correct and change"
-                             "your option..."
+                     DISPLAY "Invalid option. Please correct and "
+                             "change your option..."
 
             END-EVALUATE.
           225231-finish-validate-menu-read-apprx-cod-sal.
@@ -1285,11 +1303,13 @@
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
             DISPLAY "|       Approximate Key Locator.       |"
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
-            DISPLAY "| [1]. Key greater than value.         |"
-            DISPLAY "| [2]. Key greater than or equal value.|"
-            DISPLAY "| [3]. Key less than value.            |"
-            DISPLAY "| [4]. Key less than or equal to value.|"
-            DISPLAY "| [5]. Exit this menu.                 |"
+            DISPLAY "| [1]. Key is not greater than value.  |"
+            DISPLAY "| [2]. Key greater than value.         |"
+            DISPLAY "| [3]. Key greater than or equal value.|"
+            DISPLAY "| [4]. Key is not less than value.     |"
+            DISPLAY "| [5]. Key less than value.            |"
+            DISPLAY "| [6]. Key less than or equal to value.|"
+            DISPLAY "| [7]. Exit this menu.                 |"
             DISPLAY "+===+====+===+====+===+====+===+===+===+"
             DISPLAY "Enter your choice: " WITH NO ADVANCING
              ACCEPT ws-menu-mode-read-option-givenkey
@@ -1306,21 +1326,29 @@
             END-IF
 
             EVALUATE TRUE
+                WHEN sw-menu-mode-read-option-givenkey-ngt
+                     PERFORM 225231121-start-menu-mode-code-pos-ngt
+                        THRU 225231121-finish-menu-mode-code-pos-ngt
+
                 WHEN sw-menu-mode-read-option-givenkey-gt
-                     PERFORM 225231121-start-menu-mode-read-pos-gt
-                        THRU 225231121-finish-menu-mode-read-pos-gt
+                     PERFORM 225231122-start-menu-mode-code-pos-gt
+                        THRU 225231122-finish-menu-mode-code-pos-gt
 
                 WHEN sw-menu-mode-read-option-givenkey-gteq
-                     PERFORM 225231122-start-menu-mode-read-pos-gteq
-                        THRU 225231122-finish-menu-mode-read-pos-gteq
+                     PERFORM 225231123-start-menu-mode-code-pos-gteq
+                        THRU 225231123-finish-menu-mode-code-pos-gteq
+
+                WHEN sw-menu-mode-read-option-givenkey-nlt
+                     PERFORM 225231124-start-menu-mode-code-pos-nlt
+                        THRU 225231124-finish-menu-mode-code-pos-nlt
 
                 WHEN sw-menu-mode-read-option-givenkey-lt
-                     PERFORM 225231123-start-menu-mode-read-pos-lt
-                        THRU 225231123-finish-menu-mode-read-pos-lt
+                     PERFORM 225231125-start-menu-mode-code-pos-lt
+                        THRU 225231125-finish-menu-mode-code-pos-lt
 
                 WHEN sw-menu-mode-read-option-givenkey-lteq
-                     PERFORM 225231124-start-menu-mode-read-pos-lteq
-                        THRU 225231124-finish-menu-mode-read-pos-lteq
+                     PERFORM 225231126-start-menu-mode-code-pos-lteq
+                        THRU 225231126-finish-menu-mode-code-pos-lteq
 
                 WHEN sw-menu-mode-read-option-givenkey-exit
                      DISPLAY "Quitting this menu..."
@@ -1333,7 +1361,43 @@
           22523112-finish-validate-approximate-offset-menu.
             EXIT.
 
-          225231121-start-menu-mode-read-pos-gt.
+          225231121-start-menu-mode-code-pos-ngt.
+            SET sw-operation-class-STARTNGT   TO TRUE
+
+            PERFORM 000300-preliminary-review-employee-code-contents.
+
+            START idxfile
+              KEY IS NOT GREATER THAN f-idxfile-rec-cod-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY asterisk asterisk
+                          "The value could not be located for a key "
+                          "is not greater than one of those existing."
+                          asterisk asterisk
+
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD  cte-01              TO ws-repositioning-records
+
+                  DISPLAY asterisk
+                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "] was found for a key that wasn't "
+                          "greater than one of the existing ones: "
+                          "[" f-idxfile-rec-cod-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Correct positioning on nearest lower key!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231121-finish-menu-mode-code-pos-ngt.
+            EXIT.
+
+          225231122-start-menu-mode-code-pos-gt.
             SET sw-operation-class-STARTGT TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents.
@@ -1346,12 +1410,14 @@
                           "The value could not be located for a key "
                           "greater than one of those existing."
                           asterisk asterisk
+
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
+
                   DISPLAY asterisk
                           "The value: [" ws-f-idxfile-rec-cod-employee
                           "] was found for a key that was "
@@ -1364,10 +1430,10 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231121-finish-menu-mode-read-pos-gt.
+          225231122-finish-menu-mode-code-pos-gt.
             EXIT.
 
-          225231122-start-menu-mode-read-pos-gteq.
+          225231123-start-menu-mode-code-pos-gteq.
             SET sw-operation-class-STARTGTEQ  TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents.
@@ -1380,12 +1446,14 @@
                           "The value could not be located for a key "
                           "greater than or equal to those existing."
                           asterisk asterisk
+
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
+
                   DISPLAY asterisk
                           "The value: [" ws-f-idxfile-rec-cod-employee
                           "] was found for a key that was greater than "
@@ -1398,10 +1466,46 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231122-finish-menu-mode-read-pos-gteq.
+          225231123-finish-menu-mode-code-pos-gteq.
             EXIT.
 
-          225231123-start-menu-mode-read-pos-lt.
+          225231124-start-menu-mode-code-pos-nlt.
+            SET sw-operation-class-STARTNLT   TO TRUE
+
+            PERFORM 000300-preliminary-review-employee-code-contents
+
+            START idxfile
+              KEY IS NOT LESS THAN f-idxfile-rec-cod-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY asterisk asterisk
+                          "The value could not be located for a key "
+                          "is not less than one of those existing."
+                          asterisk asterisk
+
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225240-start-menu-mode-finish-position
+                     THRU 225240-finish-menu-mode-finish-position
+
+             NOT INVALID KEY
+                  ADD  cte-01              TO ws-repositioning-records
+
+                  DISPLAY asterisk
+                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "] was found for a key that wasn't less than "
+                          "one of the existing ones: "
+                          "[" f-idxfile-rec-cod-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Correct positioning on nearest upper key!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231124-finish-menu-mode-code-pos-nlt.
+            EXIT.
+
+          225231125-start-menu-mode-code-pos-lt.
             SET sw-operation-class-STARTLT    TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1414,11 +1518,14 @@
                           "The value could not be located for a key "
                           "less than one of those existing."
                           asterisk asterisk
+
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
              NOT INVALID KEY
+                  ADD  cte-01              TO ws-repositioning-records
+
                   DISPLAY asterisk
                           "The value: [" ws-f-idxfile-rec-cod-employee
                           "] was found for a key that was less than "
@@ -1431,10 +1538,10 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231123-finish-menu-mode-read-pos-lt.
+          225231125-finish-menu-mode-code-pos-lt.
             EXIT.
 
-          225231124-start-menu-mode-read-pos-lteq.
+          225231126-start-menu-mode-code-pos-lteq.
             SET sw-operation-class-STARTLTEQ  TO TRUE
 
             PERFORM 000300-preliminary-review-employee-code-contents
@@ -1447,12 +1554,14 @@
                           "The value could not be located for a key "
                           "less than or equal to those existing."
                           asterisk asterisk
+
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
+
                   DISPLAY asterisk
                           "The value: [" ws-f-idxfile-rec-cod-employee
                           "] was found for a key that was less than "
@@ -1465,7 +1574,7 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231124-finish-menu-mode-read-pos-lteq.
+          225231126-finish-menu-mode-code-pos-lteq.
             EXIT.
 
           2252312-start-menu-read-salary-apprx.
@@ -1488,21 +1597,29 @@
             END-IF
 
             EVALUATE TRUE
+                WHEN sw-menu-mode-read-option-givenkey-ngt
+                     PERFORM 225231211-start-locate-salary-key-ngt
+                        THRU 225231211-finish-locate-salary-key-ngt
+
                 WHEN sw-menu-mode-read-option-givenkey-gt
-                     PERFORM 225231211-start-locate-salary-key-gt
-                        THRU 225231211-finish-locate-salary-key-gt
+                     PERFORM 225231212-start-locate-salary-key-gt
+                        THRU 225231212-finish-locate-salary-key-gt
 
                 WHEN sw-menu-mode-read-option-givenkey-gteq
-                     PERFORM 225231212-start-locate-salary-key-gteq
-                        THRU 225231212-finish-locate-salary-key-gteq
+                     PERFORM 225231213-start-locate-salary-key-gteq
+                        THRU 225231213-finish-locate-salary-key-gteq
+
+                WHEN sw-menu-mode-read-option-givenkey-nlt
+                     PERFORM 225231214-start-locate-salary-key-nlt
+                        THRU 225231214-finish-locate-salary-key-nlt
 
                 WHEN sw-menu-mode-read-option-givenkey-lt
-                     PERFORM 225231213-start-locate-salary-key-lt
-                        THRU 225231213-finish-locate-salary-key-lt
+                     PERFORM 225231215-start-locate-salary-key-lt
+                        THRU 225231215-finish-locate-salary-key-lt
 
                 WHEN sw-menu-mode-read-option-givenkey-lteq
-                     PERFORM 225231214-start-locate-salary-key-lteq
-                        THRU 225231214-finish-locate-salary-key-lteq
+                     PERFORM 225231216-start-locate-salary-key-lteq
+                        THRU 225231216-finish-locate-salary-key-lteq
 
                 WHEN sw-menu-mode-read-option-givenkey-exit
                      DISPLAY "Exiting this menu..."
@@ -1515,7 +1632,45 @@
           22523121-finish-validate-loc-opt-salary-employee.
             EXIT.
 
-          225231211-start-locate-salary-key-gt.
+          225231211-start-locate-salary-key-ngt.
+            SET sw-operation-class-STARTNGT      TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            START idxfile
+              KEY IS NOT GREATER THAN f-idxfile-rec-salary-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY "The salary cannot be allocated for a value "
+                          "is not greater than that of the existing "
+                          "ones."
+
+                  SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
+                  DISPLAY asterisk
+                          "The salary: ["
+                           ws-f-idxfile-rec-salary-employee
+                          "] was found for a value that wasn't greater "
+                          "than that of the existing ones: "
+                          "[" f-idxfile-rec-salary-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning upper salary done correctly!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231211-finish-locate-salary-key-ngt.
+            EXIT.
+
+          225231212-start-locate-salary-key-gt.
             SET sw-operation-class-STARTGT       TO TRUE
 
             PERFORM 000400-preliminary-review-employee-salary-contents
@@ -1525,7 +1680,8 @@
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
-                          "greater than that of the existing ones."
+                          "is greater than that of the existing ones."
+
                   SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
@@ -1539,7 +1695,7 @@
                           "The salary: ["
                            ws-f-idxfile-rec-salary-employee
                           "] was found for a value that was greater "
-                          "than the existing ones: "
+                          "than that of the existing ones: "
                           "[" f-idxfile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
@@ -1548,10 +1704,10 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231211-finish-locate-salary-key-gt.
+          225231212-finish-locate-salary-key-gt.
             EXIT.
 
-          225231212-start-locate-salary-key-gteq.
+          225231213-start-locate-salary-key-gteq.
             SET sw-operation-class-STARTGTEQ     TO TRUE
 
             PERFORM 000400-preliminary-review-employee-salary-contents
@@ -1561,8 +1717,9 @@
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
-                          "greater than or equal to that of the "
+                          "is greater than or equal to that of the "
                           "existing ones."
+
                   SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
@@ -1586,10 +1743,47 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231212-finish-locate-salary-key-gteq.
+          225231213-finish-locate-salary-key-gteq.
             EXIT.
 
-          225231213-start-locate-salary-key-lt.
+          225231214-start-locate-salary-key-nlt.
+            SET sw-operation-class-STARTNLT      TO TRUE
+
+            PERFORM 000400-preliminary-review-employee-salary-contents
+
+            START idxfile
+              KEY IS NOT LESS THAN f-idxfile-rec-salary-employee
+                  INVALID KEY
+                  DISPLAY "Invalid Key!"
+                  DISPLAY "The salary cannot be allocated for a value "
+                          "is not less than that of the existing ones."
+
+                  SET sw-idxfile-record-found-N  TO TRUE
+                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 225210-start-menu-mode-start-position
+                     THRU 225210-finish-menu-mode-start-position
+
+              NOT INVALID KEY
+                  ADD cte-01              TO ws-repositioning-records
+                  SET sw-idxfile-record-found-Y  TO TRUE
+
+                  DISPLAY asterisk
+                          "The salary: ["
+                           ws-f-idxfile-rec-salary-employee
+                          "] was found for a value that wasn't less "
+                          "than the existing ones: "
+                          "[" f-idxfile-rec-salary-employee "]."
+                          asterisk
+                  DISPLAY asterisk
+                          "Positioning upper salary done correctly!"
+                          asterisk
+                  PERFORM 000500-press-enter-key-to-continue
+
+            END-START.
+          225231214-finish-locate-salary-key-nlt.
+            EXIT.
+
+          225231215-start-locate-salary-key-lt.
             SET sw-operation-class-STARTLT       TO TRUE
 
             PERFORM 000400-preliminary-review-employee-salary-contents
@@ -1599,7 +1793,8 @@
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
-                          "less than that of the existing ones."
+                          "is less than that of the existing ones."
+
                   SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
@@ -1613,7 +1808,7 @@
                           "The salary: ["
                            ws-f-idxfile-rec-salary-employee
                           "] was found for a value that was less "
-                          "than the existing ones: "
+                          "than that of the existing ones: "
                           "[" f-idxfile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
@@ -1622,10 +1817,10 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231213-finish-locate-salary-key-lt.
+          225231215-finish-locate-salary-key-lt.
             EXIT.
 
-          225231214-start-locate-salary-key-lteq.
+          225231216-start-locate-salary-key-lteq.
             SET sw-operation-class-STARTLTEQ     TO TRUE
 
             PERFORM 000400-preliminary-review-employee-salary-contents
@@ -1635,8 +1830,9 @@
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
-                          "less than or equal to that of the "
+                          "is less than or equal to that of the "
                           "existing ones."
+
                   SET sw-idxfile-record-found-N  TO TRUE
                   PERFORM 000500-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
@@ -1660,7 +1856,7 @@
                   PERFORM 000500-press-enter-key-to-continue
 
             END-START.
-          225231214-finish-locate-salary-key-lteq.
+          225231216-finish-locate-salary-key-lteq.
             EXIT.
 
           225240-start-menu-mode-finish-position.
@@ -1675,6 +1871,7 @@
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
+
                           DISPLAY asterisk
                                   "Positioning at the end."
                                   asterisk
@@ -1693,6 +1890,7 @@
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
+
                  PERFORM 000500-press-enter-key-to-continue
                  PERFORM 225240-start-menu-mode-finish-position
                     THRU 225240-finish-menu-mode-finish-position
@@ -1700,6 +1898,7 @@
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
                  SET sw-idxfile-EOF-N         TO TRUE
+
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
 
@@ -1716,6 +1915,7 @@
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
+
                  PERFORM 000500-press-enter-key-to-continue
                  PERFORM 225210-start-menu-mode-start-position
                     THRU 225210-finish-menu-mode-start-position
@@ -1723,6 +1923,7 @@
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
                  SET sw-idxfile-EOF-N         TO TRUE
+
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
 
