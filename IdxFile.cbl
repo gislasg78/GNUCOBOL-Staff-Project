@@ -41,6 +41,19 @@
        78  cte-34                                          VALUE 34.
 
        01  ws-environmental-variables.
+           03  ws-current-date-and-time.
+               05  ws-CDT-Year                  PIC 9(04)  VALUE ZEROES.
+               05  ws-CDT-Month                 PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-Day                   PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-Hour                  PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-Minutes               PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-Seconds               PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-Hundredths-Of-Secs    PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-GMT-Diff-Hours        PIC S9(02) VALUE ZEROES
+                                                SIGN  IS LEADING
+                                                SEPARATE CHARACTER.
+               05  ws-CDT-GMT-Diff-Minutes      PIC 9(02)  VALUE ZEROES.
+
            03  ws-f-idxfile-indicators.
                05  ws-f-error-status-code-table-aux.
                        07  ws-f-error-status-code-table-code-error-aux
@@ -343,10 +356,15 @@
             END-SEARCH.
 
        000200-check-file-status-code.
+           MOVE FUNCTION CURRENT-DATE TO ws-current-date-and-time
+
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+---+----+"
            DISPLAY "|      File status information.     |"
            DISPLAY "+---+----+---+----+---+----+---+----+"
+           DISPLAY "|      [" ws-current-date-and-time
+                   "]      |"
+           DISPLAY "+-----------------------------------+"
            DISPLAY "| " asterisk " File Name      : [" 
                                    ws-idxfile-name "]."
            DISPLAY "| " asterisk " Operation      : ["
@@ -408,8 +426,6 @@
               PERFORM 200000-start-process-menu
                  THRU 200000-finish-process-menu
                 UNTIL sw-menu-option-exit
-           ELSE
-              DISPLAY "Opening. Status Code: [" fs-idxfile "]."
            END-IF
 
            PERFORM 300000-start-end-program
@@ -428,7 +444,9 @@
            DISPLAY "Idx File to work on: [" ws-idxfile-name "]."
 
            SET sw-operation-class-OPEN  TO TRUE
-           OPEN I-O idxfile.
+           OPEN I-O idxfile
+
+           DISPLAY "Opening. Status Code: [" fs-idxfile "].".
        100000-finish-begin-program.
            EXIT.
 
@@ -1934,6 +1952,8 @@
        300000-start-end-program.
            SET sw-operation-class-CLOSE       TO TRUE
            CLOSE idxfile
+
+           DISPLAY "Closing. Status Code: ["  fs-idxfile "]."
 
            MOVE fs-idxfile                    TO RETURN-CODE
 
