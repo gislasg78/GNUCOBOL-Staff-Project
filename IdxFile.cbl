@@ -34,6 +34,9 @@
                                                            VALUE ZEROES.
 
        WORKING-STORAGE SECTION.
+       01  ws-work-section-begins               PIC X(42)  VALUE
+           "The working storage section begins here...".
+
        77  fs-idxfile                           PIC 9(02)  VALUE ZEROES.
        77  ws-idxfile-name                      PIC X(12)  VALUE SPACES.
 
@@ -42,17 +45,45 @@
 
        01  ws-environmental-variables.
            03  ws-current-date-and-time.
-               05  ws-CDT-Year                  PIC 9(04)  VALUE ZEROES.
-               05  ws-CDT-Month                 PIC 9(02)  VALUE ZEROES.
-               05  ws-CDT-Day                   PIC 9(02)  VALUE ZEROES.
-               05  ws-CDT-Hour                  PIC 9(02)  VALUE ZEROES.
-               05  ws-CDT-Minutes               PIC 9(02)  VALUE ZEROES.
-               05  ws-CDT-Seconds               PIC 9(02)  VALUE ZEROES.
-               05  ws-CDT-Hundredths-Of-Secs    PIC 9(02)  VALUE ZEROES.
-               05  ws-CDT-GMT-Diff-Hours        PIC S9(02) VALUE ZEROES
+               05  ws-CDT-Date.
+                   07  ws-CDT-Year              PIC 9(04)  VALUE ZEROES.
+                   07  ws-CDT-Month             PIC 9(02)  VALUE ZEROES.
+                   07  ws-CDT-Day               PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-Time.
+                   07  ws-CDT-Hour              PIC 9(02)  VALUE ZEROES.
+                   07  ws-CDT-Minutes           PIC 9(02)  VALUE ZEROES.
+                   07  ws-CDT-Seconds           PIC 9(02)  VALUE ZEROES.
+                   07  ws-CDT-Hundredths-Of-Secs
+                                                PIC 9(02)  VALUE ZEROES.
+               05  ws-CDT-Time-Zone.
+                   07  ws-CDT-GMT-Diff-Hours    PIC S9(02) VALUE ZEROES
                                                 SIGN  IS LEADING
                                                 SEPARATE CHARACTER.
-               05  ws-CDT-GMT-Diff-Minutes      PIC 9(02)  VALUE ZEROES.
+                   07  ws-CDT-GMT-Diff-Minutes  PIC 9(02)  VALUE ZEROES.
+
+           03  ws-date-and-time-formatted.
+               05  ws-FT-Date.
+                   07  ws-FT-Year               PIC 9(04)  VALUE ZEROES.
+                   07  FILLER                   PIC X(01)  VALUE X'2F'.
+                   07  ws-FT-Month              PIC 9(02)  VALUE ZEROES.
+                   07  FILLER                   PIC X(01)  VALUE X'2F'.
+                   07  ws-FT-Day                PIC 9(02)  VALUE ZEROES.
+               05  FILLER                       PIC X(01)  VALUE X'20'.
+               05  FILLER                       PIC X(01)  VALUE X'2D'.
+               05  FILLER                       PIC X(01)  VALUE X'20'.
+               05  ws-FT-Time.
+                   07  ws-FT-Hour               PIC 9(02)  VALUE ZEROES.
+                   07  FILLER                   PIC X(01)  VALUE X'3A'.
+                   07  ws-FT-Minutes            PIC 9(02)  VALUE ZEROES.
+                   07  FILLER                   PIC X(01)  VALUE X'3A'.
+                   07  ws-FT-Seconds            PIC 9(02)  VALUE ZEROES.
+                   07  FILLER                   PIC X(01)  VALUE X'2E'.
+                   07  ws-FT-Hundredths-Of-Secs PIC 9(02)  VALUE ZEROES.
+               05  FILLER                       PIC X(01)  VALUE X'20'.
+               05  ws-FT-Time-Zone.
+                   07  ws-FT-GMT-Diff-Hours     PIC +9(2)  VALUE ZEROES.
+                   07  FILLER                   PIC X(01)  VALUE X'3A'.
+                   07  ws-FT-GMT-Diff-Minutes   PIC 9(02)  VALUE ZEROES.
 
            03  ws-f-idxfile-indicators.
                05  ws-f-error-status-code-table-aux.
@@ -330,6 +361,9 @@
        01  ws-f-error-status-code-table-desc-error-tag     PIC X(25)
                VALUE "Unknown File Status".
 
+       01  ws-work-section-ends                 PIC X(42)  VALUE
+           "The working storage section ends here...".
+
        PROCEDURE DIVISION.
        DECLARATIVES.
        File-Handler SECTION.
@@ -355,31 +389,48 @@
 
             END-SEARCH.
 
-       000200-check-file-status-code.
-           MOVE FUNCTION CURRENT-DATE TO ws-current-date-and-time
+       000200-get-current-date-and-time-record.
+           MOVE FUNCTION CURRENT-DATE     TO ws-current-date-and-time
 
+           MOVE ws-CDT-Year               TO ws-FT-Year 
+           MOVE ws-CDT-Month              TO ws-FT-Month
+           MOVE ws-CDT-Day                TO ws-FT-Day
+           
+           MOVE ws-CDT-Hour               TO ws-FT-Hour
+           MOVE ws-CDT-Minutes            TO ws-FT-Minutes
+           MOVE ws-CDT-Seconds            TO ws-FT-Seconds
+           MOVE ws-CDT-Hundredths-Of-Secs TO ws-FT-Hundredths-Of-Secs
+
+           MOVE ws-CDT-GMT-Diff-Hours     TO ws-FT-GMT-Diff-Hours
+           MOVE ws-CDT-GMT-Diff-Minutes   TO ws-FT-GMT-Diff-Minutes.
+
+       000300-check-file-status-code.
            DISPLAY SPACE
-           DISPLAY "+---+----+---+----+---+----+---+----+"
-           DISPLAY "|      File status information.     |"
-           DISPLAY "+---+----+---+----+---+----+---+----+"
-           DISPLAY "|      [" ws-current-date-and-time
-                   "]      |"
-           DISPLAY "+-----------------------------------+"
+           DISPLAY "+---+----+---+----+---+----+---+----+---+----+"
+           DISPLAY "|           File status information.         |"
+           DISPLAY "+---+----+---+----+---+----+---+----+---+----+"
+           DISPLAY "|      [" ws-date-and-time-formatted
+                   "]     |"
+           DISPLAY "+--------------------------------------------+"
+           DISPLAY "| " asterisk " Latest Build   : ["
+                   FUNCTION WHEN-COMPILED "].|"
            DISPLAY "| " asterisk " File Name      : [" 
-                                   ws-idxfile-name "]."
+                                   ws-idxfile-name "].         |"
            DISPLAY "| " asterisk " Operation      : ["
-                                   ws-operation-class "]."
+                                   ws-operation-class "].        |"
            DISPLAY "| " asterisk " Position Index : ["
-                   idx-error-status-code-table "]."
+                   idx-error-status-code-table "].           |"
            DISPLAY "| " asterisk " Status Code    : ["
                    ws-f-error-status-code-table-code-error-aux "]."
+                   "                   |"
            DISPLAY "| " asterisk " Description    : "
+                   "                        |"
            DISPLAY "| -> ["
                    ws-f-error-status-code-table-desc-error-aux
-                   "] <-"
-           DISPLAY "+---+----+---+----+---+----+---+----+".
+                   "]. <-         |"
+           DISPLAY "+---+----+---+----+---+----+---+----+---+----+".
 
-       000300-preliminary-review-employee-code-contents.
+       000400-preliminary-review-employee-code-contents.
             DISPLAY SPACE
             DISPLAY "|-> "
                     asterisk asterisk asterisk
@@ -395,7 +446,7 @@
                     "]. "
                     asterisk asterisk asterisk.
 
-       000400-preliminary-review-employee-salary-contents.
+       000500-preliminary-review-employee-salary-contents.
             DISPLAY SPACE
             DISPLAY "|-> "
                     asterisk asterisk asterisk
@@ -411,7 +462,7 @@
                     "]. "
                     asterisk asterisk asterisk.
 
-       000500-press-enter-key-to-continue.
+       000600-press-enter-key-to-continue.
            DISPLAY "Press the ENTER key to continue..."
               WITH NO ADVANCING
             ACCEPT OMITTED.
@@ -563,21 +614,21 @@
           221200-start-look-for-a-record.
             SET sw-operation-class-READ    TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             READ idxfile RECORD          INTO ws-f-idxfile-rec
              KEY IS f-idxfile-rec-cod-employee
                  INVALID KEY
                          SET sw-idxfile-record-found-N TO TRUE
                          DISPLAY "Record Not Found!"
-                         PERFORM 000500-press-enter-key-to-continue
+                         PERFORM 000600-press-enter-key-to-continue
 
              NOT INVALID KEY
                          ADD cte-01        TO ws-reading-records
                          SET sw-idxfile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
 
-                         PERFORM 000500-press-enter-key-to-continue
+                         PERFORM 000600-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
 
@@ -599,7 +650,7 @@
                     ws-f-idxfile-rec-salary-employee-ed "]."
             DISPLAY "+---+----+---+----+---+----+---+"
 
-            PERFORM 000500-press-enter-key-to-continue
+            PERFORM 000600-press-enter-key-to-continue
 
             DISPLAY SPACE.
          221210-finish-show-file-info.
@@ -628,18 +679,18 @@
          221500-start-store-a-record.
             SET sw-operation-class-WRITE   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             WRITE f-idxfile-rec          FROM ws-f-idxfile-rec
                   INVALID KEY
                           DISPLAY "Duplicate Key!"
-                          PERFORM 000500-press-enter-key-to-continue
+                          PERFORM 000600-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD cte-01       TO ws-written-records
 
                           DISPLAY "Record saved successfully!"
-                          PERFORM 000500-press-enter-key-to-continue
+                          PERFORM 000600-press-enter-key-to-continue
 
             END-WRITE.
          221500-finish-store-a-record.
@@ -685,18 +736,18 @@
          222100-start-eliminate-a-record.
             SET sw-operation-class-DELETE  TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             DELETE idxfile RECORD
                    INVALID KEY
                            DISPLAY "Invalid Key!"
-                           PERFORM 000500-press-enter-key-to-continue
+                           PERFORM 000600-press-enter-key-to-continue
 
                NOT INVALID KEY
                            ADD cte-01      TO ws-eliminated-records
 
                            DISPLAY "Record deleted successfully!"
-                           PERFORM 000500-press-enter-key-to-continue
+                           PERFORM 000600-press-enter-key-to-continue
 
             END-DELETE.
          222100-finish-eliminate-a-record.
@@ -778,18 +829,18 @@
           223211-start-change-a-record.
             SET sw-operation-class-REWRITE TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             REWRITE f-idxfile-rec        FROM ws-f-idxfile-rec
                     INVALID KEY
                             DISPLAY "Invalid Key!"
-                            PERFORM 000500-press-enter-key-to-continue
+                            PERFORM 000600-press-enter-key-to-continue
 
                 NOT INVALID KEY
                             ADD cte-01     TO ws-rewritten-records
 
                             DISPLAY "Record changed successfully!"
-                            PERFORM 000500-press-enter-key-to-continue
+                            PERFORM 000600-press-enter-key-to-continue
 
             END-REWRITE.
           223211-finish-change-a-record.
@@ -981,21 +1032,21 @@
           22422111-start-read-record-salary-employee.
             SET sw-operation-class-READ    TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             READ idxfile RECORD          INTO ws-f-idxfile-rec
              KEY IS f-idxfile-rec-salary-employee
                  INVALID KEY
                          SET sw-idxfile-record-found-N TO TRUE
                          DISPLAY "Record Not Found!"
-                         PERFORM 000500-press-enter-key-to-continue
+                         PERFORM 000600-press-enter-key-to-continue
 
              NOT INVALID KEY
                          ADD cte-01        TO ws-reading-records
                          SET sw-idxfile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
 
-                         PERFORM 000500-press-enter-key-to-continue
+                         PERFORM 000600-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
 
@@ -1023,7 +1074,7 @@
           22422121-start-routine-mode-locate-for-sal.
             SET sw-operation-class-STARTEQ       TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             START idxfile
               KEY IS EQUAL TO f-idxfile-rec-salary-employee
@@ -1034,7 +1085,7 @@
                           "existing ones."
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1052,7 +1103,7 @@
                   DISPLAY asterisk
                           "Positioning exact salary done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           22422121-finish-routine-mode-locate-for-sal.
@@ -1176,7 +1227,7 @@
                           DISPLAY asterisk asterisk
                                   "Error positioning at begin!"
                                   asterisk asterisk
-                          PERFORM 000500-press-enter-key-to-continue
+                          PERFORM 000600-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
@@ -1184,7 +1235,7 @@
                           DISPLAY asterisk
                                   "Positioning at the begin."
                                   asterisk
-                          PERFORM 000500-press-enter-key-to-continue
+                          PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225210-finish-menu-mode-start-position.
@@ -1231,7 +1282,7 @@
           2252211-start-menu-mode-code-pos-eq.
             SET sw-operation-class-STARTEQ       TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             START idxfile
               KEY IS EQUAL TO f-idxfile-rec-cod-employee
@@ -1244,7 +1295,7 @@
                           asterisk asterisk
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1261,7 +1312,7 @@
                   DISPLAY asterisk
                           "Positioning exact key done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           2252211-finish-menu-mode-code-pos-eq.
@@ -1382,7 +1433,7 @@
           225231121-start-menu-mode-code-pos-ngt.
             SET sw-operation-class-STARTNGT   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents.
+            PERFORM 000400-preliminary-review-employee-code-contents.
 
             START idxfile
               KEY IS NOT GREATER THAN f-idxfile-rec-cod-employee
@@ -1393,7 +1444,7 @@
                           "is not greater than one of those existing."
                           asterisk asterisk
 
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1409,7 +1460,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231121-finish-menu-mode-code-pos-ngt.
@@ -1418,7 +1469,7 @@
           225231122-start-menu-mode-code-pos-gt.
             SET sw-operation-class-STARTGT TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents.
+            PERFORM 000400-preliminary-review-employee-code-contents.
 
             START idxfile
               KEY IS GREATER THAN f-idxfile-rec-cod-employee
@@ -1429,7 +1480,7 @@
                           "greater than one of those existing."
                           asterisk asterisk
 
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1445,7 +1496,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231122-finish-menu-mode-code-pos-gt.
@@ -1454,7 +1505,7 @@
           225231123-start-menu-mode-code-pos-gteq.
             SET sw-operation-class-STARTGTEQ  TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents.
+            PERFORM 000400-preliminary-review-employee-code-contents.
 
             START idxfile
               KEY IS GREATER THAN OR EQUAL TO f-idxfile-rec-cod-employee
@@ -1465,7 +1516,7 @@
                           "greater than or equal to those existing."
                           asterisk asterisk
 
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1481,7 +1532,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231123-finish-menu-mode-code-pos-gteq.
@@ -1490,7 +1541,7 @@
           225231124-start-menu-mode-code-pos-nlt.
             SET sw-operation-class-STARTNLT   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             START idxfile
               KEY IS NOT LESS THAN f-idxfile-rec-cod-employee
@@ -1501,7 +1552,7 @@
                           "is not less than one of those existing."
                           asterisk asterisk
 
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
@@ -1517,7 +1568,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231124-finish-menu-mode-code-pos-nlt.
@@ -1526,7 +1577,7 @@
           225231125-start-menu-mode-code-pos-lt.
             SET sw-operation-class-STARTLT    TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             START idxfile
               KEY IS LESS THAN f-idxfile-rec-cod-employee
@@ -1537,7 +1588,7 @@
                           "less than one of those existing."
                           asterisk asterisk
 
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
@@ -1553,7 +1604,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231125-finish-menu-mode-code-pos-lt.
@@ -1562,7 +1613,7 @@
           225231126-start-menu-mode-code-pos-lteq.
             SET sw-operation-class-STARTLTEQ  TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             START idxfile
               KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-cod-employee
@@ -1573,7 +1624,7 @@
                           "less than or equal to those existing."
                           asterisk asterisk
 
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225240-start-menu-mode-finish-position
                      THRU 225240-finish-menu-mode-finish-position
 
@@ -1589,7 +1640,7 @@
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231126-finish-menu-mode-code-pos-lteq.
@@ -1653,7 +1704,7 @@
           225231211-start-locate-salary-key-ngt.
             SET sw-operation-class-STARTNGT      TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             START idxfile
               KEY IS NOT GREATER THAN f-idxfile-rec-salary-employee
@@ -1664,7 +1715,7 @@
                           "ones."
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1682,7 +1733,7 @@
                   DISPLAY asterisk
                           "Positioning upper salary done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231211-finish-locate-salary-key-ngt.
@@ -1691,7 +1742,7 @@
           225231212-start-locate-salary-key-gt.
             SET sw-operation-class-STARTGT       TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             START idxfile
               KEY IS GREATER THAN f-idxfile-rec-salary-employee
@@ -1701,7 +1752,7 @@
                           "is greater than that of the existing ones."
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1719,7 +1770,7 @@
                   DISPLAY asterisk
                           "Positioning upper salary done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231212-finish-locate-salary-key-gt.
@@ -1728,7 +1779,7 @@
           225231213-start-locate-salary-key-gteq.
             SET sw-operation-class-STARTGTEQ     TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             START idxfile
               KEY IS GREATER OR EQUAL TO f-idxfile-rec-salary-employee
@@ -1739,7 +1790,7 @@
                           "existing ones."
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1758,7 +1809,7 @@
                           "Positioning upper or equal salary "
                           "done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231213-finish-locate-salary-key-gteq.
@@ -1767,7 +1818,7 @@
           225231214-start-locate-salary-key-nlt.
             SET sw-operation-class-STARTNLT      TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             START idxfile
               KEY IS NOT LESS THAN f-idxfile-rec-salary-employee
@@ -1777,7 +1828,7 @@
                           "is not less than that of the existing ones."
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1795,7 +1846,7 @@
                   DISPLAY asterisk
                           "Positioning upper salary done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231214-finish-locate-salary-key-nlt.
@@ -1804,7 +1855,7 @@
           225231215-start-locate-salary-key-lt.
             SET sw-operation-class-STARTLT       TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             START idxfile
               KEY IS LESS THAN f-idxfile-rec-salary-employee
@@ -1814,7 +1865,7 @@
                           "is less than that of the existing ones."
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1832,7 +1883,7 @@
                   DISPLAY asterisk
                           "Positioning lower salary done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231215-finish-locate-salary-key-lt.
@@ -1841,7 +1892,7 @@
           225231216-start-locate-salary-key-lteq.
             SET sw-operation-class-STARTLTEQ     TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-salary-contents
+            PERFORM 000500-preliminary-review-employee-salary-contents
 
             START idxfile
               KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-salary-employee
@@ -1852,7 +1903,7 @@
                           "existing ones."
 
                   SET sw-idxfile-record-found-N  TO TRUE
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
@@ -1871,7 +1922,7 @@
                           "Positioning lower or equal salary "
                           "done correctly!"
                           asterisk
-                  PERFORM 000500-press-enter-key-to-continue
+                  PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225231216-finish-locate-salary-key-lteq.
@@ -1885,7 +1936,7 @@
                           DISPLAY asterisk asterisk
                                   "Error positioning at end!"
                                   asterisk asterisk
-                          PERFORM 000500-press-enter-key-to-continue
+                          PERFORM 000600-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
@@ -1893,7 +1944,7 @@
                           DISPLAY asterisk
                                   "Positioning at the end."
                                   asterisk
-                          PERFORM 000500-press-enter-key-to-continue
+                          PERFORM 000600-press-enter-key-to-continue
 
             END-START.
           225240-finish-menu-mode-finish-position.
@@ -1902,14 +1953,14 @@
           225250-start-menu-mode-read-backwarding.
             SET sw-operation-class-READPREV   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             READ idxfile PREVIOUS RECORD    INTO ws-f-idxfile-rec
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
 
-                 PERFORM 000500-press-enter-key-to-continue
+                 PERFORM 000600-press-enter-key-to-continue
                  PERFORM 225240-start-menu-mode-finish-position
                     THRU 225240-finish-menu-mode-finish-position
 
@@ -1927,14 +1978,14 @@
           225260-start-menu-mode-read-forwarding.
             SET sw-operation-class-READNEXT   TO TRUE
 
-            PERFORM 000300-preliminary-review-employee-code-contents
+            PERFORM 000400-preliminary-review-employee-code-contents
 
             READ idxfile NEXT RECORD        INTO ws-f-idxfile-rec
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
 
-                 PERFORM 000500-press-enter-key-to-continue
+                 PERFORM 000600-press-enter-key-to-continue
                  PERFORM 225210-start-menu-mode-start-position
                     THRU 225210-finish-menu-mode-start-position
 
