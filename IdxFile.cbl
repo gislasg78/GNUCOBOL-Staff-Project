@@ -4,11 +4,12 @@
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
+                  ALPHABET ascii-code IS ASCII.
                   SYMBOLIC CHARACTERS asterisk IS 43.
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT OPTIONAL idxfile ASSIGN TO ws-idxfile-name
+           SELECT OPTIONAL idxfile ASSIGN TO DISK ws-idxfile-name
                   ORGANIZATION IS INDEXED
                   ACCESS MODE  IS DYNAMIC
                   RECORD KEY   IS f-idxfile-rec-cod-employee
@@ -413,16 +414,20 @@
                    "]     |"
            DISPLAY "+--------------------------------------------+"
            DISPLAY "| " asterisk " Latest Build   : ["
-                   FUNCTION WHEN-COMPILED "].|"
+                          FUNCTION WHEN-COMPILED
+                   "].|"
            DISPLAY "| " asterisk " File Name      : [" 
-                                   ws-idxfile-name "].         |"
+                                   ws-idxfile-name
+                    "].         |"
            DISPLAY "| " asterisk " Operation      : ["
-                                   ws-operation-class "].        |"
+                                   ws-operation-class
+                   "].        |"
            DISPLAY "| " asterisk " Position Index : ["
-                   idx-error-status-code-table "].           |"
+                                   idx-error-status-code-table
+                   "].           |"
            DISPLAY "| " asterisk " Status Code    : ["
-                   ws-f-error-status-code-table-code-error-aux "]."
-                   "                   |"
+                   ws-f-error-status-code-table-code-error-aux
+                   "].                   |"
            DISPLAY "| " asterisk " Description    : "
                    "                        |"
            DISPLAY "| -> ["
