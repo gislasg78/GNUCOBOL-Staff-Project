@@ -47,7 +47,9 @@
        01  ws-environmental-variables.
            03  ws-current-date-and-time.
                05  ws-CDT-Date.
-                   07  ws-CDT-Year              PIC 9(04)  VALUE ZEROES.
+                   07  ws-CDT-Year.
+                       09  ws-CDT-Year-Century  PIC 9(02)  VALUE ZEROES.
+                       09  ws-CDT-Year-Year     PIC 9(02)  VALUE ZEROES.
                    07  ws-CDT-Month             PIC 9(02)  VALUE ZEROES.
                    07  ws-CDT-Day               PIC 9(02)  VALUE ZEROES.
                05  ws-CDT-Time.
@@ -64,7 +66,9 @@
 
            03  ws-date-and-time-formatted.
                05  ws-FT-Date.
-                   07  ws-FT-Year               PIC 9(04)  VALUE ZEROES.
+                   07  ws-FT-Year.
+                       09  ws-FT-Year-Century   PIC 9(02)  VALUE ZEROES.
+                       09  ws-FT-Year-Year      PIC 9(02)  VALUE ZEROES.
                    07  FILLER                   PIC X(01)  VALUE X'2F'.
                    07  ws-FT-Month              PIC 9(02)  VALUE ZEROES.
                    07  FILLER                   PIC X(01)  VALUE X'2F'.
@@ -393,7 +397,9 @@
        000200-get-current-date-and-time-record.
            MOVE FUNCTION CURRENT-DATE     TO ws-current-date-and-time
 
-           MOVE ws-CDT-Year               TO ws-FT-Year 
+           MOVE ws-CDT-Year-Century       TO ws-FT-Year-Century
+           MOVE ws-CDT-Year-Year          TO ws-FT-Year-Year
+
            MOVE ws-CDT-Month              TO ws-FT-Month
            MOVE ws-CDT-Day                TO ws-FT-Day
            
