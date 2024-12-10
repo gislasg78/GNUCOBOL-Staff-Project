@@ -418,7 +418,7 @@
                    ws-operation-class
                    "].|"
            DISPLAY "| " asterisk " Position Index: ["
-                    idx-error-status-code-table
+                   idx-error-status-code-table
                    "].   |"
            DISPLAY "| " asterisk " Status Code   : ["
                    ws-f-error-status-code-table-code-error-aux
