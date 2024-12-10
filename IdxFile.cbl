@@ -402,7 +402,7 @@
            PERFORM 000700-get-date-and-time-formatted
            DISPLAY "Current Date : [" ws-date-and-time-formatted "]."
 
-           MOVE FUNCTION WHEN-COMPILED TO ws-current-date-and-time
+           MOVE FUNCTION WHEN-COMPILED    TO ws-current-date-and-time
            PERFORM 000700-get-date-and-time-formatted
            DISPLAY "Latest Build : [" ws-date-and-time-formatted "].".
 
@@ -468,6 +468,9 @@
             ACCEPT OMITTED.
 
        000700-get-date-and-time-formatted.
+           DISPLAY SPACE
+           DISPLAY "Providing editing format to current date and time."
+
            MOVE ws-CDT-Year-Century       TO ws-FT-Year-Century
            MOVE ws-CDT-Year-Year          TO ws-FT-Year-Year
 
