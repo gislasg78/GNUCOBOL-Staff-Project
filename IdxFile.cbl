@@ -208,8 +208,10 @@
            03  ws-realization-questions.
                05  ws-carry-out-sure            PIC A(01)  VALUE SPACE.
                    88  sw-carry-out-sure-Y      VALUES ARE 'Y', 'y'.
+                   88  sw-carry-out-sure-N      VALUES ARE 'N', 'n'.
                05  ws-continue-response         PIC A(01)  VALUE SPACE.
                    88  sw-continue-response-N   VALUES ARE 'N', 'n'.
+                   88  sw-continue-response-Y   VALUES ARE 'Y', 'y'.
 
        01  ws-statistics-processed-records.
            03  ws-eliminated-records            PIC 9(04)  VALUE ZEROES.
@@ -601,6 +603,8 @@
            IF (sw-idxfile-record-found-N) THEN
                PERFORM 221300-start-continue-carry-out-oper
                   THRU 221300-finish-continue-carry-out-oper
+                  WITH TEST AFTER
+                 UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N
 
                IF (sw-carry-out-sure-Y)  THEN
                    PERFORM 221400-start-capture-salary-employee
@@ -616,7 +620,9 @@
            END-IF
 
            PERFORM 221600-start-continue-operation
-              THRU 221600-finish-continue-operation.
+              THRU 221600-finish-continue-operation
+              WITH TEST AFTER
+             UNTIL sw-continue-response-Y OR sw-continue-response-N.
          221000-finish-add-a-record.
            EXIT.
 
@@ -680,7 +686,14 @@
                     "operation? (y/n) : "
                WITH NO ADVANCING
 
-             ACCEPT ws-carry-out-sure.
+             ACCEPT ws-carry-out-sure
+
+            DISPLAY "The selected answer was: [" ws-carry-out-sure "]."
+
+            IF sw-carry-out-sure-Y OR sw-carry-out-sure-N
+               NEXT SENTENCE
+            ELSE
+               DISPLAY "Invalid answer. Please correct it now.".
          221300-finish-continue-carry-out-oper.
             EXIT.
 
@@ -719,7 +732,15 @@
                     "Do you want to continue doing the same operation? "
                     "(y/n) : " WITH NO ADVANCING
 
-             ACCEPT ws-continue-response.
+             ACCEPT ws-continue-response
+
+            DISPLAY "The selected answer was: [" ws-continue-response
+                    "]."
+
+            IF sw-continue-response-Y OR sw-continue-response-N
+               NEXT SENTENCE
+            ELSE
+               DISPLAY "Incorrect answer. The answer is not valid.".
          221600-finish-continue-operation.
             EXIT.
 
@@ -737,6 +758,8 @@
            IF (sw-idxfile-record-found-Y) THEN
                PERFORM 221300-start-continue-carry-out-oper
                   THRU 221300-finish-continue-carry-out-oper
+                  WITH TEST AFTER
+                 UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N
 
                IF (sw-carry-out-sure-Y)  THEN
                    PERFORM 222100-start-eliminate-a-record
@@ -747,7 +770,9 @@
            END-IF
 
            PERFORM 221600-start-continue-operation
-              THRU 221600-finish-continue-operation.
+              THRU 221600-finish-continue-operation
+              WITH TEST AFTER
+             UNTIL sw-continue-response-Y OR sw-continue-response-N.
          222000-finish-delete-a-record.
             EXIT.
 
@@ -829,6 +854,8 @@
             IF (sw-idxfile-record-found-Y) THEN
                 PERFORM 221300-start-continue-carry-out-oper
                    THRU 221300-finish-continue-carry-out-oper
+                   WITH TEST AFTER
+                  UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N
 
                 IF (sw-carry-out-sure-Y)   THEN
                     PERFORM 221400-start-capture-salary-employee
@@ -978,7 +1005,9 @@
                THRU 221200-finish-look-for-a-record
 
             PERFORM 221600-start-continue-operation
-               THRU 221600-finish-continue-operation.
+               THRU 221600-finish-continue-operation
+               WITH TEST AFTER
+              UNTIL sw-continue-response-Y OR sw-continue-response-N.
           2242121-finish-routine-mode-read-direct-rd.
             EXIT.
 
@@ -995,7 +1024,9 @@
             END-IF
 
             PERFORM 221600-start-continue-operation
-               THRU 221600-finish-continue-operation.
+               THRU 221600-finish-continue-operation
+               WITH TEST AFTER
+              UNTIL sw-continue-response-Y OR sw-continue-response-N.
           2242122-finish-routine-mode-read-dir-seq.
             EXIT.
 
@@ -1043,7 +1074,9 @@
                THRU 22422111-finish-read-record-salary-employee
 
             PERFORM 221600-start-continue-operation
-               THRU 221600-finish-continue-operation.
+               THRU 221600-finish-continue-operation
+               WITH TEST AFTER
+              UNTIL sw-continue-response-Y OR sw-continue-response-N.
           2242211-finish-routine-mode-read-direct-sal.
             EXIT.
 
@@ -1085,7 +1118,9 @@
             END-IF
 
             PERFORM 221600-start-continue-operation
-               THRU 221600-finish-continue-operation.
+               THRU 221600-finish-continue-operation
+               WITH TEST AFTER
+              UNTIL sw-continue-response-Y OR sw-continue-response-N.
           2242212-finish-routine-mode-read-dirseq-sal.
             EXIT.
 
