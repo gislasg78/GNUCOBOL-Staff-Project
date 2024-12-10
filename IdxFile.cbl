@@ -395,51 +395,40 @@
             END-SEARCH.
 
        000200-get-current-date-and-time-record.
+           DISPLAY SPACE
+           DISPLAY "Running Information."
+
            MOVE FUNCTION CURRENT-DATE     TO ws-current-date-and-time
+           PERFORM 000700-get-date-and-time-formatted
+           DISPLAY "Current Date : [" ws-date-and-time-formatted "]."
 
-           MOVE ws-CDT-Year-Century       TO ws-FT-Year-Century
-           MOVE ws-CDT-Year-Year          TO ws-FT-Year-Year
-
-           MOVE ws-CDT-Month              TO ws-FT-Month
-           MOVE ws-CDT-Day                TO ws-FT-Day
-           
-           MOVE ws-CDT-Hour               TO ws-FT-Hour
-           MOVE ws-CDT-Minutes            TO ws-FT-Minutes
-           MOVE ws-CDT-Seconds            TO ws-FT-Seconds
-           MOVE ws-CDT-Hundredths-Of-Secs TO ws-FT-Hundredths-Of-Secs
-
-           MOVE ws-CDT-GMT-Diff-Hours     TO ws-FT-GMT-Diff-Hours
-           MOVE ws-CDT-GMT-Diff-Minutes   TO ws-FT-GMT-Diff-Minutes.
+           MOVE FUNCTION WHEN-COMPILED TO ws-current-date-and-time
+           PERFORM 000700-get-date-and-time-formatted
+           DISPLAY "Latest Build : [" ws-date-and-time-formatted "].".
 
        000300-check-file-status-code.
            DISPLAY SPACE
-           DISPLAY "+---+----+---+----+---+----+---+----+---+----+"
-           DISPLAY "|           File status information.         |"
-           DISPLAY "+---+----+---+----+---+----+---+----+---+----+"
-           DISPLAY "|      [" ws-date-and-time-formatted
-                   "]     |"
-           DISPLAY "+--------------------------------------------+"
-           DISPLAY "| " asterisk " Latest Build   : ["
-                          FUNCTION WHEN-COMPILED
+           DISPLAY "+---+----+---+----+---+----+---+----+"
+           DISPLAY "|      File status information.     |"
+           DISPLAY "+---+----+---+----+---+----+---+----+"
+           DISPLAY "| " asterisk " File Name     : [" 
+                   ws-idxfile-name
+                   "]. |"
+           DISPLAY "| " asterisk " Operation     : ["
+                   ws-operation-class
                    "].|"
-           DISPLAY "| " asterisk " File Name      : [" 
-                                   ws-idxfile-name
-                    "].         |"
-           DISPLAY "| " asterisk " Operation      : ["
-                                   ws-operation-class
-                   "].        |"
-           DISPLAY "| " asterisk " Position Index : ["
-                                   idx-error-status-code-table
-                   "].           |"
-           DISPLAY "| " asterisk " Status Code    : ["
+           DISPLAY "| " asterisk " Position Index: ["
+                    idx-error-status-code-table
+                   "].   |"
+           DISPLAY "| " asterisk " Status Code   : ["
                    ws-f-error-status-code-table-code-error-aux
-                   "].                   |"
-           DISPLAY "| " asterisk " Description    : "
-                   "                        |"
+                   "].           |"
+           DISPLAY "| " asterisk " Description   : "
+                   "                |"
            DISPLAY "| -> ["
                    ws-f-error-status-code-table-desc-error-aux
-                   "]. <-         |"
-           DISPLAY "+---+----+---+----+---+----+---+----+---+----+".
+                   "]. <-|"
+           DISPLAY "+---+----+---+----+---+----+---+----+".
 
        000400-preliminary-review-employee-code-contents.
             DISPLAY SPACE
@@ -477,6 +466,21 @@
            DISPLAY "Press the ENTER key to continue..."
               WITH NO ADVANCING
             ACCEPT OMITTED.
+
+       000700-get-date-and-time-formatted.
+           MOVE ws-CDT-Year-Century       TO ws-FT-Year-Century
+           MOVE ws-CDT-Year-Year          TO ws-FT-Year-Year
+
+           MOVE ws-CDT-Month              TO ws-FT-Month
+           MOVE ws-CDT-Day                TO ws-FT-Day
+           
+           MOVE ws-CDT-Hour               TO ws-FT-Hour
+           MOVE ws-CDT-Minutes            TO ws-FT-Minutes
+           MOVE ws-CDT-Seconds            TO ws-FT-Seconds
+           MOVE ws-CDT-Hundredths-Of-Secs TO ws-FT-Hundredths-Of-Secs
+
+           MOVE ws-CDT-GMT-Diff-Hours     TO ws-FT-GMT-Diff-Hours
+           MOVE ws-CDT-GMT-Diff-Minutes   TO ws-FT-GMT-Diff-Minutes.
 
        END DECLARATIVES.
 
