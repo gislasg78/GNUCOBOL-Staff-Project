@@ -5,7 +5,8 @@
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
                   ALPHABET ascii-code IS ASCII.
-                  SYMBOLIC CHARACTERS asterisk IS 43.
+                  NUMERIC SIGN IS TRAILING SEPARATE.
+                  SYMBOLIC CHARACTERS asterisk IS 43 IN ascii-code.
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
@@ -2011,7 +2012,7 @@
             READ idxfile PREVIOUS RECORD    INTO ws-f-idxfile-rec
               AT END
                  SET sw-idxfile-EOF-Y         TO TRUE
-                 DISPLAY "End of file!"
+                 DISPLAY "Begin of file!"
 
                  PERFORM 000600-press-enter-key-to-continue
                  PERFORM 225240-start-menu-mode-finish-position
