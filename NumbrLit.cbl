@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID.  numbrlit.
+       PROGRAM-ID.  NumbrLit.
        
        DATA DIVISION.
        WORKING-STORAGE SECTION.
