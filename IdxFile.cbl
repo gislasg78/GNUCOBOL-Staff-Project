@@ -215,11 +215,11 @@
                    88  sw-continue-response-Y   VALUES ARE 'Y', 'y'.
 
        01  ws-statistics-processed-records.
-           03  ws-eliminated-records            PIC 9(04)  VALUE ZEROES.
-           03  ws-reading-records               PIC 9(04)  VALUE ZEROES.
-           03  ws-repositioning-records         PIC 9(04)  VALUE ZEROES.
-           03  ws-rewritten-records             PIC 9(04)  VALUE ZEROES.
-           03  ws-written-records               PIC 9(04)  VALUE ZEROES.
+           03  ws-eliminated-records            PIC S9(04) VALUE ZEROES.
+           03  ws-reading-records               PIC S9(04) VALUE ZEROES.
+           03  ws-repositioning-records         PIC S9(04) VALUE ZEROES.
+           03  ws-rewritten-records             PIC S9(04) VALUE ZEROES.
+           03  ws-written-records               PIC S9(04) VALUE ZEROES.
 
        01  ws-f-error-status-code-table.
            03  ws-status-code-success-completion.
