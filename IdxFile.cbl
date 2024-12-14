@@ -25,11 +25,11 @@
            BLOCK  CONTAINS 05 TO 15 RECORDS
            DATA   RECORD   IS f-idxfile-rec
            LABEL  RECORD   IS STANDARD
-           RECORD CONTAINS 14 CHARACTERS
+           RECORD CONTAINS 15 CHARACTERS
            RECORDING MODE  IS F.
 
        01  f-idxfile-rec.
-           03  f-idxfile-rec-cod-employee       PIC 9(05)  VALUE ZEROES.
+           03  f-idxfile-rec-cod-employee       PIC 9(06)  VALUE ZEROES.
            03  f-idxfile-rec-salary-employee    PIC S9(06)V9(02)
                                                 SIGN  IS LEADING
                                                 SEPARATE CHARACTER
@@ -108,7 +108,7 @@
                    88  sw-idxfile-record-found-Y           VALUE 'Y'.
 
            03  ws-f-idxfile-rec.
-               05  ws-f-idxfile-rec-cod-employee           PIC 9(05)
+               05  ws-f-idxfile-rec-cod-employee           PIC 9(06)
                                                            VALUE ZEROES.
                05  ws-f-idxfile-rec-salary-employee
                                                 PIC S9(06)V9(02)
