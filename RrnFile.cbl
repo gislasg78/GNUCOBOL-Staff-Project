@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. RrnFile.
+       PROGRAM-ID. RrnFileSeq.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -8,138 +8,157 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT OPTIONAL relFile ASSIGN TO ws-name-relFile
+           SELECT OPTIONAL rrnFile ASSIGN TO ws-name-rrnFile
                   ORGANIZATION IS RELATIVE
-                  RELATIVE KEY IS ws-key-relFile
-                  FILE STATUS  IS fs-relFile.
+                  ACCESS MODE  IS SEQUENTIAL
+                  RELATIVE KEY IS ws-key-rrnFile
+                  FILE STATUS  IS fs-rrnFile.
 
        DATA DIVISION.
        FILE SECTION.
-       FD  relFile
-           DATA RECORD IS relFile-rec
+       FD  rrnFile
+           DATA RECORD IS rrnFile-rec
            RECORD CONTAINS 15 CHARACTERS.
 
-       01  relFile-rec.
-           03  relFile-rec-code       PIC 9(06)        VALUE ZEROES.
-           03  relFile-rec-salary     PIC S9(06)V9(02) VALUE ZEROES.
+       01  rrnFile-rec.
+           03  rrnFile-rec-code-employee   PIC 9(06)       VALUE ZEROES.
+           03  rrnFile-rec-salary-employee PIC S9(06)V9(02) 
+                                           SIGN IS LEADING
+                                           SEPARATE CHARACTER
+                                                           VALUE ZEROES.
 
        WORKING-STORAGE SECTION.
-       77  fs-relfile                 PIC 9(02)        VALUE ZEROES.
+       77  fs-rrnFile                     PIC 9(02)        VALUE ZEROES.
 
-       77  ws-continue-response       PIC A(01)        VALUE SPACE.
-           88  sw-continue-response-N VALUES ARE 'N' 'n'.
+       77  ws-continue-response           PIC A(01)        VALUE SPACE.
+           88  sw-continue-response-N     VALUES ARE 'N' 'n'.
 
-       77  ws-key-relFile             PIC 9(06)        VALUE ZEROES.
-       77  ws-name-relFile            PIC X(12)        VALUE SPACES.
+       77  ws-key-rrnFile                 PIC 9(06)        VALUE ZEROES.
+       77  ws-name-rrnFile                PIC X(12)        VALUE SPACES.
 
-       77  ws-relFile-EOF             PIC A(01)        VALUE SPACE.
-           88  sw-relFile-EOF-N                        VALUE 'N'.
-           88  sw-relFile-EOF-Y                        VALUE 'Y'.
+       77  ws-rrnFile-EOF                 PIC A(01)        VALUE SPACE.
+           88  sw-rrnFile-EOF-N                            VALUE 'N'.
+           88  sw-rrnFile-EOF-Y                            VALUE 'Y'.
 
-       01  ws-relFile-rec.
-           03  ws-relFile-rec-code    PIC 9(06)        VALUE ZEROES.
-           03  ws-relFile-rec-salary  PIC S9(06)V9(02) VALUE ZEROES.
+       01  ws-rrnFile-rec.
+           03  ws-rrnFile-rec-code-employee                PIC 9(06)
+                                                           VALUE ZEROES.
+           03  ws-rrnFile-rec-salary-employee          PIC S9(06)V9(02)
+                                                      SIGN IS LEADING
+                                                  SEPARATE CHARACTER
+                                                     VALUE ZEROES.
 
        PROCEDURE DIVISION.
        DECLARATIVES.
        File-Handler SECTION.
-           USE AFTER ERROR PROCEDURE ON relFile.
+           USE AFTER ERROR PROCEDURE ON rrnFile.
 
        Status-Check.
            DISPLAY SPACE
            DISPLAY "File status information."
-           DISPLAY "File   Name: [" ws-name-relFile "]."
-           DISPLAY "Status Code: [" fs-relFile "].".
+           DISPLAY "File   Name: [" ws-name-rrnFile "]."
+           DISPLAY "Status Code: [" fs-rrnFile "].".
 
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
            DISPLAY "Basic maintenance of a relative file."
            DISPLAY "Enter the file name: " WITH NO ADVANCING
-           ACCEPT ws-name-relFile
+           ACCEPT ws-name-rrnFile
 
-           OPEN EXTEND relFile
-           DISPLAY "Opening. Status Code: [" fs-relFile "]."
+           OPEN EXTEND rrnFile
+           DISPLAY "Opening. Status Code: [" fs-rrnFile "]."
 
            PERFORM UNTIL sw-continue-response-N
-                      OR fs-relFile IS NOT EQUAL TO ZEROES
+                      OR fs-rrnFile IS NOT EQUAL TO ZEROES
 
-                   INITIALIZE relFile-rec
-                              ws-relFile-rec
+                   INITIALIZE rrnFile-rec
+                              ws-rrnFile-rec
+                              ws-key-rrnfile
 
                    DISPLAY SPACE
                    DISPLAY "Employee data capture."
                    DISPLAY "Employee code   : " WITH NO ADVANCING
-                   ACCEPT ws-relFile-rec-code
-                   MOVE ws-relFile-rec-code   TO relFile-rec-code
+                   ACCEPT ws-rrnFile-rec-code-employee
+                   MOVE ws-rrnFile-rec-code-employee 
+                     TO rrnFile-rec-code-employee
 
                    DISPLAY "Salary Employee : " WITH NO ADVANCING
-                   ACCEPT ws-relFile-rec-salary
-                   MOVE ws-relFile-rec-salary TO relFile-rec-salary
+                   ACCEPT ws-rrnFile-rec-salary-employee
+                   MOVE ws-rrnFile-rec-salary-employee
+                     TO rrnFile-rec-salary-employee
 
-                   WRITE relFile-rec        FROM ws-relFile-rec
+                   WRITE rrnFile-rec        FROM ws-rrnFile-rec
                          INVALID KEY
                          DISPLAY "Invalid Key!"
 
                      NOT INVALID KEY
                          DISPLAY "Record saved successfully."
                          DISPLAY SPACE
-                         DISPLAY "Record Number # : [" ws-key-relFile
+                         DISPLAY "Record Number # : [" ws-key-rrnFile
                                  "]."
                          DISPLAY "Employee code   : [" 
-                                 ws-relFile-rec-code "] = ["
-                                 relFile-rec-code "]."
+                                 ws-rrnFile-rec-code-employee "] = ["
+                                 rrnFile-rec-code-employee "]."
                          DISPLAY "Salary Employee : ["
-                                 ws-relFile-rec-salary "] = ["
-                                 relFile-rec-salary "]"
+                                 ws-rrnFile-rec-salary-employee "] = ["
+                                 rrnFile-rec-salary-employee "]"
 
                    END-WRITE
+                   DISPLAY "Writing. Status Code: [" fs-rrnFile "]."
 
                    DISPLAY "Do you want to capture more records? (y/n) "
                            ": " WITH NO ADVANCING
                    ACCEPT ws-continue-response
            END-PERFORM
 
-           CLOSE relFile
-           DISPLAY "Closing. Status Code: [" fs-relFile "]."
+           CLOSE rrnFile
+           DISPLAY "Closing. Status Code: [" fs-rrnFile "]."
 
            DISPLAY SPACE
            DISPLAY "Reading sequential file."
 
-           OPEN INPUT relFile
-           DISPLAY "Opening. Status Code: [" fs-relFile "]."
+           OPEN INPUT rrnFile
+           DISPLAY "Opening. Status Code: [" fs-rrnFile "]."
 
-           PERFORM UNTIL sw-relFile-EOF-Y
-                      OR fs-relFile IS NOT EQUAL TO ZEROES
+           PERFORM UNTIL sw-rrnFile-EOF-Y
+                      OR fs-rrnFile IS NOT EQUAL TO ZEROES
 
-                   READ relFile NEXT RECORD    INTO ws-relFile-rec
+                   INITIALIZE rrnFile-rec
+                              ws-rrnFile-rec
+                              ws-key-rrnfile
+
+                   READ rrnFile NEXT RECORD    INTO ws-rrnFile-rec
                         AT END
-                           SET sw-relFile-EOF-Y  TO TRUE
+                           SET sw-rrnFile-EOF-Y  TO TRUE
                            DISPLAY "End Of File!"
 
                     NOT AT END
-                           SET sw-relFile-EOF-N TO TRUE
+                           SET sw-rrnFile-EOF-N TO TRUE
 
                            DISPLAY SPACE
-                           DISPLAY "Record # [" ws-key-relFile "]."
+                           DISPLAY "Record # [" ws-key-rrnFile "]."
                            DISPLAY "Employee code   : [" 
-                                   ws-relFile-rec-code
+                                   ws-rrnFile-rec-code-employee
                                    "] = ["
-                                   relFile-rec-code
+                                   rrnFile-rec-code-employee
                                    "]."
                            DISPLAY "Salary Employee : ["
-                                   ws-relFile-rec-salary
+                                   ws-rrnFile-rec-salary-employee
                                    "] = ["
-                                   relFile-rec-salary
+                                   rrnFile-rec-salary-employee
                                    "]."
-                           DISPLAY "Press ENTER to continue..."
-                           ACCEPT OMITTED
 
+                   END-READ
+                   DISPLAY "Reading. Status Code: [" fs-rrnFile "]."
+
+                   DISPLAY "Press ENTER to continue..."
+                   ACCEPT OMITTED
            END-PERFORM
 
-           CLOSE relFile
-           DISPLAY "Closing. Status Code: [" fs-relFile "]."
+           CLOSE rrnFile
+           DISPLAY "Closing. Status Code: [" fs-rrnFile "]."
 
            STOP RUN.
 
-       END PROGRAM RrnFile.
+       END PROGRAM RrnFileSeq.
