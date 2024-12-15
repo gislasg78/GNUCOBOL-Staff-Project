@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. IdxFile.
+       PROGRAM-ID. IdxFileDyn.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -10,27 +10,27 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT OPTIONAL idxfile ASSIGN TO DISK ws-idxfile-name
+           SELECT OPTIONAL idxFile ASSIGN TO DISK ws-idxFile-name
                   ORGANIZATION IS INDEXED
                   ACCESS MODE  IS DYNAMIC
-                  RECORD KEY   IS f-idxfile-rec-cod-employee
-                  ALTERNATE RECORD KEY IS f-idxfile-rec-salary-employee
+                  RECORD KEY   IS f-idxFile-rec-cod-employee
+                  ALTERNATE RECORD KEY IS f-idxFile-rec-salary-employee
                             WITH DUPLICATES
                   PADDING CHARACTER IS asterisk
-                  FILE STATUS  IS fs-idxfile.
+                  FILE STATUS  IS fs-idxFile.
 
        DATA DIVISION.
        FILE SECTION.
-       FD  idxfile
+       FD  idxFile
            BLOCK  CONTAINS 05 TO 15 RECORDS
-           DATA   RECORD   IS f-idxfile-rec
+           DATA   RECORD   IS f-idxFile-rec
            LABEL  RECORD   IS STANDARD
            RECORD CONTAINS 15 CHARACTERS
            RECORDING MODE  IS F.
 
-       01  f-idxfile-rec.
-           03  f-idxfile-rec-cod-employee       PIC 9(06)  VALUE ZEROES.
-           03  f-idxfile-rec-salary-employee    PIC S9(06)V9(02)
+       01  f-idxFile-rec.
+           03  f-idxFile-rec-cod-employee       PIC 9(06)  VALUE ZEROES.
+           03  f-idxFile-rec-salary-employee    PIC S9(06)V9(02)
                                                 SIGN  IS LEADING
                                                 SEPARATE CHARACTER
                                                            VALUE ZEROES.
@@ -39,8 +39,8 @@
        01  ws-work-section-begins               PIC X(42)  VALUE
            "The working storage section begins here...".
 
-       77  fs-idxfile                           PIC 9(02)  VALUE ZEROES.
-       77  ws-idxfile-name                      PIC X(12)  VALUE SPACES.
+       77  fs-idxFile                           PIC 9(02)  VALUE ZEROES.
+       77  ws-idxFile-name                      PIC X(12)  VALUE SPACES.
 
        78  cte-01                                          VALUE 01.
        78  cte-34                                          VALUE 34.
@@ -91,26 +91,26 @@
                    07  FILLER                   PIC X(01)  VALUE X'3A'.
                    07  ws-FT-GMT-Diff-Minutes   PIC 9(02)  VALUE ZEROES.
 
-           03  ws-f-idxfile-indicators.
+           03  ws-f-idxFile-indicators.
                05  ws-f-error-status-code-table-aux.
                        07  ws-f-error-status-code-table-code-error-aux
                                                 PIC 9(02)  VALUE ZEROES.
                        07  ws-f-error-status-code-table-desc-error-aux
                                                 PIC X(25)  VALUE SPACES.
-               05  ws-f-idxfile-rec-salary-employee-ed
+               05  ws-f-idxFile-rec-salary-employee-ed
                                                     PIC   $-,---,--9.99
                                                            VALUE ZEROES.
-               05  ws-idxfile-EOF               PIC A(01)  VALUE SPACE.
-                   88  sw-idxfile-EOF-Y                    VALUE 'Y'.
-                   88  sw-idxfile-EOF-N                    VALUE 'N'.
-               05  ws-idxfile-record-found      PIC A(01)  VALUE SPACE.
-                   88  sw-idxfile-record-found-N           VALUE 'N'.
-                   88  sw-idxfile-record-found-Y           VALUE 'Y'.
+               05  ws-idxFile-EOF               PIC A(01)  VALUE SPACE.
+                   88  sw-idxFile-EOF-Y                    VALUE 'Y'.
+                   88  sw-idxFile-EOF-N                    VALUE 'N'.
+               05  ws-idxFile-record-found      PIC A(01)  VALUE SPACE.
+                   88  sw-idxFile-record-found-N           VALUE 'N'.
+                   88  sw-idxFile-record-found-Y           VALUE 'Y'.
 
-           03  ws-f-idxfile-rec.
-               05  ws-f-idxfile-rec-cod-employee           PIC 9(06)
+           03  ws-f-idxFile-rec.
+               05  ws-f-idxFile-rec-cod-employee           PIC 9(06)
                                                            VALUE ZEROES.
-               05  ws-f-idxfile-rec-salary-employee
+               05  ws-f-idxFile-rec-salary-employee
                                                 PIC S9(06)V9(02)
                                                 SIGN  IS LEADING
                                                 SEPARATE CHARACTER
@@ -208,8 +208,8 @@
                                                 VALUE "WRITE".
            03  ws-realization-questions.
                05  ws-carry-out-sure            PIC A(01)  VALUE SPACE.
-                   88  sw-carry-out-sure-Y      VALUES ARE 'Y', 'y'.
                    88  sw-carry-out-sure-N      VALUES ARE 'N', 'n'.
+                   88  sw-carry-out-sure-Y      VALUES ARE 'Y', 'y'.
                05  ws-continue-response         PIC A(01)  VALUE SPACE.
                    88  sw-continue-response-N   VALUES ARE 'N', 'n'.
                    88  sw-continue-response-Y   VALUES ARE 'Y', 'y'.
@@ -375,11 +375,11 @@
        PROCEDURE DIVISION.
        DECLARATIVES.
        File-Handler SECTION.
-           USE AFTER ERROR PROCEDURE ON idxfile.
+           USE AFTER ERROR PROCEDURE ON idxFile.
 
        000100-search-for-error-and-description-codes.
             INITIALIZE ws-f-error-status-code-table-aux
-            MOVE fs-idxfile
+            MOVE fs-idxFile
               TO ws-f-error-status-code-table-code-error-aux
 
             SET idx-error-status-code-table              TO cte-01
@@ -415,7 +415,7 @@
            DISPLAY "|      File status information.     |"
            DISPLAY "+---+----+---+----+---+----+---+----+"
            DISPLAY "| " asterisk " File Name     : [" 
-                   ws-idxfile-name
+                   ws-idxFile-name
                    "]. |"
            DISPLAY "| " asterisk " Operation     : ["
                    ws-operation-class
@@ -443,9 +443,9 @@
                     " <-|"         
             DISPLAY asterisk asterisk asterisk
                     " Code Employee: ["
-                    ws-f-idxfile-rec-cod-employee
+                    ws-f-idxFile-rec-cod-employee
                     "] = ["
-                    f-idxfile-rec-cod-employee
+                    f-idxFile-rec-cod-employee
                     "]. "
                     asterisk asterisk asterisk.
 
@@ -459,9 +459,9 @@
                     " <-|"         
             DISPLAY asterisk asterisk asterisk
                     " Salary Employee: ["
-                    ws-f-idxfile-rec-salary-employee-ed
+                    ws-f-idxFile-rec-salary-employee-ed
                     "] = ["
-                    f-idxfile-rec-salary-employee
+                    f-idxFile-rec-salary-employee
                     "]. "
                     asterisk asterisk asterisk.
 
@@ -494,7 +494,7 @@
            PERFORM 100000-start-begin-program
               THRU 100000-finish-begin-program
 
-           IF fs-idxfile IS EQUAL TO ZEROES
+           IF fs-idxFile IS EQUAL TO ZEROES
               PERFORM 200000-start-process-menu
                  THRU 200000-finish-process-menu
                 UNTIL sw-menu-option-exit
@@ -511,19 +511,19 @@
            DISPLAY "|   Indexed Sequential Files.  |"
            DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY asterisk " Enter the file name: " WITH NO ADVANCING
-            ACCEPT ws-idxfile-name
+            ACCEPT ws-idxFile-name
 
-           DISPLAY "Idx File to work on: [" ws-idxfile-name "]."
+           DISPLAY "Idx File to work on: [" ws-idxFile-name "]."
 
            SET sw-operation-class-OPEN  TO TRUE
-           OPEN I-O idxfile
+           OPEN I-O idxFile
 
-           DISPLAY "Opening. Status Code: [" fs-idxfile "].".
+           DISPLAY "Opening. Status Code: [" fs-idxFile "].".
        100000-finish-begin-program.
            EXIT.
 
        200000-start-process-menu.
-           INITIALIZE f-idxfile-rec
+           INITIALIZE f-idxFile-rec
                       ws-environmental-variables
 
            PERFORM 210000-start-option-menu-display
@@ -591,7 +591,7 @@
            EXIT.
 
          221000-start-add-a-record.
-           INITIALIZE ws-f-idxfile-indicators
+           INITIALIZE ws-f-idxFile-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -601,7 +601,7 @@
            PERFORM 221200-start-look-for-a-record
               THRU 221200-finish-look-for-a-record
 
-           IF (sw-idxfile-record-found-N) THEN
+           IF (sw-idxFile-record-found-N) THEN
                PERFORM 221300-start-continue-carry-out-oper
                   THRU 221300-finish-continue-carry-out-oper
                   WITH TEST AFTER
@@ -629,10 +629,10 @@
 
           221100-start-capture-key-field.
             DISPLAY asterisk " Employee Code   : " WITH NO ADVANCING
-            ACCEPT ws-f-idxfile-rec-cod-employee
+            ACCEPT ws-f-idxFile-rec-cod-employee
 
-            MOVE ws-f-idxfile-rec-cod-employee
-              TO f-idxfile-rec-cod-employee.
+            MOVE ws-f-idxFile-rec-cod-employee
+              TO f-idxFile-rec-cod-employee.
           221100-finish-capture-key-field.
             EXIT.
 
@@ -641,16 +641,16 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            READ idxfile RECORD          INTO ws-f-idxfile-rec
-             KEY IS f-idxfile-rec-cod-employee
+            READ idxFile RECORD          INTO ws-f-idxFile-rec
+             KEY IS f-idxFile-rec-cod-employee
                  INVALID KEY
-                         SET sw-idxfile-record-found-N TO TRUE
+                         SET sw-idxFile-record-found-N TO TRUE
                          DISPLAY "Record Not Found!"
                          PERFORM 000600-press-enter-key-to-continue
 
              NOT INVALID KEY
                          ADD cte-01        TO ws-reading-records
-                         SET sw-idxfile-record-found-Y TO TRUE
+                         SET sw-idxFile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
 
                          PERFORM 000600-press-enter-key-to-continue
@@ -662,17 +662,17 @@
             EXIT.
 
          221210-start-show-file-info.
-            MOVE ws-f-idxfile-rec-salary-employee
-              TO ws-f-idxfile-rec-salary-employee-ed
+            MOVE ws-f-idxFile-rec-salary-employee
+              TO ws-f-idxFile-rec-salary-employee-ed
 
             DISPLAY SPACE
             DISPLAY "+---+----+---+----+---+----+---+"
             DISPLAY "|     Employee Information.    |"
             DISPLAY "+---+----+---+----+---+----+---+"
             DISPLAY "| Code   : ["
-                    ws-f-idxfile-rec-cod-employee "]."
+                    ws-f-idxFile-rec-cod-employee "]."
             DISPLAY "| Salary : ["
-                    ws-f-idxfile-rec-salary-employee-ed "]."
+                    ws-f-idxFile-rec-salary-employee-ed "]."
             DISPLAY "+---+----+---+----+---+----+---+"
 
             PERFORM 000600-press-enter-key-to-continue
@@ -700,11 +700,11 @@
 
          221400-start-capture-salary-employee.
            DISPLAY asterisk " Employee Salary : " WITH NO ADVANCING
-           ACCEPT ws-f-idxfile-rec-salary-employee
+           ACCEPT ws-f-idxFile-rec-salary-employee
 
-           MOVE ws-f-idxfile-rec-salary-employee
-             TO ws-f-idxfile-rec-salary-employee-ed
-                f-idxfile-rec-salary-employee.
+           MOVE ws-f-idxFile-rec-salary-employee
+             TO ws-f-idxFile-rec-salary-employee-ed
+                f-idxFile-rec-salary-employee.
          221400-finish-capture-salary-employee.
             EXIT.
 
@@ -713,7 +713,7 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            WRITE f-idxfile-rec          FROM ws-f-idxfile-rec
+            WRITE f-idxFile-rec          FROM ws-f-idxFile-rec
                   INVALID KEY
                           DISPLAY "Duplicate Key!"
                           PERFORM 000600-press-enter-key-to-continue
@@ -746,7 +746,7 @@
             EXIT.
 
          222000-start-delete-a-record.
-           INITIALIZE ws-f-idxfile-indicators
+           INITIALIZE ws-f-idxFile-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -756,7 +756,7 @@
            PERFORM 221200-start-look-for-a-record
               THRU 221200-finish-look-for-a-record
 
-           IF (sw-idxfile-record-found-Y) THEN
+           IF (sw-idxFile-record-found-Y) THEN
                PERFORM 221300-start-continue-carry-out-oper
                   THRU 221300-finish-continue-carry-out-oper
                   WITH TEST AFTER
@@ -782,7 +782,7 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            DELETE idxfile RECORD
+            DELETE idxFile RECORD
                    INVALID KEY
                            DISPLAY "Invalid Key!"
                            PERFORM 000600-press-enter-key-to-continue
@@ -798,7 +798,7 @@
             EXIT.
 
          223000-start-modify-a-record.
-            INITIALIZE ws-f-idxfile-indicators
+            INITIALIZE ws-f-idxFile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -852,7 +852,7 @@
             EXIT.
 
           223210-start-modify-salary-employee.
-            IF (sw-idxfile-record-found-Y) THEN
+            IF (sw-idxFile-record-found-Y) THEN
                 PERFORM 221300-start-continue-carry-out-oper
                    THRU 221300-finish-continue-carry-out-oper
                    WITH TEST AFTER
@@ -877,7 +877,7 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            REWRITE f-idxfile-rec        FROM ws-f-idxfile-rec
+            REWRITE f-idxFile-rec        FROM ws-f-idxFile-rec
                     INVALID KEY
                             DISPLAY "Invalid Key!"
                             PERFORM 000600-press-enter-key-to-continue
@@ -893,7 +893,7 @@
             EXIT.
 
          224000-start-look-for-any-record.
-           INITIALIZE ws-f-idxfile-indicators
+           INITIALIZE ws-f-idxFile-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -946,7 +946,7 @@
             EXIT.
 
           224210-start-show-mode-look-for-code.
-            INITIALIZE ws-f-idxfile-indicators
+            INITIALIZE ws-f-idxFile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1019,7 +1019,7 @@
             PERFORM 2252211-start-menu-mode-code-pos-eq
                THRU 2252211-finish-menu-mode-code-pos-eq
 
-            IF (sw-idxfile-record-found-Y)
+            IF (sw-idxFile-record-found-Y)
                 PERFORM 225260-start-menu-mode-read-forwarding
                    THRU 225260-finish-menu-mode-read-forwarding
             END-IF
@@ -1032,7 +1032,7 @@
             EXIT.
 
           224220-start-show-mode-look-for-rc-sal.
-            INITIALIZE ws-f-idxfile-indicators
+            INITIALIZE ws-f-idxFile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1086,16 +1086,16 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            READ idxfile RECORD          INTO ws-f-idxfile-rec
-             KEY IS f-idxfile-rec-salary-employee
+            READ idxFile RECORD          INTO ws-f-idxFile-rec
+             KEY IS f-idxFile-rec-salary-employee
                  INVALID KEY
-                         SET sw-idxfile-record-found-N TO TRUE
+                         SET sw-idxFile-record-found-N TO TRUE
                          DISPLAY "Record Not Found!"
                          PERFORM 000600-press-enter-key-to-continue
 
              NOT INVALID KEY
                          ADD cte-01        TO ws-reading-records
-                         SET sw-idxfile-record-found-Y TO TRUE
+                         SET sw-idxFile-record-found-Y TO TRUE
                          DISPLAY "Record found successfully!"
 
                          PERFORM 000600-press-enter-key-to-continue
@@ -1113,7 +1113,7 @@
             PERFORM 22422121-start-routine-mode-locate-for-sal
                THRU 22422121-finish-routine-mode-locate-for-sal
 
-            IF (sw-idxfile-record-found-Y)
+            IF (sw-idxFile-record-found-Y)
                 PERFORM 225260-start-menu-mode-read-forwarding
                    THRU 225260-finish-menu-mode-read-forwarding
             END-IF
@@ -1130,29 +1130,29 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            START idxfile
-              KEY IS EQUAL TO f-idxfile-rec-salary-employee
+            START idxFile
+              KEY IS EQUAL TO f-idxFile-rec-salary-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary could not be located for an "
                           "exactly equal or identical value from the "
                           "existing ones."
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
                           "The salary: ["
-                           ws-f-idxfile-rec-salary-employee
+                           ws-f-idxFile-rec-salary-employee
                           "] was found for a value that was exactly the"
                           " same or identical to the existing ones: "
-                          "[" f-idxfile-rec-salary-employee "]."
+                          "[" f-idxFile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning exact salary done correctly!"
@@ -1164,7 +1164,7 @@
             EXIT.
 
          225000-start-look-for-all-records.
-           INITIALIZE ws-f-idxfile-indicators
+           INITIALIZE ws-f-idxFile-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -1248,12 +1248,12 @@
                 WHEN sw-menu-mode-read-option-r-backward
                      PERFORM 225250-start-menu-mode-read-backwarding
                         THRU 225250-finish-menu-mode-read-backwarding
-                       UNTIL sw-idxfile-EOF-Y
+                       UNTIL sw-idxFile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-r-forward
                      PERFORM 225260-start-menu-mode-read-forwarding
                         THRU 225260-finish-menu-mode-read-forwarding
-                       UNTIL sw-idxfile-EOF-Y
+                       UNTIL sw-idxFile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-prev-rcrd
                      PERFORM 225250-start-menu-mode-read-backwarding
@@ -1276,7 +1276,7 @@
           225210-start-menu-mode-start-position.
             SET sw-operation-class-STARTFRST  TO TRUE
 
-            START idxfile FIRST
+            START idxFile FIRST
                   INVALID KEY
                           DISPLAY asterisk asterisk
                                   "Error positioning at begin!"
@@ -1296,7 +1296,7 @@
             EXIT.
 
           225220-start-locate-givenkey-code-salary.
-            INITIALIZE ws-f-idxfile-indicators
+            INITIALIZE ws-f-idxFile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1338,8 +1338,8 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            START idxfile
-              KEY IS EQUAL TO f-idxfile-rec-cod-employee
+            START idxFile
+              KEY IS EQUAL TO f-idxFile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
@@ -1348,20 +1348,20 @@
                           "existing ones."
                           asterisk asterisk
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
-                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "The value: [" ws-f-idxFile-rec-cod-employee
                           "] was found for a key that was exactly the "
                           "same or identical to the existing ones: "
-                          "[" f-idxfile-rec-cod-employee "]."
+                          "[" f-idxFile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning exact key done correctly!"
@@ -1373,7 +1373,7 @@
             EXIT.
 
           225230-start-menu-read-approx-code-salary.
-            INITIALIZE ws-f-idxfile-indicators
+            INITIALIZE ws-f-idxFile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1409,7 +1409,7 @@
             EXIT.
 
           2252311-start-menu-read-code-apprx.
-            INITIALIZE ws-f-idxfile-indicators
+            INITIALIZE ws-f-idxFile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1489,8 +1489,8 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents.
 
-            START idxfile
-              KEY IS NOT GREATER THAN f-idxfile-rec-cod-employee
+            START idxFile
+              KEY IS NOT GREATER THAN f-idxFile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
@@ -1506,10 +1506,10 @@
                   ADD  cte-01              TO ws-repositioning-records
 
                   DISPLAY asterisk
-                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "The value: [" ws-f-idxFile-rec-cod-employee
                           "] was found for a key that wasn't "
                           "greater than one of the existing ones: "
-                          "[" f-idxfile-rec-cod-employee "]."
+                          "[" f-idxFile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
@@ -1525,8 +1525,8 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents.
 
-            START idxfile
-              KEY IS GREATER THAN f-idxfile-rec-cod-employee
+            START idxFile
+              KEY IS GREATER THAN f-idxFile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
@@ -1542,10 +1542,10 @@
                   ADD  cte-01              TO ws-repositioning-records
 
                   DISPLAY asterisk
-                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "The value: [" ws-f-idxFile-rec-cod-employee
                           "] was found for a key that was "
                           "greater than one of the existing ones: "
-                          "[" f-idxfile-rec-cod-employee "]."
+                          "[" f-idxFile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
@@ -1561,8 +1561,8 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents.
 
-            START idxfile
-              KEY IS GREATER THAN OR EQUAL TO f-idxfile-rec-cod-employee
+            START idxFile
+              KEY IS GREATER THAN OR EQUAL TO f-idxFile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
@@ -1578,10 +1578,10 @@
                   ADD  cte-01              TO ws-repositioning-records
 
                   DISPLAY asterisk
-                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "The value: [" ws-f-idxFile-rec-cod-employee
                           "] was found for a key that was greater than "
                           "or equal to one of the existing ones: "
-                          "[" f-idxfile-rec-cod-employee "]."
+                          "[" f-idxFile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
@@ -1597,8 +1597,8 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            START idxfile
-              KEY IS NOT LESS THAN f-idxfile-rec-cod-employee
+            START idxFile
+              KEY IS NOT LESS THAN f-idxFile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
@@ -1614,10 +1614,10 @@
                   ADD  cte-01              TO ws-repositioning-records
 
                   DISPLAY asterisk
-                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "The value: [" ws-f-idxFile-rec-cod-employee
                           "] was found for a key that wasn't less than "
                           "one of the existing ones: "
-                          "[" f-idxfile-rec-cod-employee "]."
+                          "[" f-idxFile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Correct positioning on nearest upper key!"
@@ -1633,8 +1633,8 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            START idxfile
-              KEY IS LESS THAN f-idxfile-rec-cod-employee
+            START idxFile
+              KEY IS LESS THAN f-idxFile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
@@ -1650,10 +1650,10 @@
                   ADD  cte-01              TO ws-repositioning-records
 
                   DISPLAY asterisk
-                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "The value: [" ws-f-idxFile-rec-cod-employee
                           "] was found for a key that was less than "
                           "one of the existing ones: "
-                          "[" f-idxfile-rec-cod-employee "]."
+                          "[" f-idxFile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
@@ -1669,8 +1669,8 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            START idxfile
-              KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-cod-employee
+            START idxFile
+              KEY IS LESS THAN OR EQUAL TO f-idxFile-rec-cod-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
@@ -1686,10 +1686,10 @@
                   ADD  cte-01              TO ws-repositioning-records
 
                   DISPLAY asterisk
-                          "The value: [" ws-f-idxfile-rec-cod-employee
+                          "The value: [" ws-f-idxFile-rec-cod-employee
                           "] was found for a key that was less than "
                           "or equal to one than of the existing ones: "
-                          "[" f-idxfile-rec-cod-employee "]."
+                          "[" f-idxFile-rec-cod-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Correct positioning on nearest lower key!"
@@ -1701,7 +1701,7 @@
             EXIT.
 
           2252312-start-menu-read-salary-apprx.
-            INITIALIZE ws-f-idxfile-indicators
+            INITIALIZE ws-f-idxFile-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1760,29 +1760,29 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            START idxfile
-              KEY IS NOT GREATER THAN f-idxfile-rec-salary-employee
+            START idxFile
+              KEY IS NOT GREATER THAN f-idxFile-rec-salary-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is not greater than that of the existing "
                           "ones."
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
                           "The salary: ["
-                           ws-f-idxfile-rec-salary-employee
+                           ws-f-idxFile-rec-salary-employee
                           "] was found for a value that wasn't greater "
                           "than that of the existing ones: "
-                          "[" f-idxfile-rec-salary-employee "]."
+                          "[" f-idxFile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning upper salary done correctly!"
@@ -1798,28 +1798,28 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            START idxfile
-              KEY IS GREATER THAN f-idxfile-rec-salary-employee
+            START idxFile
+              KEY IS GREATER THAN f-idxFile-rec-salary-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is greater than that of the existing ones."
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
                           "The salary: ["
-                           ws-f-idxfile-rec-salary-employee
+                           ws-f-idxFile-rec-salary-employee
                           "] was found for a value that was greater "
                           "than that of the existing ones: "
-                          "[" f-idxfile-rec-salary-employee "]."
+                          "[" f-idxFile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning upper salary done correctly!"
@@ -1835,29 +1835,29 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            START idxfile
-              KEY IS GREATER OR EQUAL TO f-idxfile-rec-salary-employee
+            START idxFile
+              KEY IS GREATER OR EQUAL TO f-idxFile-rec-salary-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is greater than or equal to that of the "
                           "existing ones."
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
                           "The salary: ["
-                           ws-f-idxfile-rec-salary-employee
+                           ws-f-idxFile-rec-salary-employee
                           "] was found for a value that was greater "
                           "than or equal to the existing ones: "
-                          "[" f-idxfile-rec-salary-employee "]."
+                          "[" f-idxFile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning upper or equal salary "
@@ -1874,28 +1874,28 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            START idxfile
-              KEY IS NOT LESS THAN f-idxfile-rec-salary-employee
+            START idxFile
+              KEY IS NOT LESS THAN f-idxFile-rec-salary-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is not less than that of the existing ones."
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
                           "The salary: ["
-                           ws-f-idxfile-rec-salary-employee
+                           ws-f-idxFile-rec-salary-employee
                           "] was found for a value that wasn't less "
                           "than the existing ones: "
-                          "[" f-idxfile-rec-salary-employee "]."
+                          "[" f-idxFile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning upper salary done correctly!"
@@ -1911,28 +1911,28 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            START idxfile
-              KEY IS LESS THAN f-idxfile-rec-salary-employee
+            START idxFile
+              KEY IS LESS THAN f-idxFile-rec-salary-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is less than that of the existing ones."
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
                           "The salary: ["
-                           ws-f-idxfile-rec-salary-employee
+                           ws-f-idxFile-rec-salary-employee
                           "] was found for a value that was less "
                           "than that of the existing ones: "
-                          "[" f-idxfile-rec-salary-employee "]."
+                          "[" f-idxFile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning lower salary done correctly!"
@@ -1948,29 +1948,29 @@
 
             PERFORM 000500-preliminary-review-employee-salary-contents
 
-            START idxfile
-              KEY IS LESS THAN OR EQUAL TO f-idxfile-rec-salary-employee
+            START idxFile
+              KEY IS LESS THAN OR EQUAL TO f-idxFile-rec-salary-employee
                   INVALID KEY
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is less than or equal to that of the "
                           "existing ones."
 
-                  SET sw-idxfile-record-found-N  TO TRUE
+                  SET sw-idxFile-record-found-N  TO TRUE
                   PERFORM 000600-press-enter-key-to-continue
                   PERFORM 225210-start-menu-mode-start-position
                      THRU 225210-finish-menu-mode-start-position
 
               NOT INVALID KEY
                   ADD cte-01              TO ws-repositioning-records
-                  SET sw-idxfile-record-found-Y  TO TRUE
+                  SET sw-idxFile-record-found-Y  TO TRUE
 
                   DISPLAY asterisk
                           "The salary: ["
-                           ws-f-idxfile-rec-salary-employee
+                           ws-f-idxFile-rec-salary-employee
                           "] was found for a value that was less "
                           "than or equal to the existing ones: "
-                          "[" f-idxfile-rec-salary-employee "]."
+                          "[" f-idxFile-rec-salary-employee "]."
                           asterisk
                   DISPLAY asterisk
                           "Positioning lower or equal salary "
@@ -1985,7 +1985,7 @@
           225240-start-menu-mode-finish-position.
             SET sw-operation-class-STARTLST   TO TRUE
 
-            START idxfile LAST
+            START idxFile LAST
                   INVALID KEY
                           DISPLAY asterisk asterisk
                                   "Error positioning at end!"
@@ -2009,9 +2009,9 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            READ idxfile PREVIOUS RECORD    INTO ws-f-idxfile-rec
+            READ idxFile PREVIOUS RECORD    INTO ws-f-idxFile-rec
               AT END
-                 SET sw-idxfile-EOF-Y         TO TRUE
+                 SET sw-idxFile-EOF-Y         TO TRUE
                  DISPLAY "Begin of file!"
 
                  PERFORM 000600-press-enter-key-to-continue
@@ -2020,7 +2020,7 @@
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
-                 SET sw-idxfile-EOF-N         TO TRUE
+                 SET sw-idxFile-EOF-N         TO TRUE
 
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
@@ -2034,9 +2034,9 @@
 
             PERFORM 000400-preliminary-review-employee-code-contents
 
-            READ idxfile NEXT RECORD        INTO ws-f-idxfile-rec
+            READ idxFile NEXT RECORD        INTO ws-f-idxFile-rec
               AT END
-                 SET sw-idxfile-EOF-Y         TO TRUE
+                 SET sw-idxFile-EOF-Y         TO TRUE
                  DISPLAY "End of file!"
 
                  PERFORM 000600-press-enter-key-to-continue
@@ -2045,7 +2045,7 @@
 
              NOT AT END
                  ADD cte-01                   TO ws-reading-records
-                 SET sw-idxfile-EOF-N         TO TRUE
+                 SET sw-idxFile-EOF-N         TO TRUE
 
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
@@ -2056,11 +2056,11 @@
 
        300000-start-end-program.
            SET sw-operation-class-CLOSE       TO TRUE
-           CLOSE idxfile
+           CLOSE idxFile
 
-           DISPLAY "Closing. Status Code: ["  fs-idxfile "]."
+           DISPLAY "Closing. Status Code: ["  fs-idxFile "]."
 
-           MOVE fs-idxfile                    TO RETURN-CODE
+           MOVE fs-idxFile                    TO RETURN-CODE
 
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+"
@@ -2076,4 +2076,4 @@
        300000-finish-end-program.
            EXIT.
 
-       END PROGRAM IdxFile.
+       END PROGRAM IdxFileDyn.
