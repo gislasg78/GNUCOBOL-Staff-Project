@@ -8,42 +8,42 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT OPTIONAL idxFile ASSIGN TO ws-name-idxFile
+           SELECT OPTIONAL IdxFile ASSIGN TO ws-name-IdxFile
                   ORGANIZATION IS INDEXED
-                  RECORD   KEY IS f-idxFile-rec-code-employee
-                  ALTERNATE RECORD KEY IS f-idxFile-rec-salary-employee
+                  RECORD   KEY IS f-IdxFile-rec-code-employee
+                  ALTERNATE RECORD KEY IS f-IdxFile-rec-salary-employee
                             WITH DUPLICATES
-                  FILE STATUS  IS fs-idxFile.
+                  FILE STATUS  IS fs-IdxFile.
 
        DATA DIVISION.
        FILE SECTION.
-       FD  idxFile
-           DATA RECORD IS f-idxFile-rec
+       FD  IdxFile
+           DATA RECORD IS f-IdxFile-rec
            RECORD CONTAINS 15 CHARACTERS.
 
-       01  f-idxFile-rec.
-           03  f-idxFile-rec-code-employee   PIC 9(06)     VALUE ZEROES.
-           03  f-idxFile-rec-salary-employee PIC S9(06)V9(02) 
+       01  f-IdxFile-rec.
+           03  f-IdxFile-rec-code-employee   PIC 9(06)     VALUE ZEROES.
+           03  f-IdxFile-rec-salary-employee PIC S9(06)V9(02) 
                                              SIGN IS LEADING
                                              SEPARATE CHARACTER
                                                            VALUE ZEROES.
 
        WORKING-STORAGE SECTION.
-       77  fs-idxFile                        PIC 9(02)     VALUE ZEROES.
+       77  fs-IdxFile                        PIC 9(02)     VALUE ZEROES.
 
        77  ws-continue-response              PIC A(01)     VALUE SPACE.
            88  sw-continue-response-N        VALUES ARE 'N' 'n'.
 
-       77  ws-name-idxFile                   PIC X(12)     VALUE SPACES.
+       77  ws-name-IdxFile                   PIC X(12)     VALUE SPACES.
 
-       77  ws-idxFile-EOF                    PIC A(01)     VALUE SPACE.
-           88  sw-idxFile-EOF-N                            VALUE 'N'.
-           88  sw-idxFile-EOF-Y                            VALUE 'Y'.
+       77  ws-IdxFile-EOF                    PIC A(01)     VALUE SPACE.
+           88  sw-IdxFile-EOF-N                            VALUE 'N'.
+           88  sw-IdxFile-EOF-Y                            VALUE 'Y'.
 
-       01  ws-f-idxFile-rec.
-           03  ws-f-idxFile-rec-code-employee              PIC 9(06)
+       01  ws-f-IdxFile-rec.
+           03  ws-f-IdxFile-rec-code-employee              PIC 9(06)
                                                            VALUE ZEROES.
-           03  ws-f-idxFile-rec-salary-employee        PIC S9(06)V9(02)
+           03  ws-f-IdxFile-rec-salary-employee        PIC S9(06)V9(02)
                                                        SIGN IS LEADING
                                                       SEPARATE CHARACTER 
                                                            VALUE ZEROES.
@@ -51,43 +51,43 @@
        PROCEDURE DIVISION.
        DECLARATIVES.
        File-Handler SECTION.
-           USE AFTER ERROR PROCEDURE ON idxFile.
+           USE AFTER ERROR PROCEDURE ON IdxFile.
 
        Status-Check.
            DISPLAY SPACE
            DISPLAY "File status information."
-           DISPLAY "File   Name: [" ws-name-idxFile "]."
-           DISPLAY "Status Code: [" fs-idxFile "].".
+           DISPLAY "File   Name: [" ws-name-IdxFile "]."
+           DISPLAY "Status Code: [" fs-IdxFile "].".
 
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
            DISPLAY "Basic maintenance to an indexed sequential file."
            DISPLAY "Enter the file name: " WITH NO ADVANCING
-           ACCEPT ws-name-idxFile
+           ACCEPT ws-name-IdxFile
 
-           OPEN EXTEND idxFile
-           DISPLAY "Opening. Status Code: [" fs-idxFile "]."
+           OPEN EXTEND IdxFile
+           DISPLAY "Opening. Status Code: [" fs-IdxFile "]."
 
            PERFORM UNTIL sw-continue-response-N
-                      OR fs-idxFile IS NOT EQUAL TO ZEROES
+                      OR fs-IdxFile IS NOT EQUAL TO ZEROES
 
-                   INITIALIZE f-idxFile-rec
-                              ws-f-idxFile-rec
+                   INITIALIZE f-IdxFile-rec
+                              ws-f-IdxFile-rec
 
                    DISPLAY SPACE
                    DISPLAY "Employee data capture."
                    DISPLAY "Employee code   : " WITH NO ADVANCING
-                   ACCEPT ws-f-idxFile-rec-code-employee
-                   MOVE ws-f-idxFile-rec-code-employee
-                     TO f-idxFile-rec-code-employee
+                   ACCEPT ws-f-IdxFile-rec-code-employee
+                   MOVE ws-f-IdxFile-rec-code-employee
+                     TO f-IdxFile-rec-code-employee
 
                    DISPLAY "Salary Employee : " WITH NO ADVANCING
-                   ACCEPT ws-f-idxFile-rec-salary-employee
-                   MOVE ws-f-idxFile-rec-salary-employee
-                     TO f-idxFile-rec-salary-employee
+                   ACCEPT ws-f-IdxFile-rec-salary-employee
+                   MOVE ws-f-IdxFile-rec-salary-employee
+                     TO f-IdxFile-rec-salary-employee
 
-                   WRITE f-idxFile-rec        FROM ws-f-idxFile-rec
+                   WRITE f-IdxFile-rec        FROM ws-f-IdxFile-rec
                          INVALID KEY
                          DISPLAY "Invalid Key!"
 
@@ -95,64 +95,89 @@
                          DISPLAY SPACE
                          DISPLAY "Record saved successfully."
                          DISPLAY "Employee code   : [" 
-                                 ws-f-idxFile-rec-code-employee
+                                 ws-f-IdxFile-rec-code-employee
                                  "] = ["
-                                 f-idxFile-rec-code-employee "]."
+                                 f-IdxFile-rec-code-employee "]."
                          DISPLAY "Salary Employee : ["
-                                 ws-f-idxFile-rec-salary-employee
+                                 ws-f-IdxFile-rec-salary-employee
                                  "] = ["
-                                 f-idxFile-rec-salary-employee "]"
+                                 f-IdxFile-rec-salary-employee "]"
 
                    END-WRITE
-                   DISPLAY "Writing. Status Code: [" fs-idxFile "]."
+                   DISPLAY "Writing. Status Code: [" fs-IdxFile "]."
 
                    DISPLAY "Do you want to capture more records? (y/n) "
                            ": " WITH NO ADVANCING
                    ACCEPT ws-continue-response
            END-PERFORM
 
-           CLOSE idxFile
-           DISPLAY "Closing. Status Code: [" fs-idxFile "]."
+           CLOSE IdxFile
+           DISPLAY "Closing. Status Code: [" fs-IdxFile "]."
+
 
 
            DISPLAY SPACE
            DISPLAY "Sequential read to an indexed sequential file."
 
-           OPEN INPUT idxFile
-           DISPLAY "Opening. Status Code: [" fs-idxFile "]."
+           OPEN INPUT IdxFile
+           DISPLAY "Opening. Status Code: [" fs-IdxFile "]."
 
-           PERFORM UNTIL sw-idxFile-EOF-Y
-                      OR fs-idxFile IS NOT EQUAL TO ZEROES
+           DISPLAY SPACE
+           DISPLAY "Employee code to start: "
+              WITH NO ADVANCING
+            ACCEPT ws-f-IdxFile-rec-code-employee
 
-                    READ idxFile NEXT RECORD   INTO ws-f-idxFile-rec
+           MOVE ws-f-IdxFile-rec-code-employee
+             TO f-IdxFile-rec-code-employee
+
+           START IdxFile
+             KEY IS GREATER THAN OR EQUAL TO f-IdxFile-rec-code-employee
+                 INVALID KEY
+                         DISPLAY "Employee code: ["
+                         ws-f-IdxFile-rec-code-employee
+                         "] not located."
+
+             NOT INVALID KEY
+                         DISPLAY "Employee code: ["
+                         ws-f-IdxFile-rec-code-employee
+                         "] OK!"
+
+           END-START
+           DISPLAY "Starting. Status Code: [" fs-IdxFile "]."
+
+
+           PERFORM UNTIL sw-IdxFile-EOF-Y
+                      OR fs-IdxFile IS NOT EQUAL TO ZEROES
+
+                    READ IdxFile NEXT RECORD   INTO ws-f-IdxFile-rec
                         AT END
-                           SET sw-idxFile-EOF-Y  TO TRUE
+                           SET sw-IdxFile-EOF-Y  TO TRUE
                            DISPLAY "End Of File!"
 
                     NOT AT END
-                           SET sw-idxFile-EOF-N TO TRUE
+                           SET sw-IdxFile-EOF-N TO TRUE
 
                            DISPLAY SPACE
                            DISPLAY "Employee code   : [" 
-                                   ws-f-idxFile-rec-code-employee
+                                   ws-f-IdxFile-rec-code-employee
                                    "] = ["
-                                   f-idxFile-rec-code-employee
+                                   f-IdxFile-rec-code-employee
                                    "]."
                            DISPLAY "Salary Employee : ["
-                                   ws-f-idxFile-rec-salary-employee
+                                   ws-f-IdxFile-rec-salary-employee
                                    "] = ["
-                                   f-idxFile-rec-salary-employee
+                                   f-IdxFile-rec-salary-employee
                                    "]."
 
                   END-READ
-                  DISPLAY "Reading. Status Code: [" fs-idxFile "]."
+                  DISPLAY "Reading. Status Code: [" fs-IdxFile "]."
  
                   DISPLAY "Press ENTER to continue..."
                   ACCEPT OMITTED
            END-PERFORM
 
-           CLOSE idxFile
-           DISPLAY "Closing. Status Code: [" fs-idxFile "]."
+           CLOSE IdxFile
+           DISPLAY "Closing. Status Code: [" fs-IdxFile "]."
 
            STOP RUN.
 
