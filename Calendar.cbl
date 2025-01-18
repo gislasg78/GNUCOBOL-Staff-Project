@@ -3,8 +3,8 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       77  ws-date-day-calc       USAGE SIGNED-INT    VALUE ZEROES.
-       77  ws-date-quottient-aux  USAGE SIGNED-INT    VALUE ZEROES.
+       77  ws-date-day-calc       USAGE SIGNED-INT    VALUE ZERO.
+       77  ws-date-quottient-aux  USAGE SIGNED-INT    VALUE ZERO.
        77  ws-date-dayofweek-aux  USAGE SIGNED-INT    VALUE ZERO.
 
        78  cte-01                                     VALUE 01.
@@ -44,6 +44,7 @@
                05  FILLER                   PIC X(01) VALUE X'2F'.
                05  ws-date-day              PIC 9(02) VALUE ZEROES.
                05  FILLER                   PIC X(01) VALUE X'5D'.
+               05  FILLER                   PIC X(01) VALUE X'2E'.
 
            03  ws-residues-calculation-leap-year.
                05  ws-residues-calc-lp-constants.
@@ -174,47 +175,41 @@
                        PERFORM Check-Leap-Year
                     END-IF
 
-                    PERFORM Check-Month-Array
+                    SET idx-month-names-array
+                     TO ws-date-month          OF ws-date-input
 
-                    IF idx-month-names-array IS GREATER THAN OR EQUAL TO
-                       cte-01 AND IS LESS THAN OR EQUAL TO cte-12
-
-                       IF ws-date-day OF ws-date-input IS GREATER THAN
-                       OR EQUAL TO cte-01 AND IS LESS THAN OR EQUAL TO
-                          ws-month-names-array-totaldays
-                         (idx-month-names-array)
-                           PERFORM Perpetual-Calendar
-                       ELSE
-                           DISPLAY "The day value: ["
-                                    ws-date-day OF ws-date-input
-                                   "] is not valid."
-                           DISPLAY "The range must be between: ["
-                                    cte-01
-                                   "] and ["
-                                    ws-month-names-array-totaldays
-                                    (idx-month-names-array)
-                                   "] as valid range!"
-                       END-IF
+                    IF  ws-date-day            OF ws-date-input
+                    IS  GREATER THAN  OR EQUAL TO cte-01
+                    AND IS LESS THAN  OR EQUAL TO
+                        ws-month-names-array-totaldays
+                       (idx-month-names-array)
+                       PERFORM Get-Day-Of-Week
+                       PERFORM Write-Date
+                    ELSE
+                       DISPLAY "Invalid day: ["
+                                ws-date-day    OF ws-date-input
+                               "]. Out of range: [" cte-01
+                               "] and ["
+                                ws-month-names-array-totaldays
+                               (idx-month-names-array) "]."
                     END-IF
                  ELSE
-                    DISPLAY "The day value: ["
-                             ws-date-day    OF ws-date-input
-                            "] is not valid."
-                    DISPLAY "The day range must be between: ["
-                             cte-01 "] and [" cte-31 "]."
+                    DISPLAY "Invalid day: ["
+                             ws-date-day       OF ws-date-input
+                            "]. Out of range: [" cte-01
+                            "] and [" cte-31 "]."
                  END-IF
               ELSE
-                 DISPLAY "The month value: ["
+                 DISPLAY "Invalid month: ["
                           ws-date-month        OF ws-date-input
-                         "] is not valid."
-                 DISPLAY "The month range must be between: ["
-                         cte-01 "] and [" cte-12 "]."
+                         "]. Out of range: [" cte-01
+                         "] and [" cte-12 "]."
               END-IF
            ELSE
-              DISPLAY "The year value: ["
-                       ws-date-year            OF ws-date-input
-                      "] is not valid."
-              DISPLAY "The year range must be beyond: [" cte-1582 "]."
+                 DISPLAY "Invalid year: ["
+                          ws-date-year        OF ws-date-input
+                         "]. Out of range: [>=" cte-1582
+                         "]."
            END-IF.
 
        Check-Leap-Year.
@@ -229,39 +224,24 @@
            DIVIDE ws-cte-400 INTO ws-date-year OF ws-date-input
            GIVING ws-quottient-400   REMAINDER ws-residue-400
 
-           IF  (ws-residue-04  IS EQUAL     TO ZEROS
-           AND  ws-residue-100 IS NOT EQUAL TO ZEROES)
-            OR  ws-residue-400 IS EQUAL     TO ZEROES
+           IF  (ws-residue-04  IS EQUAL        TO ZEROS
+           AND  ws-residue-100 IS NOT EQUAL    TO ZEROES)
+            OR  ws-residue-400 IS EQUAL        TO ZEROES
                 SET sw-month-names-array-totaldays-Feb-Leap
-                   (idx-month-names-array)  TO TRUE
+                   (idx-month-names-array)     TO TRUE
            ELSE
                 SET sw-month-names-array-totaldays-Feb-Norm
-                   (idx-month-names-array)  TO TRUE
+                   (idx-month-names-array)     TO TRUE
            END-IF.
 
-       Check-Month-Array.
-           SET idx-month-names-array        TO cte-01
-           SEARCH ALL ws-month-names-array
-               AT END
-                  DISPLAY "The month value: [" 
-                           ws-date-month    OF ws-date-input
-                          "] is not found!"
-
-             WHEN ws-month-names-array-numbermonth
-                 (idx-month-names-array)
-               IS EQUAL TO ws-date-month OF ws-date-input
-                  NEXT SENTENCE
-
-           END-SEARCH.
-
-       Perpetual-Calendar.
-           MOVE ws-date-year  OF ws-date-input TO ws-date-year-aux
-           MOVE ws-date-month OF ws-date-input TO ws-date-month-aux
-           MOVE ws-date-day   OF ws-date-input TO ws-date-day-aux
+       Get-Day-Of-Week.
+           MOVE ws-date-year       OF ws-date-input TO ws-date-year-aux
+           MOVE ws-date-month      OF ws-date-input TO ws-date-month-aux
+           MOVE ws-date-day        OF ws-date-input TO ws-date-day-aux
 
            IF ws-date-month-aux IS LESS THAN   OR EQUAL TO cte-02
-              ADD cte-12        TO ws-date-month-aux
-              SUBTRACT cte-01 FROM ws-date-year-aux
+              ADD cte-12           TO ws-date-month-aux
+              SUBTRACT cte-01    FROM ws-date-year-aux
            END-IF
 
            COMPUTE ws-date-day-calc = 
@@ -275,30 +255,28 @@
                    cte-02)
 
            DIVIDE ws-date-day-calc BY cte-07
-           GIVING ws-date-quottient-aux REMAINDER ws-date-dayofweek-aux
+           GIVING ws-date-quottient-aux REMAINDER ws-date-dayofweek-aux.
 
-           IF  ws-date-dayofweek-aux  IS GREATER THAN OR EQUAL TO ZEROES
-           AND ws-date-dayofweek-aux  IS LESS    THAN OR EQUAL TO cte-06
-               MOVE CORR ws-date-input   TO ws-date-output
+       Write-Date.
+           MOVE CORR ws-date-input TO ws-date-output
 
-               DISPLAY SPACE
-               DISPLAY ws-date-output "."
-               DISPLAY FUNCTION TRIM
-                      (
-                       ws-day-names-array-nameofday
-                      (ws-date-dayofweek-aux + cte-01)
-                      )
-                       ", "
-                       FUNCTION TRIM
-                      (
-                       ws-month-names-array-nameofmonth
-                      (ws-date-month OF ws-date-input)
-                      )
-                       " "
-                       ws-date-day   OF ws-date-input
-                       ", "
-                       ws-date-year  OF ws-date-input
-                       "."
-           END-IF.
+           DISPLAY SPACE
+           DISPLAY ws-date-output
+           DISPLAY FUNCTION TRIM
+                  (
+                    ws-day-names-array-nameofday
+                   (ws-date-dayofweek-aux + cte-01)
+                  )
+                   ", "
+                   FUNCTION TRIM
+                  (
+                    ws-month-names-array-nameofmonth
+                   (ws-date-month OF ws-date-input)
+                  )
+                   " "
+                    ws-date-day   OF ws-date-input
+                   ", "
+                    ws-date-year  OF ws-date-input
+                   ".".
 
        END PROGRAM Calendar.
