@@ -1,11 +1,11 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. Val_Date.
+       PROGRAM-ID. Calendar.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       77  ws-date-day-calc                 COMP-1    VALUE ZEROES.
-       77  ws-date-quottient-aux            COMP-1    VALUE ZEROES.
-       77  ws-date-dayofweek-aux            PIC 9(01) VALUE ZERO.
+       77  ws-date-day-calc       USAGE SIGNED-INT    VALUE ZEROES.
+       77  ws-date-quottient-aux  USAGE SIGNED-INT    VALUE ZEROES.
+       77  ws-date-dayofweek-aux  USAGE SIGNED-INT    VALUE ZERO.
 
        78  cte-01                                     VALUE 01.
        78  cte-02                                     VALUE 02.
@@ -151,69 +151,71 @@
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
-           DISPLAY "Date validity checker."
-           DISPLAY "Please enter the following requested data."
-           DISPLAY "Year : " WITH NO ADVANCING
-            ACCEPT ws-date-year  OF ws-date-input
-           DISPLAY "Month: " WITH NO ADVANCING
-            ACCEPT ws-date-month OF ws-date-input
-           DISPLAY "Day  : " WITH NO ADVANCING
-            ACCEPT ws-date-day   OF ws-date-input
-
+           PERFORM Read-Date
            PERFORM Date-Validator
 
            STOP RUN.
 
+       Read-Date.
+           DISPLAY "Date validity checker."
+           DISPLAY "Please enter the following requested data."
+           DISPLAY "Year  (1582 ->) : " WITH NO ADVANCING
+            ACCEPT ws-date-year  OF ws-date-input
+           DISPLAY "Month (01 - 12) : " WITH NO ADVANCING
+            ACCEPT ws-date-month OF ws-date-input
+           DISPLAY "Day   (01 - 31) : " WITH NO ADVANCING
+            ACCEPT ws-date-day   OF ws-date-input.
+
        Date-Validator.
-           DISPLAY SPACE
-
-           IF  ws-date-year  OF ws-date-input IS EQUAL TO ZEROES
-           AND ws-date-month OF ws-date-input IS EQUAL TO ZEROES
-           AND ws-date-day   OF ws-date-input IS EQUAL TO ZEROES
-              DISPLAY SPACE
-              DISPLAY "Invalid date. The system date is taken."
-              ACCEPT ws-date-input FROM DATE YYYYMMDD
-           END-IF
-
-           PERFORM Check-Year-Number
-
            IF sw-date-year-1582-to-9999        OF ws-date-input
-              PERFORM Check-Leap-Year
-
               IF sw-date-month-01-to-12        OF ws-date-input
-                 PERFORM Check-Month-Number
-
-                 IF idx-month-names-array IS GREATER THAN OR EQUAL TO
-                    cte-01 AND IS LESS THAN OR EQUAL TO cte-12
-                    IF sw-date-day-01-to-31    OF ws-date-input
-                       PERFORM Check-Day-Number-In-Range-Month
-                    ELSE
-                       DISPLAY "The day range must be between: ["
-                                cte-01 "] and [" cte-31 "]."
-                       DISPLAY "The day value: ["
-                                ws-date-day    OF ws-date-input
-                               "] is not valid."
+                 IF sw-date-day-01-to-31       OF ws-date-input
+                    IF ws-date-month OF ws-date-input IS EQUAL TO cte-02
+                       PERFORM Check-Leap-Year
                     END-IF
+
+                    PERFORM Check-Month-Array
+
+                    IF idx-month-names-array IS GREATER THAN OR EQUAL TO
+                       cte-01 AND IS LESS THAN OR EQUAL TO cte-12
+
+                       IF ws-date-day OF ws-date-input IS GREATER THAN
+                       OR EQUAL TO cte-01 AND IS LESS THAN OR EQUAL TO
+                          ws-month-names-array-totaldays
+                         (idx-month-names-array)
+                           PERFORM Perpetual-Calendar
+                       ELSE
+                           DISPLAY "The day value: ["
+                                    ws-date-day OF ws-date-input
+                                   "] is not valid."
+                           DISPLAY "The range must be between: ["
+                                    cte-01
+                                   "] and ["
+                                    ws-month-names-array-totaldays
+                                    (idx-month-names-array)
+                                   "] as valid range!"
+                       END-IF
+                    END-IF
+                 ELSE
+                    DISPLAY "The day value: ["
+                             ws-date-day    OF ws-date-input
+                            "] is not valid."
+                    DISPLAY "The day range must be between: ["
+                             cte-01 "] and [" cte-31 "]."
                  END-IF
               ELSE
-                 DISPLAY "The month range must be between: ["
-                         cte-01 "] and [" cte-12 "]."
                  DISPLAY "The month value: ["
                           ws-date-month        OF ws-date-input
                          "] is not valid."
+                 DISPLAY "The month range must be between: ["
+                         cte-01 "] and [" cte-12 "]."
               END-IF
            ELSE
-              DISPLAY "The year range must be beyond: [" cte-1582 "]."
               DISPLAY "The year value: ["
                        ws-date-year            OF ws-date-input
                       "] is not valid."
+              DISPLAY "The year range must be beyond: [" cte-1582 "]."
            END-IF.
-
-       Check-Year-Number.
-           IF ws-date-year OF ws-date-input IS GREATER THAN
-           OR EQUAL TO cte-1582
-              DISPLAY "Year : [" ws-date-year  OF ws-date-input
-                      "]. OK!".
 
        Check-Leap-Year.
            SET idx-month-names-array           TO cte-02
@@ -237,46 +239,20 @@
                    (idx-month-names-array)  TO TRUE
            END-IF.
 
-       Check-Month-Number.
+       Check-Month-Array.
            SET idx-month-names-array        TO cte-01
            SEARCH ALL ws-month-names-array
                AT END
                   DISPLAY "The month value: [" 
                            ws-date-month    OF ws-date-input
-                          "] is not valid."
+                          "] is not found!"
 
              WHEN ws-month-names-array-numbermonth
-                 (idx-month-names-array) IS EQUAL TO 
-                  ws-date-month OF ws-date-input
-                  DISPLAY "Month: [" ws-month-names-array-numbermonth
-                                    (idx-month-names-array)
-                          "] = ["    ws-month-names-array-nameofmonth
-                                    (idx-month-names-array)
-                          "] OK!"
+                 (idx-month-names-array)
+               IS EQUAL TO ws-date-month OF ws-date-input
+                  NEXT SENTENCE
 
            END-SEARCH.
-
-       Check-Day-Number-In-Range-Month.
-           EVALUATE ws-date-day OF ws-date-input
-               WHEN IS GREATER THAN OR EQUAL TO cte-01
-                AND IS LESS THAN OR EQUAL TO
-                    ws-month-names-array-totaldays
-                   (idx-month-names-array)
-                    DISPLAY "Day  : ["
-                             ws-date-day OF ws-date-input
-                            "] OK!"
-
-                    PERFORM Perpetual-Calendar
-
-               WHEN OTHER
-                    DISPLAY "The day value: ["
-                             ws-date-day OF ws-date-input
-                            "] is not valid."
-                    DISPLAY "The range must be between: [" cte-01
-                            "] and [" ws-month-names-array-totaldays
-                                     (idx-month-names-array) "]."
-
-           END-EVALUATE.
 
        Perpetual-Calendar.
            MOVE ws-date-year  OF ws-date-input TO ws-date-year-aux
@@ -288,7 +264,7 @@
               SUBTRACT cte-01 FROM ws-date-year-aux
            END-IF
 
-           COMPUTE ws-date-day-calc ROUNDED = 
+           COMPUTE ws-date-day-calc = 
                   (ws-date-day-aux + cte-02 *
                    ws-date-month-aux + cte-03 *
                    (ws-date-month-aux + cte-01) / cte-05 +
@@ -298,27 +274,31 @@
                    ws-date-year-aux / cte-400 +
                    cte-02)
 
-           DISPLAY SPACE
-           DISPLAY "Day Calculation: [" ws-date-day-calc "]."
-
            DIVIDE ws-date-day-calc BY cte-07
            GIVING ws-date-quottient-aux REMAINDER ws-date-dayofweek-aux
-
-           DISPLAY "Quottient   : [" ws-date-quottient-aux "]."
-           DISPLAY "Day Of Week : [" ws-date-dayofweek-aux "]."
 
            IF  ws-date-dayofweek-aux  IS GREATER THAN OR EQUAL TO ZEROES
            AND ws-date-dayofweek-aux  IS LESS    THAN OR EQUAL TO cte-06
                MOVE CORR ws-date-input   TO ws-date-output
 
                DISPLAY SPACE
-               DISPLAY "Day of Week : ["
-                        ws-day-names-array-nameofday
-                       (ws-date-dayofweek-aux + cte-01)
-                       "]."
-               DISPLAY "Correct Date: " ws-date-output "."
-           ELSE
-               DISPLAY "Incorrect day of week calculation."
+               DISPLAY ws-date-output "."
+               DISPLAY FUNCTION TRIM
+                      (
+                       ws-day-names-array-nameofday
+                      (ws-date-dayofweek-aux + cte-01)
+                      )
+                       ", "
+                       FUNCTION TRIM
+                      (
+                       ws-month-names-array-nameofmonth
+                      (ws-date-month OF ws-date-input)
+                      )
+                       " "
+                       ws-date-day   OF ws-date-input
+                       ", "
+                       ws-date-year  OF ws-date-input
+                       "."
            END-IF.
 
-       END PROGRAM Val_Date.
+       END PROGRAM Calendar.
