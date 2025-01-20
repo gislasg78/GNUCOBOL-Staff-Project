@@ -3,9 +3,7 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       77  ws-date-day-calc       USAGE SIGNED-INT    VALUE ZERO.
-       77  ws-date-quottient-aux  USAGE SIGNED-INT    VALUE ZERO.
-       77  ws-date-dayofweek-aux  USAGE SIGNED-INT    VALUE ZERO.
+       77  idx-month-names-array-aux                  USAGE INDEX.
 
        78  cte-01                                     VALUE 01.
        78  cte-02                                     VALUE 02.
@@ -21,10 +19,16 @@
        78  cte-1582                                   VALUE 1582.
 
        01  ws-environmental-variables.
-           03  ws-date-auxiliar.
-               05  ws-date-year-aux         PIC 9(04) VALUE ZEROES.
-               05  ws-date-month-aux        PIC 9(02) VALUE ZEROES.
-               05  ws-date-day-aux          PIC 9(02) VALUE ZEROES.
+           03  ws-date-calculations-works.
+               05  ws-date-auxiliar.
+                   07  ws-date-year-aux    USAGE SIGNED-INT VALUE ZEROS.
+                   07  ws-date-month-aux   USAGE SIGNED-INT VALUE ZEROS.
+                   07  ws-date-day-aux     USAGE SIGNED-INT VALUE ZEROS.
+               05  ws-date-core-calculations.
+                   07  ws-cluster-of-days   PIC 9(03) VALUE ZEROES. 
+                   07  ws-date-day-calc    USAGE SIGNED-INT VALUE ZERO.
+                   07  ws-date-dayofweek-aux     SIGNED-INT VALUE ZERO.
+                   07  ws-date-quottient-aux     SIGNED-INT VALUE ZERO.
 
            03  ws-date-input.
                05  ws-date-year             PIC 9(04) VALUE ZEROES.
@@ -56,7 +60,7 @@
                    07  ws-quottient-100     PIC 9(03) VALUE ZEROES.
                    07  ws-quottient-400     PIC 9(03) VALUE ZEROES.
                05  ws-residues-calc-lp-residues.
-                   07  ws-residue-04        PIC 9(03) VALUE ZEROES.
+                   07  ws-residue-04        PIC 9(01) VALUE ZERO.
                    07  ws-residue-100       PIC 9(03) VALUE ZEROES.
                    07  ws-residue-400       PIC 9(03) VALUE ZEROES.
 
@@ -83,11 +87,11 @@
                05  FILLER                   PIC 9(01) VALUE 6.
                05  FILLER                   PIC A(09) VALUE "Friday".
        01  ws-day-names-tables-redef REDEFINES ws-day-names-tables.
-           03  ws-day-names-array           OCCURS cte-12 TIMES
+           03  ws-day-names-array           OCCURS    cte-12 TIMES
                      ASCENDING KEY ws-day-names-array-numberday
                      INDEXED    BY idx-day-names-array.
-               05  ws-day-names-array-numberday     PIC 9(01).
-               05  ws-day-names-array-nameofday     PIC A(09).
+               05  ws-day-names-array-numberday       PIC 9(01).
+               05  ws-day-names-array-nameofday       PIC A(09).
 
        01  ws-month-names-tables.
            03  ws-month-names-January.
@@ -139,16 +143,16 @@
                05  FILLER                   PIC A(09) VALUE "December".
                05  FILLER                   PIC 9(02) VALUE 31.
        01  ws-month-names-tables-redef REDEFINES ws-month-names-tables.
-           03  ws-month-names-array         OCCURS cte-12 TIMES
+           03  ws-month-names-array         OCCURS    cte-12 TIMES
                      ASCENDING KEY ws-month-names-array-numbermonth
                      INDEXED    BY idx-month-names-array.
-               05  ws-month-names-array-numbermonth PIC 9(02).
-               05  ws-month-names-array-nameofmonth PIC A(09).
-               05  ws-month-names-array-totaldays   PIC 9(02).
+               05  ws-month-names-array-numbermonth   PIC 9(02).
+               05  ws-month-names-array-nameofmonth   PIC A(09).
+               05  ws-month-names-array-totaldays     PIC 9(02).
                    88  sw-month-names-array-totaldays-Feb-Norm
-                                                    VALUE 28.
+                                                      VALUE 28.
                    88  sw-month-names-array-totaldays-Feb-Leap
-                                                    VALUE 29.
+                                                      VALUE 29.
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
@@ -183,6 +187,7 @@
                     AND IS LESS THAN  OR EQUAL TO
                         ws-month-names-array-totaldays
                        (idx-month-names-array)
+                       PERFORM Obtain-Julian-Year
                        PERFORM Get-Day-Of-Week
                        PERFORM Write-Date
                     ELSE
@@ -234,14 +239,39 @@
                    (idx-month-names-array)     TO TRUE
            END-IF.
 
+       Obtain-Julian-Year.
+           MOVE ZEROES                         TO ws-cluster-of-days
+
+           PERFORM VARYING idx-month-names-array-aux
+              FROM cte-01         BY cte-01
+             UNTIL idx-month-names-array-aux
+                IS EQUAL TO ws-date-month      OF ws-date-input
+                OR IS GREATER THAN cte-12
+
+                ADD ws-month-names-array-totaldays
+                   (idx-month-names-array-aux)
+                 TO ws-cluster-of-days
+
+           END-PERFORM
+
+           ADD ws-date-day        OF ws-date-input
+            TO ws-cluster-of-days
+
+           DISPLAY SPACE
+           DISPLAY "Julian Year: {"
+                    ws-date-year OF ws-date-input
+                   "} : ["
+                    ws-cluster-of-days
+                    "].".
+
        Get-Day-Of-Week.
-           MOVE ws-date-year       OF ws-date-input TO ws-date-year-aux
-           MOVE ws-date-month      OF ws-date-input TO ws-date-month-aux
-           MOVE ws-date-day        OF ws-date-input TO ws-date-day-aux
+           MOVE ws-date-year  OF ws-date-input TO ws-date-year-aux
+           MOVE ws-date-month OF ws-date-input TO ws-date-month-aux
+           MOVE ws-date-day   OF ws-date-input TO ws-date-day-aux
 
            IF ws-date-month-aux IS LESS THAN   OR EQUAL TO cte-02
-              ADD cte-12           TO ws-date-month-aux
-              SUBTRACT cte-01    FROM ws-date-year-aux
+              ADD cte-12        TO ws-date-month-aux
+              SUBTRACT cte-01 FROM ws-date-year-aux
            END-IF
 
            COMPUTE ws-date-day-calc = 
@@ -273,9 +303,10 @@
                     ws-month-names-array-nameofmonth
                    (ws-date-month OF ws-date-input)
                   )
-                   " "
+                   SPACE
                     ws-date-day   OF ws-date-input
-                   ", "
+                   ","
+                   SPACE
                     ws-date-year  OF ws-date-input
                    ".".
 
