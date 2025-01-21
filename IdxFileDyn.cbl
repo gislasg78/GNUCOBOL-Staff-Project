@@ -1257,12 +1257,14 @@
                 WHEN sw-menu-mode-read-option-r-backward
                      PERFORM 225250-start-menu-mode-read-backwarding
                         THRU 225250-finish-menu-mode-read-backwarding
-                       UNTIL sw-IdxFile-EOF-Y
+                       UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
+                          OR sw-IdxFile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-r-forward
                      PERFORM 225260-start-menu-mode-read-forwarding
                         THRU 225260-finish-menu-mode-read-forwarding
-                       UNTIL sw-IdxFile-EOF-Y
+                       UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
+                          OR sw-IdxFile-EOF-Y
 
                 WHEN sw-menu-mode-read-option-prev-rcrd
                      PERFORM 225250-start-menu-mode-read-backwarding
