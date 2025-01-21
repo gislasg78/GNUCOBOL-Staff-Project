@@ -4,7 +4,7 @@
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-                  ALPHABET ascii-code IS ASCII.
+                  ALPHABET ascii-code IS STANDARD-1.
                   NUMERIC SIGN IS TRAILING SEPARATE.
                   SYMBOLIC CHARACTERS asterisk IS 43 IN ascii-code.
 
@@ -16,17 +16,18 @@
                   RECORD KEY   IS f-IdxFile-rec-cod-employee
                   ALTERNATE RECORD KEY IS f-IdxFile-rec-salary-employee
                             WITH DUPLICATES
+                  LOCK MODE    IS AUTOMATIC WITH LOCK ON RECORD
                   PADDING CHARACTER IS asterisk
                   FILE STATUS  IS fs-IdxFile.
 
        DATA DIVISION.
        FILE SECTION.
        FD  IdxFile
-           BLOCK  CONTAINS 05 TO 15 RECORDS
+           BLOCK  CONTAINS 05 RECORDS
            DATA   RECORD   IS f-IdxFile-rec
            LABEL  RECORD   IS STANDARD
            RECORD CONTAINS 15 CHARACTERS
-           RECORDING MODE  IS F.
+           RECORDING MODE  IS FIXED.
 
        01  f-IdxFile-rec.
            03  f-IdxFile-rec-cod-employee       PIC 9(06)  VALUE ZEROES.
