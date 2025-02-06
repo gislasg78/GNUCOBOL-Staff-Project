@@ -208,6 +208,8 @@
                        THRU 124000-end-unclutter-initial-table
 
                WHEN sw-ch-opt-bubblesort
+                    DISPLAY "Bubble sort..."
+
                     SUBTRACT ws-cte-01 FROM cte-35
                       GIVING ws-rnd-n-temporal-idx
 
@@ -225,15 +227,19 @@
                          IS GREATER THAN cte-35
 
                WHEN sw-ch-opt-insertionsort
+                    DISPLAY "Insertion sort..."
+
                     PERFORM 126000-begin-insertionsort
                        THRU 126000-end-insertionsort
                     VARYING idx-ft-data-fruit
                        FROM ws-cte-02
                          BY ws-cte-01
                       UNTIL idx-ft-data-fruit
-                         IS GREATER THAN OR IS EQUAL TO cte-35
+                         IS GREATER THAN cte-35
 
                WHEN sw-ch-opt-selectionsort
+                    DISPLAY "Selection sort..."
+
                     PERFORM 127000-begin-selectionsort
                        THRU 127000-end-selectionsort
                     VARYING idx-ft-data-fruit
@@ -260,6 +266,7 @@
                WHEN OTHER
                     DISPLAY "Incorrect option. Please correct your "
                             "choice..."
+
            END-EVALUATE.
         120000-end-validate-option-chosen-main-menu.
            EXIT.
