@@ -10,7 +10,7 @@
            SELECT cpu-file    ASSIGN TO WS-File-CPUData
                               LINE SEQUENTIAL.
 
-           SELECT report-file ASSIGN TO WS-File-CPUReport
+           SELECT report-file ASSIGN TO DISPLAY
                               LINE SEQUENTIAL.
 
            SELECT sort-file   ASSIGN TO DISK.
@@ -32,7 +32,6 @@
 
        WORKING-STORAGE SECTION.
        77  WS-File-CPUData         PIC X(13) VALUE "cpudata.txt".
-       77  WS-File-CPUReport       PIC X(13) VALUE "cpureport.txt".
 
        01  WS-Date                 PIC 9(08).
 
@@ -51,7 +50,12 @@
            03  WS-OC-Qty           BINARY-LONG.
            03  WS-OC-Total-Num     BINARY-LONG.
 
-       01  WS-Starz                PIC X(44) VALUE ALL '*'.
+       01  WS-Underline-lines.
+           03  WS-Comma            PIC X(01) VALUE X'2C'.
+           03  WS-Equal-Signs      PIC X(06) VALUE ALL X'3D'.
+           03  WS-Equality-Signs   PIC X(29) VALUE ALL X'3D'.
+           03  WS-Starz            PIC X(44) VALUE ALL X'2A'.
+           03  WS-Y                PIC A(01) VALUE X'59'.
 
        01  WS-Vendor-Counters.
            03  WS-VC-AVE           PIC 9(05)V99.
@@ -64,40 +68,40 @@
                         F-SR-Vendor-TXT
                         F-SR-Family-TXT
 
-           PAGE LIMIT IS 36 LINES
+           PAGE LIMIT IS 25 LINES
                 HEADING 1
                 FIRST DETAIL 6
-                LAST DETAIL 36.
+                LAST DETAIL 25.
 
        01  TYPE IS PAGE HEADING.
            03  LINE NUMBER PLUS 1.
-               05  COL 1  SOURCE WS-Starz        PIC X(44).
+               05  COL 1  SOURCE WS-Starz            PIC X(44).
            03  LINE NUMBER PLUS 1.
-               05  COL 1  SOURCE WS-Date         PIC 9999/99/99.
+               05  COL 1  SOURCE WS-Date             PIC 9999/99/99.
                05  COL 14 VALUE 'CPU Benchmark Scores'.
                05  COL 37 VALUE 'Page:'.
-               05  COL 43 SOURCE PAGE-COUNTER    PIC Z9.
+               05  COL 43 SOURCE PAGE-COUNTER        PIC Z9.
            03  LINE NUMBER PLUS 1.
-               05  COL 1  SOURCE WS-Starz        PIC X(44).
+               05  COL 1  SOURCE WS-Starz            PIC X(44).
            03  LINE NUMBER PLUS 1.
                05  COL 1  VALUE '**'.
                05  COL 6  VALUE 'All CPU Data From cpubenchmark.net'.
                05  COL 43 VALUE '**'.
            03  LINE NUMBER PLUS 1.
-               05  COL 1  SOURCE WS-Starz        PIC X(44).
+               05  COL 1  SOURCE WS-Starz            PIC X(44).
 
        01  TYPE CONTROL HEADING F-SR-Family-TXT.
            03  LINE NUMBER PLUS 2.
-               05  COL 1  SOURCE F-SR-Vendor-TXT PIC X(06).
-               05  COL 8  SOURCE F-SR-Family-TXT PIC X(07).
+               05  COL 1  SOURCE F-SR-Vendor-TXT     PIC X(06).
+               05  COL 8  SOURCE F-SR-Family-TXT     PIC X(07).
            03  LINE NUMBER PLUS 1.
                05  COL 1  VALUE 'Family'.
                05  COL 8  VALUE 'Model'.
                05  COL 15 VALUE 'Benchmark Score (High to Low)'.
            03  LINE NUMBER PLUS 1.
-               05  COL 1  VALUE '======'.
-               05  COL 8  VALUE '======'.
-               05  COL 15 VALUE '============================='.
+               05  COL 1  SOURCE WS-Equal-Signs      PIC X(06).
+               05  COL 8  SOURCE WS-Equal-Signs      PIC X(06).
+               05  COL 15 SOURCE WS-Equality-Signs   PIC X(29).
 
        01  Detail-Line TYPE IS DETAIL.
            03  LINE NUMBER PLUS 1.
@@ -139,8 +143,8 @@
            ELSE
               MOVE ZERO TO WS-FC-AVE
            END-IF
-           MOVE ZERO TO WS-FC-Qty
-                        WS-FC-Total-NUM.
+           MOVE ZERO    TO WS-FC-Qty
+                           WS-FC-Total-NUM.
 
        000-End-Vendor SECTION.
            USE BEFORE REPORTING End-Vendor.
@@ -149,8 +153,8 @@
            ELSE
               MOVE ZERO TO WS-VC-AVE
            END-IF
-           MOVE ZERO TO WS-VC-Qty
-                        WS-VC-Total-NUM.
+           MOVE ZERO    TO WS-VC-Qty
+                           WS-VC-Total-NUM.
 
        000-End-Overall SECTION.
            USE BEFORE REPORTING End-Overall.
@@ -159,8 +163,8 @@
            ELSE
               MOVE ZERO TO WS-OC-AVE
            END-IF
-           MOVE ZERO TO WS-OC-Qty
-                        WS-OC-Total-NUM.
+           MOVE ZERO    TO WS-OC-Qty
+                           WS-OC-Total-NUM.
 
        END DECLARATIVES.
 
@@ -185,7 +189,7 @@
                    END-READ
 
                    MOVE SPACES TO sort-rec
-                   UNSTRING cpu-rec DELIMITED BY ','
+                   UNSTRING cpu-rec DELIMITED BY WS-Comma
                        INTO F-SR-Score-NUM
                             F-SR-Vendor-TXT
                             F-SR-Family-TXT
@@ -206,12 +210,12 @@
 
            RETURN sort-file
                AT END
-                  MOVE 'Y'            TO WS-F-EOF
+                  MOVE WS-Y    TO WS-F-EOF
            END-RETURN
 
-           PERFORM UNTIL WS-F-EOF = 'Y'
+           PERFORM UNTIL WS-F-EOF = WS-Y
                    GENERATE Detail-Line
-                   ADD +1             TO WS-FC-Qty
+                   ADD WS-One-Const   TO WS-FC-Qty
                                          WS-OC-Qty
                                          WS-VC-Qty
 
@@ -221,7 +225,7 @@
 
                    RETURN sort-file
                        AT END
-                          MOVE 'Y'    TO WS-F-EOF
+                          MOVE WS-Y   TO WS-F-EOF
                    END-RETURN
            END-PERFORM
 
