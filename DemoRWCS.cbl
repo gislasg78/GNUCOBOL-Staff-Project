@@ -31,7 +31,7 @@
            03  F-SR-Model-TXT      PIC X(06).
 
        WORKING-STORAGE SECTION.
-       77  WS-File-CPUData         PIC X(13) VALUE "cpudata.txt".
+       77  WS-File-CPUData         PIC X(13) VALUE SPACES.
 
        01  WS-Date                 PIC 9(08).
 
@@ -170,6 +170,12 @@
 
        010-Main SECTION.
        1.  ACCEPT WS-Date FROM DATE YYYYMMDD
+
+           DISPLAY "CPU Benchmark Scores Report Generator."
+           DISPLAY "Enter the name of the input file: "
+              WITH NO ADVANCING
+            ACCEPT WS-File-CPUData
+
            SORT sort-file
                 ASCENDING  KEY   F-SR-Vendor-TXT
                                  F-SR-Family-TXT
