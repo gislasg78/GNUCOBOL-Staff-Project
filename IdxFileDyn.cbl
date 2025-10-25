@@ -1259,13 +1259,13 @@
                      PERFORM 225250-start-menu-mode-read-backwarding
                         THRU 225250-finish-menu-mode-read-backwarding
                        UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
-                          OR sw-IdxFile-EOF-Y
+                          OR sw-IdxFile-EOF-Y OR sw-carry-out-sure-N
 
                 WHEN sw-menu-mode-read-option-r-forward
                      PERFORM 225260-start-menu-mode-read-forwarding
                         THRU 225260-finish-menu-mode-read-forwarding
                        UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
-                          OR sw-IdxFile-EOF-Y
+                          OR sw-IdxFile-EOF-Y OR sw-carry-out-sure-N
 
                 WHEN sw-menu-mode-read-option-prev-rcrd
                      PERFORM 225250-start-menu-mode-read-backwarding
@@ -2037,7 +2037,12 @@
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
 
-            END-READ.
+            END-READ
+
+            PERFORM 221300-start-continue-carry-out-oper
+               THRU 221300-finish-continue-carry-out-oper
+               WITH TEST AFTER
+              UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
           225250-finish-menu-mode-read-backwarding.
             EXIT.
 
@@ -2062,7 +2067,12 @@
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
 
-            END-READ.
+            END-READ
+
+            PERFORM 221300-start-continue-carry-out-oper
+               THRU 221300-finish-continue-carry-out-oper
+               WITH TEST AFTER
+              UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
           225260-finish-menu-mode-read-forwarding.
             EXIT.
 
