@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. IdxFileDyn.
+       PROGRAM-ID. IdxFile.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -2098,4 +2098,4 @@
        300000-finish-end-program.
            EXIT.
 
-       END PROGRAM IdxFileDyn.
+       END PROGRAM IdxFile.
