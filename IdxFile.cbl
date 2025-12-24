@@ -5,6 +5,11 @@
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
                   ALPHABET ascii-code IS STANDARD-1.
+                  CLASS alphabetic-and-numeric IS X'20'
+                                                  X'2E'
+                                                  X'30' THRU X'39'
+                                                  X'41' THRU X'5A'
+                                                  X'61' THRU X'7A'.
                   NUMERIC SIGN IS TRAILING SEPARATE.
                   SYMBOLIC CHARACTERS asterisk IS 43 IN ascii-code.
 
@@ -20,10 +25,16 @@
                   PADDING CHARACTER IS asterisk
                   FILE STATUS  IS fs-IdxFile.
 
+           SELECT OPTIONAL OutFile ASSIGN TO DISK ws-OutFile-name
+                  ORGANIZATION IS LINE SEQUENTIAL
+                  ACCESS MODE  IS SEQUENTIAL
+                  PADDING CHARACTER IS ASTERISK
+                  FILE STATUS  IS fs-OutFile.
+
        DATA DIVISION.
        FILE SECTION.
        FD  IdxFile
-           BLOCK  CONTAINS 05 RECORDS
+           BLOCK  CONTAINS 05 TO 10 RECORDS
            DATA   RECORD   IS f-IdxFile-rec
            LABEL  RECORD   IS STANDARD
            RECORD CONTAINS 15 CHARACTERS
@@ -36,15 +47,32 @@
                                                 SEPARATE CHARACTER
                                                            VALUE ZEROES.
 
+       FD  OutFile
+           BLOCK CONTAINS  05 TO 10 RECORDS
+           DATA RECORD     IS f-OutFile-record
+           LABEL RECORD    IS OMITTED
+           RECORD CONTAINS 80 CHARACTERS
+           RECORDING MODE  IS FIXED
+
+           LINAGE IS ws-linage-totlines LINES
+             WITH FOOTING AT ws-linage-footing
+            LINES AT TOP     ws-linage-top
+            LINES AT BOTTOM  ws-linage-bottom.
+
+       01  f-OutFile-rec                        PIC X(80)  VALUE SPACES.
+
        WORKING-STORAGE SECTION.
        01  ws-work-section-begins               PIC X(42)  VALUE
            "The working storage section begins here...".
 
-       77  fs-IdxFile                           PIC 9(02)  VALUE ZEROES.
-       77  ws-IdxFile-name                      PIC X(12)  VALUE SPACES.
-
        78  cte-01                                          VALUE 01.
        78  cte-34                                          VALUE 34.
+
+       01  ws-linage-work-variables.
+           03  ws-linage-bottom                 PIC 9(01)  VALUE 01.
+           03  ws-linage-footing                PIC 9(02)  VALUE 23.
+           03  ws-linage-top                    PIC 9(01)  VALUE 01.
+           03  ws-linage-totlines               PIC 9(02)  VALUE 24.
 
        01  ws-environmental-variables.
            03  ws-current-date-and-time.
@@ -92,7 +120,7 @@
                    07  FILLER                   PIC X(01)  VALUE X'3A'.
                    07  ws-FT-GMT-Diff-Minutes   PIC 9(02)  VALUE ZEROES.
 
-           03  ws-f-IdxFile-indicators.
+           03  ws-f-IdxFile-error-status-code-indicators.
                05  ws-f-error-status-code-table-aux.
                        07  ws-f-error-status-code-table-code-error-aux
                                                 PIC 9(02)  VALUE ZEROES.
@@ -108,14 +136,35 @@
                    88  sw-IdxFile-record-found-N           VALUE 'N'.
                    88  sw-IdxFile-record-found-Y           VALUE 'Y'.
 
-           03  ws-f-IdxFile-rec.
-               05  ws-f-IdxFile-rec-cod-employee           PIC 9(06)
+           03  ws-Files-records.
+               05  ws-f-IdxFile-rec.
+                   07  ws-f-IdxFile-rec-cod-employee       PIC 9(06)
                                                            VALUE ZEROES.
-               05  ws-f-IdxFile-rec-salary-employee
+                   07  ws-f-IdxFile-rec-salary-employee
                                                 PIC S9(06)V9(02)
                                                 SIGN  IS LEADING
                                                 SEPARATE CHARACTER
                                                            VALUE ZEROES.
+               05  ws-f-OutFile-rec.
+                   07  ws-f-OutFile-rec-linage-counter     PIC +9(10)
+                                                           VALUE ZEROES.
+                   07  FILLER                              PIC X(01)
+                                                           VALUE SPACE.
+                   07  ws-f-OutFile-rec-cod-employee       PIC 9(06)
+                                                           VALUE ZEROES.
+                   07  FILLER                              PIC X(01)
+                                                           VALUE SPACE.
+                   07  ws-f-OutFile-rec-salary-employee PIC -,---,--9.99
+                                                           VALUE ZEROES.
+
+           03  ws-Files-names-status.
+               05  ws-IdxFile.
+                   07  fs-IdxFile               PIC 9(02)  VALUE ZEROES.
+                   07  ws-IdxFile-name          PIC X(12)  VALUE SPACES.
+               05  ws-OutFile.
+                   07  fs-OutFile               PIC 9(02)  VALUE ZEROES.
+                   07  ws-OutFile-name          PIC X(12)  VALUE SPACES.
+               05  ws-TempFile-name             PIC X(12)  VALUE SPACES.
 
            03  ws-menu-standard-options-performance.
                05  ws-menu-option               PIC 9(01)
@@ -125,7 +174,8 @@
                    88  sw-menu-option-modify               VALUE 3.
                    88  sw-menu-option-look-for-one         VALUE 4.
                    88  sw-menu-option-look-for-all         VALUE 5.
-                   88  sw-menu-option-exit                 VALUE 6.
+                   88  sw-menu-option-reports              VALUE 6.
+                   88  sw-menu-option-exit                 VALUE 7.
                05  ws-menu-mode-modify-option   PIC 9(01)
                                                            VALUE ZERO.
                    88  sw-menu-mode-modify-emp-salary      VALUE 1.
@@ -217,7 +267,9 @@
 
        01  ws-statistics-processed-records.
            03  ws-eliminated-records            PIC S9(04) VALUE ZEROES.
+           03  ws-printed-pages                 PIC S9(04) VALUE ZEROES.
            03  ws-reading-records               PIC S9(04) VALUE ZEROES.
+           03  ws-reporting-records             PIC S9(04) VALUE ZEROES.
            03  ws-repositioning-records         PIC S9(04) VALUE ZEROES.
            03  ws-rewritten-records             PIC S9(04) VALUE ZEROES.
            03  ws-written-records               PIC S9(04) VALUE ZEROES.
@@ -370,28 +422,72 @@
        01  ws-f-error-status-code-table-desc-error-tag     PIC X(25)
                VALUE "Unknown File Status".
 
+       01  ws-reporting-lines.
+           03  ws-reporting-headlines.
+               05  FILLER                       PIC X(03)  VALUE SPACES.
+               05  FILLER                       PIC A(07)
+                                                VALUE "Counter".
+               05  FILLER                       PIC X(03)  VALUE SPACES.
+               05  FILLER                       PIC A(04)  VALUE "Code".
+               05  FILLER                       PIC X(05)  VALUE SPACES.
+               05  FILLER                       PIC A(06)
+                                                VALUE "Salary".
+               05  FILLER                       PIC X(52)  VALUE SPACES.
+           03  ws-reporting-underlines.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(10)
+                                                VALUE ALL X'3D'.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(06)
+                                                VALUE ALL X'3D'.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(12)
+                                                VALUE ALL X'3D'.
+               05  FILLER                       PIC X(48)  VALUE SPACES.
+
        01  ws-work-section-ends                 PIC X(42)  VALUE
            "The working storage section ends here...".
 
        PROCEDURE DIVISION.
        DECLARATIVES.
-       File-Handler SECTION.
+       IdxFile-Handler SECTION.
            USE AFTER ERROR PROCEDURE ON IdxFile.
-       000000-start-status-check.
+       000000-start-status-IdxFile-check.
+           INITIALIZE ws-f-error-status-code-table-aux
+            MOVE fs-IdxFile
+              TO ws-f-error-status-code-table-code-error-aux
            PERFORM 000100-search-for-error-and-description-codes
+
            PERFORM 000200-get-current-date-and-time-record
+
+           MOVE ws-OutFile-name TO ws-TempFile-name
            PERFORM 000300-check-file-status-code
            PERFORM 000400-preliminary-review-employee-code-contents
            PERFORM 000500-preliminary-review-employee-salary-contents
            PERFORM 000600-press-enter-key-to-continue.
-       000000-finish-status-check.
+       000000-finish-status-IdxFile-check.
+           EXIT SECTION.
+
+       OutFile-Handler SECTION.
+           USE AFTER ERROR PROCEDURE ON OutFile.
+       000000-start-status-OutFile-check.
+           INITIALIZE ws-f-error-status-code-table-aux
+            MOVE fs-OutFile
+              TO ws-f-error-status-code-table-code-error-aux
+           PERFORM 000100-search-for-error-and-description-codes
+
+           PERFORM 000200-get-current-date-and-time-record
+
+           MOVE ws-OutFile-name TO ws-TempFile-name
+           PERFORM 000300-check-file-status-code
+
+           PERFORM 000400-preliminary-review-employee-code-contents
+           PERFORM 000500-preliminary-review-employee-salary-contents
+           PERFORM 000600-press-enter-key-to-continue.
+       000000-finish-status-OutFile-check.
            EXIT SECTION.
 
        000100-search-for-error-and-description-codes.
-            INITIALIZE ws-f-error-status-code-table-aux
-            MOVE fs-IdxFile
-              TO ws-f-error-status-code-table-code-error-aux
-
             SET idx-error-status-code-table              TO cte-01
             SEARCH ALL ws-f-error-status-code-table-OC
                 AT END
@@ -443,7 +539,7 @@
            DISPLAY "|      File status information.     |"
            DISPLAY "+---+----+---+----+---+----+---+----+"
            DISPLAY "| " asterisk " File Name     : [" 
-                   ws-IdxFile-name
+                   ws-TempFile-name
                    "]. |"
            DISPLAY "| " asterisk " Operation     : ["
                    ws-operation-class
@@ -520,8 +616,10 @@
            DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY "|   Indexed Sequential Files.  |"
            DISPLAY "+---+----+---+----+---+----+---+"
-           DISPLAY asterisk " Enter the file name: " WITH NO ADVANCING
-            ACCEPT ws-IdxFile-name
+
+           PERFORM 110000-start-capture-name-file
+              THRU 110000-finish-capture-name-file
+           MOVE ws-TempFile-name        TO ws-IdxFile-name
 
            DISPLAY "Idx File to work on: [" ws-IdxFile-name "]."
 
@@ -530,6 +628,27 @@
 
            DISPLAY "Opening. Status Code: [" fs-IdxFile "].".
        100000-finish-begin-program.
+           EXIT.
+
+        110000-start-capture-name-file.
+           MOVE SPACES                  TO ws-TempFile-name
+
+           DISPLAY asterisk " Enter the file name: " WITH NO ADVANCING
+            ACCEPT ws-TempFile-name
+
+           DISPLAY SPACE
+           DISPLAY "Working File Name: [" ws-TempFile-name "]".
+
+           IF ws-TempFile-name IS alphabetic-and-numeric  THEN
+              DISPLAY asterisk "Valid File Name!" asterisk
+           ELSE
+              DISPLAY asterisk asterisk
+                      "It is not valid as a file name!"
+                      asterisk asterisk
+           END-IF
+
+           DISPLAY SPACE.
+        110000-finish-capture-name-file.
            EXIT.
 
        200000-start-process-menu.
@@ -554,7 +673,8 @@
            DISPLAY "| [3]. Modify a record...      |"
            DISPLAY "| [4]. Look for a record...    |"
            DISPLAY "| [5]. Look for all records... |"
-           DISPLAY "| [6]. Exit this program.      |"
+           DISPLAY "| [6]. Global report.          |"
+           DISPLAY "| [7]. Exit this program.      |"
            DISPLAY "+===+====+===+====+===+====+===+"
            DISPLAY "Enter your own choice: " WITH NO ADVANCING
             ACCEPT ws-menu-option
@@ -589,6 +709,11 @@
                     PERFORM 225000-start-look-for-all-records
                        THRU 225000-finish-look-for-all-records
                       UNTIL sw-menu-mode-read-option-exitmenu
+
+               WHEN sw-menu-option-reports
+                    PERFORM 226000-start-generate-reports
+                       THRU 226000-finish-generate-reports
+                      UNTIL sw-continue-response-N
                         
                WHEN sw-menu-option-exit
                     DISPLAY "Leaving this program..."
@@ -601,7 +726,7 @@
            EXIT.
 
          221000-start-add-a-record.
-           INITIALIZE ws-f-IdxFile-indicators
+           INITIALIZE ws-f-IdxFile-error-status-code-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -725,16 +850,20 @@
 
             WRITE f-IdxFile-rec          FROM ws-f-IdxFile-rec
                   INVALID KEY
-                          DISPLAY "Duplicate Key!"
-                          PERFORM 000600-press-enter-key-to-continue
+                          DISPLAY asterisk "Duplicate Key!" asterisk
 
               NOT INVALID KEY
                           ADD cte-01       TO ws-written-records
 
-                          DISPLAY "Record saved successfully!"
-                          PERFORM 000600-press-enter-key-to-continue
+                          DISPLAY asterisk
+                                  "Record saved successfully!"
+                                  asterisk
 
-            END-WRITE.
+            END-WRITE
+
+            DISPLAY "Writing. Status Code: [" fs-IdxFile "]."
+
+            PERFORM 000600-press-enter-key-to-continue.
          221500-finish-store-a-record.
             EXIT.
 
@@ -756,7 +885,7 @@
             EXIT.
 
          222000-start-delete-a-record.
-           INITIALIZE ws-f-IdxFile-indicators
+           INITIALIZE ws-f-IdxFile-error-status-code-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -794,21 +923,25 @@
 
             DELETE IdxFile RECORD
                    INVALID KEY
-                           DISPLAY "Invalid Key!"
-                           PERFORM 000600-press-enter-key-to-continue
+                           DISPLAY asterisk "Invalid Key!" asterisk
 
                NOT INVALID KEY
                            ADD cte-01      TO ws-eliminated-records
 
-                           DISPLAY "Record deleted successfully!"
-                           PERFORM 000600-press-enter-key-to-continue
+                           DISPLAY asterisk
+                                   "Record deleted successfully!"
+                                   asterisk
 
-            END-DELETE.
+            END-DELETE
+
+            DISPLAY "Deleting. Status Code: [" fs-IdxFile "]."
+
+            PERFORM 000600-press-enter-key-to-continue.
          222100-finish-eliminate-a-record.
             EXIT.
 
          223000-start-modify-a-record.
-            INITIALIZE ws-f-IdxFile-indicators
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -889,21 +1022,25 @@
 
             REWRITE f-IdxFile-rec        FROM ws-f-IdxFile-rec
                     INVALID KEY
-                            DISPLAY "Invalid Key!"
-                            PERFORM 000600-press-enter-key-to-continue
+                            DISPLAY asterisk "Invalid Key!" asterisk
 
                 NOT INVALID KEY
                             ADD cte-01     TO ws-rewritten-records
 
-                            DISPLAY "Record changed successfully!"
-                            PERFORM 000600-press-enter-key-to-continue
+                            DISPLAY asterisk
+                                    "Record changed successfully!"
+                                    asterisk
 
-            END-REWRITE.
+            END-REWRITE
+
+            DISPLAY "Rewriting. Status Code: [" fs-IdxFile "]."
+
+            PERFORM 000600-press-enter-key-to-continue.
           223211-finish-change-a-record.
             EXIT.
 
          224000-start-look-for-any-record.
-           INITIALIZE ws-f-IdxFile-indicators
+           INITIALIZE ws-f-IdxFile-error-status-code-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -956,7 +1093,7 @@
             EXIT.
 
           224210-start-show-mode-look-for-code.
-            INITIALIZE ws-f-IdxFile-indicators
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1042,7 +1179,7 @@
             EXIT.
 
           224220-start-show-mode-look-for-rc-sal.
-            INITIALIZE ws-f-IdxFile-indicators
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1174,7 +1311,7 @@
             EXIT.
 
          225000-start-look-for-all-records.
-           INITIALIZE ws-f-IdxFile-indicators
+           INITIALIZE ws-f-IdxFile-error-status-code-indicators
                       ws-menu-standard-options-performance
                       ws-realization-questions
 
@@ -1256,14 +1393,14 @@
                         THRU 225250-finish-menu-mode-read-backwarding
 
                 WHEN sw-menu-mode-read-option-r-backward
-                     PERFORM 225250-start-menu-mode-read-backwarding
-                        THRU 225250-finish-menu-mode-read-backwarding
+                     PERFORM 225270-start-menu-mode-trace-backwarding
+                        THRU 225270-finish-menu-mode-trace-backwarding
                        UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
                           OR sw-IdxFile-EOF-Y OR sw-carry-out-sure-N
 
                 WHEN sw-menu-mode-read-option-r-forward
-                     PERFORM 225260-start-menu-mode-read-forwarding
-                        THRU 225260-finish-menu-mode-read-forwarding
+                     PERFORM 225280-start-menu-mode-trace-forwarding
+                        THRU 225280-finish-menu-mode-trace-forwarding
                        UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
                           OR sw-IdxFile-EOF-Y OR sw-carry-out-sure-N
 
@@ -1293,7 +1430,6 @@
                           DISPLAY asterisk asterisk
                                   "Error positioning at begin!"
                                   asterisk asterisk
-                          PERFORM 000600-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
@@ -1301,14 +1437,15 @@
                           DISPLAY asterisk
                                   "Positioning at the begin."
                                   asterisk
-                          PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            PERFORM 000600-press-enter-key-to-continue.
           225210-finish-menu-mode-start-position.
             EXIT.
 
           225220-start-locate-givenkey-code-salary.
-            INITIALIZE ws-f-IdxFile-indicators
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1385,7 +1522,7 @@
             EXIT.
 
           225230-start-menu-read-approx-code-salary.
-            INITIALIZE ws-f-IdxFile-indicators
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1421,7 +1558,7 @@
             EXIT.
 
           2252311-start-menu-read-code-apprx.
-            INITIALIZE ws-f-IdxFile-indicators
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -1713,7 +1850,7 @@
             EXIT.
 
           2252312-start-menu-read-salary-apprx.
-            INITIALIZE ws-f-IdxFile-indicators
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
                        ws-menu-standard-options-performance
                        ws-realization-questions
 
@@ -2002,7 +2139,6 @@
                           DISPLAY asterisk asterisk
                                   "Error positioning at end!"
                                   asterisk asterisk
-                          PERFORM 000600-press-enter-key-to-continue
 
               NOT INVALID KEY
                           ADD  cte-01      TO ws-repositioning-records
@@ -2010,9 +2146,10 @@
                           DISPLAY asterisk
                                   "Positioning at the end."
                                   asterisk
-                          PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            PERFORM 000600-press-enter-key-to-continue.
           225240-finish-menu-mode-finish-position.
             EXIT.
 
@@ -2024,7 +2161,7 @@
             READ IdxFile PREVIOUS RECORD    INTO ws-f-IdxFile-rec
               AT END
                  SET sw-IdxFile-EOF-Y         TO TRUE
-                 DISPLAY "Begin of file!"
+                 DISPLAY asterisk "Begin of file!" asterisk
 
                  PERFORM 000600-press-enter-key-to-continue
                  PERFORM 225240-start-menu-mode-finish-position
@@ -2037,12 +2174,7 @@
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
 
-            END-READ
-
-            PERFORM 221300-start-continue-carry-out-oper
-               THRU 221300-finish-continue-carry-out-oper
-               WITH TEST AFTER
-              UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
+            END-READ.
           225250-finish-menu-mode-read-backwarding.
             EXIT.
 
@@ -2054,7 +2186,7 @@
             READ IdxFile NEXT RECORD        INTO ws-f-IdxFile-rec
               AT END
                  SET sw-IdxFile-EOF-Y         TO TRUE
-                 DISPLAY "End of file!"
+                 DISPLAY asterisk "End of file!" asterisk
 
                  PERFORM 000600-press-enter-key-to-continue
                  PERFORM 225210-start-menu-mode-start-position
@@ -2067,13 +2199,194 @@
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
 
-            END-READ
+            END-READ.
+          225260-finish-menu-mode-read-forwarding.
+            EXIT.
+
+          225270-start-menu-mode-trace-backwarding.
+            PERFORM 225250-start-menu-mode-read-backwarding
+               THRU 225250-finish-menu-mode-read-backwarding
 
             PERFORM 221300-start-continue-carry-out-oper
                THRU 221300-finish-continue-carry-out-oper
                WITH TEST AFTER
               UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
-          225260-finish-menu-mode-read-forwarding.
+          225270-finish-menu-mode-trace-backwarding.
+            EXIT.
+
+          225280-start-menu-mode-trace-forwarding.
+            PERFORM 225260-start-menu-mode-read-forwarding
+               THRU 225260-finish-menu-mode-read-forwarding
+
+            PERFORM 221300-start-continue-carry-out-oper
+               THRU 221300-finish-continue-carry-out-oper
+               WITH TEST AFTER
+              UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
+          225280-finish-menu-mode-trace-forwarding.
+
+          226000-start-generate-reports.
+            INITIALIZE ws-f-IdxFile-error-status-code-indicators
+                       ws-menu-standard-options-performance
+                       ws-realization-questions
+
+            DISPLAY SPACE
+            DISPLAY "+---+----+---+----+---+----+---+"
+            DISPLAY "|      Output Report File.     |"
+            DISPLAY "+---+----+---+----+---+----+---+"
+
+            PERFORM 110000-start-capture-name-file
+               THRU 110000-finish-capture-name-file
+            MOVE ws-TempFile-name           TO ws-OutFile-name
+
+            PERFORM 226100-start-open-report
+               THRU 226100-finish-open-report
+
+            PERFORM 225210-start-menu-mode-start-position
+               THRU 225210-finish-menu-mode-start-position
+
+            PERFORM 226200-start-saving-report-records
+               THRU 226200-finish-saving-report-records
+              UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
+                 OR sw-IdxFile-EOF-Y        OR sw-carry-out-sure-N
+                 OR fs-OutFile IS NOT EQUAL TO ZEROES
+
+            PERFORM 226300-start-close-report
+               THRU 226300-finish-close-report
+
+            PERFORM 221600-start-continue-operation
+               THRU 221600-finish-continue-operation
+               WITH TEST AFTER
+              UNTIL sw-continue-response-Y  OR sw-continue-response-N.
+          226000-finish-generate-reports.
+            EXIT.
+
+          226100-start-open-report.
+            INITIALIZE f-OutFile-rec
+                       ws-f-OutFile-rec
+
+            SET sw-operation-class-OPEN     TO TRUE
+            OPEN EXTEND OutFile
+
+            DISPLAY "Opening. Status Code: [" fs-OutFile "].".
+
+            IF (fs-OutFile         IS EQUAL TO ZEROES)
+                MOVE cte-01                 TO ws-printed-pages
+                MOVE ws-reporting-headlines TO f-OutFile-rec
+                                               ws-f-OutFile-rec
+                PERFORM 226211-start-write-output-report-record
+                   THRU 226211-finish-write-output-report-record
+
+                MOVE ws-reporting-underlines   TO f-OutFile-rec
+                                                  ws-f-OutFile-rec
+                PERFORM 226211-start-write-output-report-record
+                   THRU 226211-finish-write-output-report-record
+
+                MOVE SPACES                 TO f-OutFile-rec
+                                               ws-f-OutFile-rec
+            END-IF.
+          226100-finish-open-report.
+            EXIT.
+
+          226200-start-saving-report-records.
+            INITIALIZE f-OutFile-rec
+                       ws-f-OutFile-rec
+
+            PERFORM 225260-start-menu-mode-read-forwarding
+               THRU 225260-finish-menu-mode-read-forwarding
+
+            IF (fs-IdxFile IS EQUAL TO ZEROES) AND NOT sw-IdxFile-EOF-Y
+                PERFORM 226210-start-move-output-report-record
+                   THRU 226210-finish-move-output-report-record
+                PERFORM 226211-start-write-output-report-record
+                   THRU 226211-finish-write-output-report-record
+            ELSE
+                DISPLAY asterisk "Report completed!" asterisk
+            END-IF
+
+            PERFORM 221300-start-continue-carry-out-oper
+               THRU 221300-finish-continue-carry-out-oper
+               WITH TEST AFTER
+              UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
+          226200-finish-saving-report-records.
+            EXIT.
+
+          226210-start-move-output-report-record.
+            INITIALIZE f-OutFile-rec
+                       ws-f-OutFile-rec
+
+            MOVE LINAGE-COUNTER
+              TO ws-f-OutFile-rec-linage-counter
+
+            MOVE ws-f-IdxFile-rec-cod-employee
+              TO ws-f-OutFile-rec-cod-employee
+
+            MOVE ws-f-IdxFile-rec-salary-employee
+              TO ws-f-OutFile-rec-salary-employee.
+          226210-finish-move-output-report-record.
+            EXIT.
+
+          226211-start-write-output-report-record.
+            DISPLAY SPACE
+            DISPLAY ws-f-OutFile-rec
+
+            WRITE f-OutFile-rec              FROM ws-f-OutFile-rec
+               AT END-OF-PAGE
+                  ADD cte-01                   TO ws-printed-pages
+                  MOVE SPACES                  TO f-OutFile-rec
+                                                  ws-f-OutFile-rec
+
+                  WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
+                        AFTER ADVANCING PAGE
+                  END-WRITE
+
+                  DISPLAY asterisk
+                          " Inserted line: [" LINAGE-COUNTER "]. "
+                          asterisk
+                  DISPLAY "Writing. Status Code: [" fs-OutFile "]."
+
+                  MOVE ws-reporting-headlines  TO f-OutFile-rec
+                                                  ws-f-OutFile-rec
+                  WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
+
+                  DISPLAY asterisk
+                          " Inserted line: [" LINAGE-COUNTER "]. "
+                          asterisk
+                  DISPLAY "Writing. Status Code: [" fs-OutFile "]."
+
+                  MOVE ws-reporting-underlines TO f-OutFile-rec
+                                                  ws-f-OutFile-rec
+                  WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
+
+                  DISPLAY asterisk
+                          " Inserted line: [" LINAGE-COUNTER "]. "
+                          asterisk
+                  DISPLAY "Writing. Status Code: [" fs-OutFile "]."
+
+                  INITIALIZE f-OutFile-rec
+                             ws-f-OutFile-rec
+
+		  DISPLAY asterisk "Page feed inserted!" asterisk
+
+              NOT AT EOP
+                  ADD cte-01               TO ws-reporting-records
+
+                  DISPLAY asterisk
+                          " Inserted line: [" LINAGE-COUNTER "]. "
+                          asterisk
+
+            END-WRITE
+
+            DISPLAY "Writing. Status Code: ["  fs-OutFile "].".
+          226211-finish-write-output-report-record.
+            EXIT.
+
+          226300-start-close-report.
+           SET sw-operation-class-CLOSE       TO TRUE
+
+           CLOSE OutFile
+
+           DISPLAY "Closing. Status Code: ["  fs-OutFile "].".
+          226300-finish-close-report.
             EXIT.
 
        300000-start-end-program.
@@ -2089,7 +2402,9 @@
            DISPLAY "|    Processed records.    |"
            DISPLAY "+---+----+---+----+---+----+"
            DISPLAY "| Eliminated   : [" ws-eliminated-records "]."
+           DISPLAY "| Pages        : [" ws-printed-pages "]"
            DISPLAY "| Read         : [" ws-reading-records "]."
+           DISPLAY "| Reported     : [" ws-reporting-records "]."
            DISPLAY "| Repositioned : [" ws-repositioning-records "]."
            DISPLAY "| Rewritten    : [" ws-rewritten-records "]."
            DISPLAY "| Writings     : [" ws-written-records "]."
