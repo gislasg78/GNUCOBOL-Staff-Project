@@ -21,22 +21,17 @@
                   RECORD KEY   IS f-IdxFile-rec-cod-employee
                   ALTERNATE RECORD KEY IS f-IdxFile-rec-salary-employee
                             WITH DUPLICATES
-                  LOCK MODE    IS AUTOMATIC WITH LOCK ON RECORD
-                  PADDING CHARACTER IS asterisk
                   FILE STATUS  IS fs-IdxFile.
 
-           SELECT OPTIONAL OutFile ASSIGN TO DISK ws-OutFile-name
+           SELECT OPTIONAL OutFile ASSIGN TO ws-OutFile-name
                   ORGANIZATION IS LINE SEQUENTIAL
                   ACCESS MODE  IS SEQUENTIAL
-                  PADDING CHARACTER IS ASTERISK
                   FILE STATUS  IS fs-OutFile.
 
        DATA DIVISION.
        FILE SECTION.
        FD  IdxFile
            BLOCK  CONTAINS 05 TO 10 RECORDS
-           DATA   RECORD   IS f-IdxFile-rec
-           LABEL  RECORD   IS STANDARD
            RECORD CONTAINS 15 CHARACTERS
            RECORDING MODE  IS FIXED.
 
@@ -49,9 +44,6 @@
 
        FD  OutFile
            BLOCK CONTAINS  05 TO 10 RECORDS
-           DATA RECORD     IS f-OutFile-record
-           LABEL RECORD    IS OMITTED
-           RECORD CONTAINS 80 CHARACTERS
            RECORDING MODE  IS FIXED
 
            LINAGE IS ws-linage-totlines LINES
@@ -67,12 +59,6 @@
 
        78  cte-01                                          VALUE 01.
        78  cte-34                                          VALUE 34.
-
-       01  ws-linage-work-variables.
-           03  ws-linage-bottom                 PIC 9(01)  VALUE 01.
-           03  ws-linage-footing                PIC 9(02)  VALUE 23.
-           03  ws-linage-top                    PIC 9(01)  VALUE 01.
-           03  ws-linage-totlines               PIC 9(02)  VALUE 24.
 
        01  ws-environmental-variables.
            03  ws-current-date-and-time.
@@ -159,10 +145,10 @@
 
            03  ws-Files-names-status.
                05  ws-IdxFile.
-                   07  fs-IdxFile               PIC 9(02)  VALUE ZEROES.
+                   07  fs-IdxFile               PIC X(02)  VALUE SPACES.
                    07  ws-IdxFile-name          PIC X(12)  VALUE SPACES.
                05  ws-OutFile.
-                   07  fs-OutFile               PIC 9(02)  VALUE ZEROES.
+                   07  fs-OutFile               PIC X(02)  VALUE SPACES.
                    07  ws-OutFile-name          PIC X(12)  VALUE SPACES.
                05  ws-TempFile-name             PIC X(12)  VALUE SPACES.
 
@@ -174,8 +160,7 @@
                    88  sw-menu-option-modify               VALUE 3.
                    88  sw-menu-option-look-for-one         VALUE 4.
                    88  sw-menu-option-look-for-all         VALUE 5.
-                   88  sw-menu-option-reports              VALUE 6.
-                   88  sw-menu-option-exit                 VALUE 7.
+                   88  sw-menu-option-exit                 VALUE 6.
                05  ws-menu-mode-modify-option   PIC 9(01)
                                                            VALUE ZERO.
                    88  sw-menu-mode-modify-emp-salary      VALUE 1.
@@ -422,7 +407,18 @@
        01  ws-f-error-status-code-table-desc-error-tag     PIC X(25)
                VALUE "Unknown File Status".
 
+       01  ws-linage-work-variables.
+           03  ws-linage-bottom                 PIC 9(01)  VALUE 01.
+           03  ws-linage-footing                PIC 9(02)  VALUE 23.
+           03  ws-linage-top                    PIC 9(01)  VALUE 01.
+           03  ws-linage-totlines               PIC 9(02)  VALUE 24.
+
        01  ws-reporting-lines.
+           03  ws-reporting-main-header.
+               05  FILLER                       PIC X(08)  VALUE SPACES.
+               05  FILLER                       PIC A(15)
+                                                VALUE "Employee Report".
+               05  FILLER                       PIC X(08)  VALUE SPACES.
            03  ws-reporting-headlines.
                05  FILLER                       PIC X(03)  VALUE SPACES.
                05  FILLER                       PIC A(07)
@@ -444,6 +440,22 @@
                05  FILLER                       PIC X(12)
                                                 VALUE ALL X'3D'.
                05  FILLER                       PIC X(48)  VALUE SPACES.
+           03  ws-reporting-page-numbered.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(15)
+                                                VALUE ALL X'2D'.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(05)
+                                                VALUE "Page:".
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(01)  VALUE X'5B'.
+               05  ws-printed-pages-reporting   PIC S9(04) 
+                                                SIGN IS LEADING
+                                                SEPARATE CHARACTER
+                                                VALUE ZEROES.
+               05  FILLER                       PIC X(01)  VALUE X'5D'.
+               05  FILLER                       PIC X(01)  VALUE X'2E'.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
 
        01  ws-work-section-ends                 PIC X(42)  VALUE
            "The working storage section ends here...".
@@ -600,7 +612,8 @@
            PERFORM 100000-start-begin-program
               THRU 100000-finish-begin-program
 
-           IF fs-IdxFile IS EQUAL TO ZEROES
+           IF  fs-IdxFile IS EQUAL TO ZEROES
+           AND fs-OutFile IS EQUAL TO ZEROES
               PERFORM 200000-start-process-menu
                  THRU 200000-finish-process-menu
                 UNTIL sw-menu-option-exit
@@ -609,16 +622,28 @@
            PERFORM 300000-start-end-program
               THRU 300000-finish-end-program
 
-           STOP "This program has ended..."
+           DISPLAY "This program has ended."
+           PERFORM 000600-press-enter-key-to-continue
            STOP RUN.
 
        100000-start-begin-program.
+           PERFORM 110000-start-open-IdxFile
+              THRU 110000-finish-open-IdxFile
+
+           PERFORM 120000-start-open-OutFile
+              THRU 120000-finish-open-OutFile.
+       100000-finish-begin-program.
+           EXIT.
+
+        110000-start-open-IdxFile.
+           DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+---+"
-           DISPLAY "|   Indexed Sequential Files.  |"
+           DISPLAY "|   Indexed Sequential File.   |"
            DISPLAY "+---+----+---+----+---+----+---+"
 
-           PERFORM 110000-start-capture-name-file
-              THRU 110000-finish-capture-name-file
+           MOVE SPACES                  TO ws-TempFile-name
+           PERFORM 111000-start-capture-name-file
+              THRU 111000-finish-capture-name-file
            MOVE ws-TempFile-name        TO ws-IdxFile-name
 
            DISPLAY "Idx File to work on: [" ws-IdxFile-name "]."
@@ -627,12 +652,10 @@
            OPEN I-O IdxFile
 
            DISPLAY "Opening. Status Code: [" fs-IdxFile "].".
-       100000-finish-begin-program.
+        110000-finish-open-IdxFile.
            EXIT.
 
-        110000-start-capture-name-file.
-           MOVE SPACES                  TO ws-TempFile-name
-
+         111000-start-capture-name-file.
            DISPLAY asterisk " Enter the file name: " WITH NO ADVANCING
             ACCEPT ws-TempFile-name
 
@@ -648,8 +671,128 @@
            END-IF
 
            DISPLAY SPACE.
-        110000-finish-capture-name-file.
+         111000-finish-capture-name-file.
            EXIT.
+
+        120000-start-open-OutFile.
+           INITIALIZE f-OutFile-rec
+                      ws-f-OutFile-rec
+
+           DISPLAY SPACE
+           DISPLAY "+---+----+---+----+---+----+---+"
+           DISPLAY "|      OutPut Report File.     |"
+           DISPLAY "+---+----+---+----+---+----+---+"
+
+           MOVE SPACES                     TO ws-TempFile-name
+           PERFORM 111000-start-capture-name-file
+              THRU 111000-finish-capture-name-file
+           MOVE ws-TempFile-name           TO ws-OutFile-name
+
+           DISPLAY "Report File to work on: [" ws-OutFile-name "]."
+
+           SET sw-operation-class-OPEN     TO TRUE
+           OPEN EXTEND OutFile
+
+           DISPLAY "Opening. Status Code: [" fs-OutFile "].".
+
+           IF (fs-OutFile         IS EQUAL TO ZEROES)
+               MOVE cte-01                 TO ws-printed-pages
+
+               PERFORM 121000-start-printout-headlines
+                  THRU 121000-finish-printout-headlines
+           END-IF.
+        120000-finish-open-OutFile.
+           EXIT.
+
+         121000-start-printout-headlines.
+           MOVE SPACES                     TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+
+           MOVE ws-reporting-main-header   TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE ws-printed-pages           TO ws-printed-pages-reporting
+           MOVE ws-reporting-page-numbered TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE SPACES                     TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+           PERFORM 000200-get-current-date-and-time-record
+           MOVE ws-date-and-time-formatted TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE SPACES                     TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE ws-reporting-headlines     TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE ws-reporting-underlines    TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE SPACES                     TO f-OutFile-rec
+                                              ws-f-OutFile-rec.
+         121000-finish-printout-headlines.
+           EXIT.
+
+          121100-start-write-output-report-record.
+            DISPLAY asterisk asterisk
+            DISPLAY f-OutFile-rec
+            DISPLAY ws-f-OutFile-rec
+            DISPLAY asterisk asterisk
+
+            WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
+               AT END-OF-PAGE
+                  PERFORM 121110-start-write-output-advance-page
+                     THRU 121110-finish-write-output-advance-page
+                  PERFORM 121000-start-printout-headlines
+                     THRU 121000-finish-printout-headlines
+
+              NOT AT EOP
+                  ADD cte-01               TO ws-reporting-records
+                  DISPLAY asterisk
+                          " Inserted line: [" LINAGE-COUNTER "]. "
+                          asterisk
+
+            END-WRITE
+
+            DISPLAY "Writing. Status Code: ["  fs-OutFile "].".
+          121100-finish-write-output-report-record.
+            EXIT.
+
+          121110-start-write-output-advance-page.
+            ADD cte-01                     TO ws-printed-pages
+            MOVE SPACES                    TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+
+            WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
+                  AFTER ADVANCING PAGE
+            END-WRITE
+
+            INITIALIZE f-OutFile-rec
+                       ws-f-OutFile-rec
+
+            DISPLAY asterisk "Page feed inserted!" asterisk
+
+            DISPLAY asterisk
+                    " Inserted line: [" LINAGE-COUNTER "]. "
+                    asterisk
+
+            DISPLAY "Writing. Status Code: [" fs-OutFile "].".
+          121110-finish-write-output-advance-page.
+            EXIT.
 
        200000-start-process-menu.
            INITIALIZE f-IdxFile-rec
@@ -673,8 +816,7 @@
            DISPLAY "| [3]. Modify a record...      |"
            DISPLAY "| [4]. Look for a record...    |"
            DISPLAY "| [5]. Look for all records... |"
-           DISPLAY "| [6]. Global report.          |"
-           DISPLAY "| [7]. Exit this program.      |"
+           DISPLAY "| [6]. Exit this program.      |"
            DISPLAY "+===+====+===+====+===+====+===+"
            DISPLAY "Enter your own choice: " WITH NO ADVANCING
             ACCEPT ws-menu-option
@@ -710,11 +852,6 @@
                        THRU 225000-finish-look-for-all-records
                       UNTIL sw-menu-mode-read-option-exitmenu
 
-               WHEN sw-menu-option-reports
-                    PERFORM 226000-start-generate-reports
-                       THRU 226000-finish-generate-reports
-                      UNTIL sw-continue-response-N
-                        
                WHEN sw-menu-option-exit
                     DISPLAY "Leaving this program..."
 
@@ -791,6 +928,8 @@
                          PERFORM 000600-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
+                         PERFORM 221220-start-write-report-outp-record
+                            THRU 221220-finish-write-report-outp-record
 
             END-READ.
          221200-finish-look-for-a-record.
@@ -816,6 +955,40 @@
          221210-finish-show-file-info.
             EXIT.
 
+         221220-start-write-report-outp-record.
+            INITIALIZE f-OutFile-rec
+                       ws-f-OutFile-rec
+
+            DISPLAY asterisk
+                    "Do you want to record this previously retrieved"
+                    " log in the Output Report? (y/n) : "
+                    WITH NO ADVANCING
+
+             ACCEPT ws-carry-out-sure
+
+            DISPLAY "The selected answer was: [" ws-carry-out-sure "]."
+
+            IF sw-carry-out-sure-Y OR sw-carry-out-sure-N
+               DISPLAY "Response entered: [" ws-carry-out-sure "] OK!"
+            ELSE
+               DISPLAY "Invalid answer. Please correct it now!"
+            END-IF.
+
+            IF sw-carry-out-sure-Y
+               MOVE LINAGE-COUNTER TO ws-f-OutFile-rec-linage-counter
+
+               MOVE ws-f-IdxFile-rec-cod-employee
+                 TO ws-f-OutFile-rec-cod-employee
+
+               MOVE ws-f-IdxFile-rec-salary-employee
+                 TO ws-f-OutFile-rec-salary-employee
+
+               PERFORM 121100-start-write-output-report-record
+                  THRU 121100-finish-write-output-report-record
+            END-IF.
+         221220-finish-write-report-outp-record.
+            EXIT.
+
          221300-start-continue-carry-out-oper.
             DISPLAY asterisk
                     "Are you really sure you want to carry out this "
@@ -827,9 +1000,10 @@
             DISPLAY "The selected answer was: [" ws-carry-out-sure "]."
 
             IF sw-carry-out-sure-Y OR sw-carry-out-sure-N
-               NEXT SENTENCE
+               DISPLAY "Response entered: [" ws-carry-out-sure "] OK!"
             ELSE
-               DISPLAY "Invalid answer. Please correct it now.".
+               DISPLAY "Invalid answer. Please correct it now!"
+            END-IF.
          221300-finish-continue-carry-out-oper.
             EXIT.
 
@@ -878,9 +1052,11 @@
                     "]."
 
             IF sw-continue-response-Y OR sw-continue-response-N
-               NEXT SENTENCE
+               DISPLAY "Response entered: [" ws-continue-response
+                       "] OK!"
             ELSE
-               DISPLAY "Incorrect answer. The answer is not valid.".
+               DISPLAY "Incorrect answer. The answer is not valid!"
+            END-IF.
          221600-finish-continue-operation.
             EXIT.
 
@@ -1248,6 +1424,8 @@
                          PERFORM 000600-press-enter-key-to-continue
                          PERFORM 221210-start-show-file-info
                             THRU 221210-finish-show-file-info
+                         PERFORM 221220-start-write-report-outp-record
+                            THRU 221220-finish-write-report-outp-record
 
             END-READ.
           22422111-finish-read-record-salary-employee.
@@ -2173,6 +2351,8 @@
 
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
+                 PERFORM 221220-start-write-report-outp-record
+                    THRU 221220-finish-write-report-outp-record
 
             END-READ.
           225250-finish-menu-mode-read-backwarding.
@@ -2198,6 +2378,8 @@
 
                  PERFORM 221210-start-show-file-info
                     THRU 221210-finish-show-file-info
+                 PERFORM 221220-start-write-report-outp-record
+                    THRU 221220-finish-write-report-outp-record
 
             END-READ.
           225260-finish-menu-mode-read-forwarding.
@@ -2224,179 +2406,49 @@
               UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
           225280-finish-menu-mode-trace-forwarding.
 
-          226000-start-generate-reports.
-            INITIALIZE ws-f-IdxFile-error-status-code-indicators
-                       ws-menu-standard-options-performance
-                       ws-realization-questions
-
-            DISPLAY SPACE
-            DISPLAY "+---+----+---+----+---+----+---+"
-            DISPLAY "|      Output Report File.     |"
-            DISPLAY "+---+----+---+----+---+----+---+"
-
-            PERFORM 110000-start-capture-name-file
-               THRU 110000-finish-capture-name-file
-            MOVE ws-TempFile-name           TO ws-OutFile-name
-
-            PERFORM 226100-start-open-report
-               THRU 226100-finish-open-report
-
-            PERFORM 225210-start-menu-mode-start-position
-               THRU 225210-finish-menu-mode-start-position
-
-            PERFORM 226200-start-saving-report-records
-               THRU 226200-finish-saving-report-records
-              UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
-                 OR sw-IdxFile-EOF-Y        OR sw-carry-out-sure-N
-                 OR fs-OutFile IS NOT EQUAL TO ZEROES
-
-            PERFORM 226300-start-close-report
-               THRU 226300-finish-close-report
-
-            PERFORM 221600-start-continue-operation
-               THRU 221600-finish-continue-operation
-               WITH TEST AFTER
-              UNTIL sw-continue-response-Y  OR sw-continue-response-N.
-          226000-finish-generate-reports.
-            EXIT.
-
-          226100-start-open-report.
-            INITIALIZE f-OutFile-rec
-                       ws-f-OutFile-rec
-
-            SET sw-operation-class-OPEN     TO TRUE
-            OPEN EXTEND OutFile
-
-            DISPLAY "Opening. Status Code: [" fs-OutFile "].".
-
-            IF (fs-OutFile         IS EQUAL TO ZEROES)
-                MOVE cte-01                 TO ws-printed-pages
-                MOVE ws-reporting-headlines TO f-OutFile-rec
-                                               ws-f-OutFile-rec
-                PERFORM 226211-start-write-output-report-record
-                   THRU 226211-finish-write-output-report-record
-
-                MOVE ws-reporting-underlines   TO f-OutFile-rec
-                                                  ws-f-OutFile-rec
-                PERFORM 226211-start-write-output-report-record
-                   THRU 226211-finish-write-output-report-record
-
-                MOVE SPACES                 TO f-OutFile-rec
-                                               ws-f-OutFile-rec
-            END-IF.
-          226100-finish-open-report.
-            EXIT.
-
-          226200-start-saving-report-records.
-            INITIALIZE f-OutFile-rec
-                       ws-f-OutFile-rec
-
-            PERFORM 225260-start-menu-mode-read-forwarding
-               THRU 225260-finish-menu-mode-read-forwarding
-
-            IF (fs-IdxFile IS EQUAL TO ZEROES) AND NOT sw-IdxFile-EOF-Y
-                PERFORM 226210-start-move-output-report-record
-                   THRU 226210-finish-move-output-report-record
-                PERFORM 226211-start-write-output-report-record
-                   THRU 226211-finish-write-output-report-record
-            ELSE
-                DISPLAY asterisk "Report completed!" asterisk
-            END-IF
-
-            PERFORM 221300-start-continue-carry-out-oper
-               THRU 221300-finish-continue-carry-out-oper
-               WITH TEST AFTER
-              UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N.
-          226200-finish-saving-report-records.
-            EXIT.
-
-          226210-start-move-output-report-record.
-            INITIALIZE f-OutFile-rec
-                       ws-f-OutFile-rec
-
-            MOVE LINAGE-COUNTER
-              TO ws-f-OutFile-rec-linage-counter
-
-            MOVE ws-f-IdxFile-rec-cod-employee
-              TO ws-f-OutFile-rec-cod-employee
-
-            MOVE ws-f-IdxFile-rec-salary-employee
-              TO ws-f-OutFile-rec-salary-employee.
-          226210-finish-move-output-report-record.
-            EXIT.
-
-          226211-start-write-output-report-record.
-            DISPLAY SPACE
-            DISPLAY ws-f-OutFile-rec
-
-            WRITE f-OutFile-rec              FROM ws-f-OutFile-rec
-               AT END-OF-PAGE
-                  ADD cte-01                   TO ws-printed-pages
-                  MOVE SPACES                  TO f-OutFile-rec
-                                                  ws-f-OutFile-rec
-
-                  WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
-                        AFTER ADVANCING PAGE
-                  END-WRITE
-
-                  DISPLAY asterisk
-                          " Inserted line: [" LINAGE-COUNTER "]. "
-                          asterisk
-                  DISPLAY "Writing. Status Code: [" fs-OutFile "]."
-
-                  MOVE ws-reporting-headlines  TO f-OutFile-rec
-                                                  ws-f-OutFile-rec
-                  WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
-
-                  DISPLAY asterisk
-                          " Inserted line: [" LINAGE-COUNTER "]. "
-                          asterisk
-                  DISPLAY "Writing. Status Code: [" fs-OutFile "]."
-
-                  MOVE ws-reporting-underlines TO f-OutFile-rec
-                                                  ws-f-OutFile-rec
-                  WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
-
-                  DISPLAY asterisk
-                          " Inserted line: [" LINAGE-COUNTER "]. "
-                          asterisk
-                  DISPLAY "Writing. Status Code: [" fs-OutFile "]."
-
-                  INITIALIZE f-OutFile-rec
-                             ws-f-OutFile-rec
-
-		  DISPLAY asterisk "Page feed inserted!" asterisk
-
-              NOT AT EOP
-                  ADD cte-01               TO ws-reporting-records
-
-                  DISPLAY asterisk
-                          " Inserted line: [" LINAGE-COUNTER "]. "
-                          asterisk
-
-            END-WRITE
-
-            DISPLAY "Writing. Status Code: ["  fs-OutFile "].".
-          226211-finish-write-output-report-record.
-            EXIT.
-
-          226300-start-close-report.
-           SET sw-operation-class-CLOSE       TO TRUE
-
-           CLOSE OutFile
-
-           DISPLAY "Closing. Status Code: ["  fs-OutFile "].".
-          226300-finish-close-report.
-            EXIT.
-
        300000-start-end-program.
+           PERFORM 310000-start-close-IdxFile
+              THRU 310000-finish-close-IdxFile
+
+           PERFORM 320000-start-close-OutFile
+              THRU 320000-finish-close-OutFile
+
+           PERFORM 330000-start-view-statistics
+              THRU 330000-finish-view-statistics.
+       300000-finish-end-program.
+           EXIT.
+
+        310000-start-close-IdxFile.
+           DISPLAY SPACE
+           DISPLAY "+---+----+---+----+---+----+---+"
+           DISPLAY "|   Indexed Sequential File.   |"
+           DISPLAY "+---+----+---+----+---+----+---+"
+
            SET sw-operation-class-CLOSE       TO TRUE
            CLOSE IdxFile
 
-           DISPLAY "Closing. Status Code: ["  fs-IdxFile "]."
-
            MOVE fs-IdxFile                    TO RETURN-CODE
 
+           DISPLAY "Closing. Status Code: ["  fs-IdxFile "].".
+        310000-finish-close-IdxFile.
+           EXIT.
+
+        320000-start-close-OutFile.
+           DISPLAY SPACE
+           DISPLAY "+---+----+---+----+---+----+---+"
+           DISPLAY "|      OutPut Report File.     |"
+           DISPLAY "+---+----+---+----+---+----+---+"
+
+           SET sw-operation-class-CLOSE       TO TRUE
+           CLOSE OutFile
+
+           MOVE fs-OutFile                    TO RETURN-CODE
+
+           DISPLAY "Closing. Status Code: ["  fs-OutFile "].".
+        320000-finish-close-OutFile.
+           EXIT.
+
+        330000-start-view-statistics.
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+"
            DISPLAY "|    Processed records.    |"
@@ -2410,7 +2462,7 @@
            DISPLAY "| Writings     : [" ws-written-records "]."
            DISPLAY "+---+----+---+----+---+----+"
            DISPLAY SPACE.
-       300000-finish-end-program.
+        330000-finish-view-statistics.
            EXIT.
 
        END PROGRAM IdxFile.
