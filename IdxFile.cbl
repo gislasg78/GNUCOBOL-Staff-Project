@@ -53,7 +53,7 @@
             LINES AT TOP     ws-linage-top
             LINES AT BOTTOM  ws-linage-bottom.
 
-       01  f-OutFile-rec                        PIC X(80)  VALUE SPACES.
+       01  f-OutFile-rec                        PIC X(31)  VALUE SPACES.
 
        WORKING-STORAGE SECTION.
        01  ws-work-section-begins               PIC X(42)  VALUE
@@ -245,12 +245,18 @@
                    88  sw-operation-class-WRITE
                                                 VALUE "WRITE".
            03  ws-realization-questions.
+               05  ws-captured-answer           PIC A(01)  VALUE SPACE.
+                   88  sw-captured-answer-N     VALUES ARE 'N', 'n'.
+                   88  sw-captured-answer-Y     VALUES ARE 'Y', 'y'.
                05  ws-carry-out-sure            PIC A(01)  VALUE SPACE.
                    88  sw-carry-out-sure-N      VALUES ARE 'N', 'n'.
                    88  sw-carry-out-sure-Y      VALUES ARE 'Y', 'y'.
                05  ws-continue-response         PIC A(01)  VALUE SPACE.
                    88  sw-continue-response-N   VALUES ARE 'N', 'n'.
                    88  sw-continue-response-Y   VALUES ARE 'Y', 'y'.
+               05  ws-question-print-record     PIC A(01)  VALUE SPACE.
+                   88  sw-question-print-rec-N  VALUES ARE 'N', 'n'.
+                   88  sw-question-print-rec-Y  VALUES ARE 'Y', 'y'.
 
        01  ws-statistics-processed-records.
            03  ws-eliminated-records            PIC S9(04) VALUE ZEROES.
@@ -751,10 +757,10 @@
            EXIT.
 
           121100-start-write-output-report-record.
-            DISPLAY asterisk asterisk
-            DISPLAY f-OutFile-rec
-            DISPLAY ws-f-OutFile-rec
-            DISPLAY asterisk asterisk
+            DISPLAY asterisk asterisk asterisk asterisk asterisk
+            DISPLAY asterisk X'7C' f-OutFile-rec X'7C' asterisk
+            DISPLAY asterisk X'7C' ws-f-OutFile-rec X'7C' asterisk
+            DISPLAY asterisk asterisk asterisk asterisk asterisk
 
             WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
                AT END-OF-PAGE
@@ -784,16 +790,15 @@
                   AFTER ADVANCING PAGE
             END-WRITE
 
+            DISPLAY "Writing. Status Code: [" fs-OutFile "]."
+
             INITIALIZE f-OutFile-rec
                        ws-f-OutFile-rec
-
-            DISPLAY asterisk "Page feed inserted!" asterisk
 
             DISPLAY asterisk
                     " Inserted line: [" LINAGE-COUNTER "]. "
                     asterisk
-
-            DISPLAY "Writing. Status Code: [" fs-OutFile "].".
+            DISPLAY asterisk "Page feed inserted!" asterisk.
           121110-finish-write-output-advance-page.
             EXIT.
 
@@ -935,7 +940,9 @@
                          PERFORM 221220-start-write-report-outp-record
                             THRU 221220-finish-write-report-outp-record
 
-            END-READ.
+            END-READ
+
+            DISPLAY "Reading. Status Code: [" fs-IdxFile "].".
          221200-finish-look-for-a-record.
             EXIT.
 
@@ -968,17 +975,14 @@
                     " log in the Output Report? (y/n) : "
                     WITH NO ADVANCING
 
-             ACCEPT ws-carry-out-sure
+            MOVE SPACE                    TO ws-captured-answer
+            PERFORM 221221-start-display-captured-selected-option
+               THRU 221221-finish-display-captured-selected-option
+               WITH TEST AFTER
+              UNTIL sw-captured-answer-Y OR sw-captured-answer-N
+            MOVE ws-captured-answer       TO ws-question-print-record
 
-            DISPLAY "The selected answer was: [" ws-carry-out-sure "]."
-
-            IF sw-carry-out-sure-Y OR sw-carry-out-sure-N
-               DISPLAY "Response entered: [" ws-carry-out-sure "] OK!"
-            ELSE
-               DISPLAY "Invalid answer. Please correct it now!"
-            END-IF.
-
-            IF sw-carry-out-sure-Y
+            IF sw-question-print-rec-Y
                MOVE LINAGE-COUNTER TO ws-f-OutFile-rec-linage-counter
 
                MOVE ws-f-IdxFile-rec-cod-employee
@@ -993,21 +997,43 @@
          221220-finish-write-report-outp-record.
             EXIT.
 
+          221221-start-display-captured-selected-option.
+            MOVE SPACE                    TO ws-captured-answer
+            ACCEPT ws-captured-answer
+
+            DISPLAY asterisk
+                    "The selected option was: ["
+                    ws-captured-answer
+                    "]."
+                    asterisk
+
+            IF (sw-captured-answer-Y) OR (sw-captured-answer-N)
+               DISPLAY asterisk
+                       "The captured option was: ["
+                       ws-captured-answer
+                       "]. OK!"
+                       asterisk
+            ELSE
+               DISPLAY asterisk
+                       "Invalid answer: [" ws-captured-answer "]. "
+                       "Please correct it now!"
+                       asterisk
+            END-IF.
+          221221-finish-display-captured-selected-option.
+            EXIT.
+
          221300-start-continue-carry-out-oper.
             DISPLAY asterisk
                     "Are you really sure you want to carry out this "
                     "operation? (y/n) : "
                WITH NO ADVANCING
 
-             ACCEPT ws-carry-out-sure
-
-            DISPLAY "The selected answer was: [" ws-carry-out-sure "]."
-
-            IF sw-carry-out-sure-Y OR sw-carry-out-sure-N
-               DISPLAY "Response entered: [" ws-carry-out-sure "] OK!"
-            ELSE
-               DISPLAY "Invalid answer. Please correct it now!"
-            END-IF.
+            MOVE SPACE                    TO ws-captured-answer
+            PERFORM 221221-start-display-captured-selected-option
+               THRU 221221-finish-display-captured-selected-option
+               WITH TEST AFTER
+              UNTIL sw-captured-answer-Y OR sw-captured-answer-N
+            MOVE ws-captured-answer       TO ws-carry-out-sure.
          221300-finish-continue-carry-out-oper.
             EXIT.
 
@@ -1050,17 +1076,12 @@
                     "Do you want to continue doing the same operation? "
                     "(y/n) : " WITH NO ADVANCING
 
-             ACCEPT ws-continue-response
-
-            DISPLAY "The selected answer was: [" ws-continue-response
-                    "]."
-
-            IF sw-continue-response-Y OR sw-continue-response-N
-               DISPLAY "Response entered: [" ws-continue-response
-                       "] OK!"
-            ELSE
-               DISPLAY "Incorrect answer. The answer is not valid!"
-            END-IF.
+            MOVE SPACE                    TO ws-captured-answer
+            PERFORM 221221-start-display-captured-selected-option
+               THRU 221221-finish-display-captured-selected-option
+               WITH TEST AFTER
+              UNTIL sw-captured-answer-Y OR sw-captured-answer-N
+            MOVE ws-captured-answer       TO ws-continue-response.
          221600-finish-continue-operation.
             EXIT.
 
@@ -1431,7 +1452,9 @@
                          PERFORM 221220-start-write-report-outp-record
                             THRU 221220-finish-write-report-outp-record
 
-            END-READ.
+            END-READ
+
+            DISPLAY "Reading. Status Code: [" fs-IdxFile "].".
           22422111-finish-read-record-salary-employee.
             EXIT.
 
@@ -2358,7 +2381,9 @@
                  PERFORM 221220-start-write-report-outp-record
                     THRU 221220-finish-write-report-outp-record
 
-            END-READ.
+            END-READ
+
+            DISPLAY "Reading. Status Code: [" fs-IdxFile "].".
           225250-finish-menu-mode-read-backwarding.
             EXIT.
 
@@ -2385,7 +2410,9 @@
                  PERFORM 221220-start-write-report-outp-record
                     THRU 221220-finish-write-report-outp-record
 
-            END-READ.
+            END-READ
+
+            DISPLAY "Reading. Status Code: [" fs-IdxFile "].".
           225260-finish-menu-mode-read-forwarding.
             EXIT.
 
