@@ -796,6 +796,7 @@
 
        200000-start-process-menu.
            INITIALIZE f-IdxFile-rec
+                      f-OutFile-rec
                       ws-environmental-variables
 
            PERFORM 210000-start-option-menu-display
