@@ -4,26 +4,23 @@
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-            SYMBOLIC CHARACTERS asterisk IS 43
             CLASS alphabetic-and-numeric IS X'20'
                                             X'30' THRU X'39'
                                             X'41' THRU X'5A'
                                             X'61' THRU X'7A'.
+            SYMBOLIC CHARACTERS asterisk IS 43.
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
             SELECT OPTIONAL myFilex ASSIGN TO ws-f-name-myFilex
                    ORGANIZATION IS LINE SEQUENTIAL
-                   PADDING CHARACTER IS asterisk
-                   FILE  STATUS IS fs-myFilex.
+                   ACCESS MODE  IS SEQUENTIAL
+                   FILE STATUS  IS fs-myFilex.
             
        DATA DIVISION.
        FILE SECTION.
        FD  myFilex
            BLOCK CONTAINS  05 TO 10 RECORDS
-           DATA RECORD     IS f-rec-myFilex
-           LABEL RECORD    IS OMITTED
-           RECORD CONTAINS 20 CHARACTERS
            RECORDING MODE  IS F
 
            LINAGE IS ws-linage-totlines LINES
@@ -31,11 +28,11 @@
             LINES AT TOP     ws-linage-top
             LINES AT BOTTOM  ws-linage-bottom.
 
-       01  f-rec-myFilex                   PIC X(20)  VALUE SPACES.
+       01  f-rec-myFilex                   PIC X(31)  VALUE SPACES.
            88  sw-f-rec-myFilex-empty                 VALUE SPACES.
        
        WORKING-STORAGE SECTION.
-       77  fs-myFilex                      PIC 9(02)  VALUE ZEROES.
+       77  fs-myFilex                      PIC X(02)  VALUE SPACES.
 
        01  ws-environmental-variables.
            03  ws-fixed-working-constants.
@@ -67,7 +64,8 @@
            DISPLAY "| File name  : [" ws-f-name-myFilex "]."
            DISPLAY "| Error code : [" fs-myFilex "]."
            DISPLAY "+---+----+---+----+---+----+---"
-           STOP "Press the ENTER key to continue...".
+           DISPLAY "Press the ENTER key to continue..."
+           ACCEPT OMITTED.
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
@@ -79,15 +77,15 @@
 
            DISPLAY "Sequential Organizing File Creator and Generator."
            OPEN EXTEND myFilex
-           DISPLAY "Opening file. Status Code: [" fs-myFilex "].".
+           DISPLAY "Opening. Status Code: [" fs-myFilex "].".
 
            PERFORM 100000-begin-save-master-record
               THRU 100000-end-save-master-record
-             UNTIL sw-exit-answer
-                OR fs-myFilex IS NOT EQUAL TO ZEROES
+             UNTIL fs-myFilex IS NOT EQUAL TO ZEROES
+                OR sw-exit-answer
 
            CLOSE myFilex
-           DISPLAY "Closing of archive. Status Code: [" fs-myFilex "].".
+           DISPLAY "Closing. Status Code: [" fs-myFilex "].".
 
            DISPLAY "Rows inserted into output file: " ws-cnt-ins-rows
            STOP RUN.
@@ -103,21 +101,21 @@
               PERFORM 110000-begin-keep-a-record
                  THRU 110000-end-keep-a-record
            ELSE
-              DISPLAY "Operation not performed. File unchanged."
+              DISPLAY "Operation not performed. File unchanged!"
               DISPLAY "Input line contains other invalid characters."
            END-IF
 
            DISPLAY "[-> " ws-f-rec-myfilex " <-]"
 
-           DISPLAY "Do you want to capture more lines of text "
-                   "(y/n)? : " WITH NO ADVANCING
+           DISPLAY "Do you want to capture more lines of text (y/n)? : "
+              WITH NO ADVANCING
            ACCEPT ws-answer.
        100000-end-save-master-record.
            EXIT.
 
 
         110000-begin-keep-a-record.
-           DISPLAY "Recording log in progress..."
+           DISPLAY asterisk "Recording log in progress." asterisk
 
            WRITE f-rec-myFilex            FROM ws-f-rec-myFilex
               AT END-OF-PAGE
@@ -127,29 +125,29 @@
              NOT AT EOP
                  ADD ws-cte-01              TO ws-cnt-ins-rows
                  DISPLAY asterisk
-                         " Inserted line: [" LINAGE-COUNTER "]. "
+                         "Inserted line: [" LINAGE-COUNTER "]."
                          asterisk
 
            END-WRITE
 
-           DISPLAY "Record Recording. Status Code: [" fs-myFilex "].".
+           DISPLAY "Writing. Status Code: [" fs-myFilex "].".
         110000-end-keep-a-record.
            EXIT.
 
          111000-begin-add-page-break.
            DISPLAY asterisk
-           DISPLAY asterisk
-                   "Line break has occurred on line: ["
-                   LINAGE-COUNTER "]."
+                   "Line break has occurred on line: "
+                   "[" LINAGE-COUNTER "]."
                    asterisk
-           DISPLAY asterisk
 
            MOVE SPACES                TO ws-f-rec-myFilex
            SET sw-f-rec-myFilex-empty TO TRUE
 
            WRITE f-rec-myFilex      FROM ws-f-rec-myFilex
                  AFTER ADVANCING PAGE
-           END-WRITE.
+           END-WRITE
+
+           DISPLAY "Writing. Status Code: [" fs-myFilex "].".
          111000-end-add-page-break.
            EXIT.
 
