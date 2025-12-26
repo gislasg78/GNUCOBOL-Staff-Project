@@ -244,6 +244,15 @@
                                                 VALUE "START NOT LT".
                    88  sw-operation-class-WRITE
                                                 VALUE "WRITE".
+
+           03  ws-realization-question-message  PIC X(58)  VALUE SPACES.
+               88  sw-carry-out-sure-msg        VALUE
+           "Are you sure you want to carry out this operation (y/n) : ".
+               88  sw-continue-response-msg     VALUE
+           "Do you want to continue doing the same operation? (y/n) : ".
+               88  sw-question-print-rec-msg    VALUE
+           "Do you want to save this previously retrieved log (y/n) : ".
+
            03  ws-realization-questions.
                05  ws-captured-answer           PIC A(01)  VALUE SPACE.
                    88  sw-captured-answer-N     VALUES ARE 'N', 'n'.
@@ -970,11 +979,7 @@
             INITIALIZE f-OutFile-rec
                        ws-f-OutFile-rec
 
-            DISPLAY asterisk
-                    "Do you want to record this previously retrieved"
-                    " log in the Output Report? (y/n) : "
-                    WITH NO ADVANCING
-
+            SET sw-question-print-rec-msg TO TRUE
             MOVE SPACE                    TO ws-captured-answer
             PERFORM 221221-start-display-captured-selected-option
                THRU 221221-finish-display-captured-selected-option
@@ -999,6 +1004,10 @@
 
           221221-start-display-captured-selected-option.
             MOVE SPACE                    TO ws-captured-answer
+
+            DISPLAY asterisk
+                    ws-realization-question-message
+                    WITH NO ADVANCING
             ACCEPT ws-captured-answer
 
             DISPLAY asterisk
@@ -1023,16 +1032,14 @@
             EXIT.
 
          221300-start-continue-carry-out-oper.
-            DISPLAY asterisk
-                    "Are you really sure you want to carry out this "
-                    "operation? (y/n) : "
-               WITH NO ADVANCING
-
+            SET sw-carry-out-sure-msg     TO TRUE
             MOVE SPACE                    TO ws-captured-answer
+
             PERFORM 221221-start-display-captured-selected-option
                THRU 221221-finish-display-captured-selected-option
                WITH TEST AFTER
               UNTIL sw-captured-answer-Y OR sw-captured-answer-N
+
             MOVE ws-captured-answer       TO ws-carry-out-sure.
          221300-finish-continue-carry-out-oper.
             EXIT.
@@ -1072,15 +1079,14 @@
             EXIT.
 
          221600-start-continue-operation.
-            DISPLAY asterisk
-                    "Do you want to continue doing the same operation? "
-                    "(y/n) : " WITH NO ADVANCING
-
+            SET sw-continue-response-msg  TO TRUE
             MOVE SPACE                    TO ws-captured-answer
+
             PERFORM 221221-start-display-captured-selected-option
                THRU 221221-finish-display-captured-selected-option
                WITH TEST AFTER
               UNTIL sw-captured-answer-Y OR sw-captured-answer-N
+
             MOVE ws-captured-answer       TO ws-continue-response.
          221600-finish-continue-operation.
             EXIT.
