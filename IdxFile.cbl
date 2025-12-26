@@ -13,6 +13,8 @@
                   NUMERIC SIGN IS TRAILING SEPARATE.
                   SYMBOLIC CHARACTERS asterisk IS 43 IN ascii-code.
 
+       REPOSITORY. FUNCTION ALL INTRINSIC.
+
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT OPTIONAL IdxFile ASSIGN TO DISK ws-IdxFile-name
@@ -721,7 +723,8 @@
 
            MOVE SPACES                     TO f-OutFile-rec
                                               ws-f-OutFile-rec
-           PERFORM 000200-get-current-date-and-time-record
+           MOVE FUNCTION CURRENT-DATE      TO ws-current-date-and-time
+           PERFORM 000210-get-date-and-time-formatted
            MOVE ws-date-and-time-formatted TO f-OutFile-rec
                                               ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
