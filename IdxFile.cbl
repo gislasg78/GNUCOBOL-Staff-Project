@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. IdxFile.
+       PROGRAM-ID. IdxDyn.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -271,8 +271,10 @@
            03  ws-eliminated-records            PIC S9(04) VALUE ZEROES.
            03  ws-printed-pages                 PIC S9(04) VALUE ZEROES.
            03  ws-reading-records               PIC S9(04) VALUE ZEROES.
-           03  ws-reporting-records             PIC S9(04) VALUE ZEROES.
-           03  ws-reporting-records-by-page     PIC S9(04) VALUE ZEROES.
+           03  ws-reporting-read-records-page   PIC S9(04) VALUE ZEROES.
+           03  ws-reporting-read-records-sum    PIC S9(04) VALUE ZEROES.
+           03  ws-reporting-written-records-pag PIC S9(04) VALUE ZEROES.
+           03  ws-reporting-written-records-sum PIC S9(04) VALUE ZEROES.
            03  ws-repositioning-records         PIC S9(04) VALUE ZEROES.
            03  ws-rewritten-records             PIC S9(04) VALUE ZEROES.
            03  ws-written-records               PIC S9(04) VALUE ZEROES.
@@ -788,10 +790,8 @@
                      THRU 121000-finish-printout-headlines
 
               NOT AT EOP
-                  ADD cte-01
-                   TO ws-reporting-records
-                      ws-reporting-records-by-page
-
+                  ADD cte-01        TO ws-reporting-written-records-pag
+                                       ws-reporting-written-records-sum
                   DISPLAY asterisk
                           "Inserted line: [" LINAGE-COUNTER "]."
                           asterisk
@@ -810,7 +810,7 @@
             WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
             DISPLAY "Writing. Status Code: [" fs-OutFile "]."
 
-            MOVE ws-reporting-records-by-page
+            MOVE ws-reporting-read-records-page
               TO ws-printed-records-reporting
             MOVE ws-reporting-page-footing TO f-OutFile-rec
                                               ws-f-OutFile-rec 
@@ -828,13 +828,18 @@
             DISPLAY "Writing. Status Code: [" fs-OutFile "]."
 
             DISPLAY asterisk
-                    "Records inserted per page: ["
-                    ws-reporting-records-by-page "]."
+                    "Records read per page: ["
+                    ws-reporting-read-records-page "]."
+                    asterisk
+            DISPLAY asterisk
+                    "Records written per page: ["
+                    ws-reporting-written-records-pag "]."
                     asterisk
 
             INITIALIZE f-OutFile-rec
                        ws-f-OutFile-rec
-            MOVE ZEROES                  TO ws-reporting-records-by-page
+            MOVE ZEROES             TO ws-reporting-read-records-page
+                                       ws-reporting-written-records-pag
 
             DISPLAY asterisk
                     "Inserted line: [" LINAGE-COUNTER "]."
@@ -1016,10 +1021,13 @@
             PERFORM 221221-start-display-captured-selected-option
                THRU 221221-finish-display-captured-selected-option
                WITH TEST AFTER
-              UNTIL sw-captured-answer-Y OR sw-captured-answer-N
+              UNTIL sw-captured-answer-Y  OR sw-captured-answer-N
             MOVE ws-captured-answer       TO ws-question-print-record
 
             IF sw-question-print-rec-Y
+               ADD cte-01          TO ws-reporting-read-records-page
+                                      ws-reporting-read-records-sum
+
                MOVE LINAGE-COUNTER TO ws-f-OutFile-rec-linage-counter
 
                MOVE ws-f-IdxFile-rec-cod-employee
@@ -2534,7 +2542,14 @@
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
-            MOVE ws-reporting-records-by-page
+            MOVE ws-reporting-read-records-page
+              TO ws-printed-records-reporting
+            MOVE ws-reporting-page-footing    TO f-OutFile-rec
+                                                 ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+            MOVE ws-reporting-read-records-sum
               TO ws-printed-records-reporting
             MOVE ws-reporting-page-footing    TO f-OutFile-rec
                                                  ws-f-OutFile-rec
@@ -2546,7 +2561,7 @@
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
-           MOVE ws-reporting-records
+           MOVE ws-reporting-written-records-sum
              TO ws-printed-records-reporting
            MOVE ws-reporting-page-footing     TO f-OutFile-rec
                                                  ws-f-OutFile-rec 
@@ -2565,16 +2580,19 @@
            DISPLAY "+---+----+---+----+---+----+"
            DISPLAY "|    Processed records.    |"
            DISPLAY "+---+----+---+----+---+----+"
-           DISPLAY "| Eliminated   : [" ws-eliminated-records "]."
-           DISPLAY "| Pages        : [" ws-printed-pages "]"
-           DISPLAY "| Read         : [" ws-reading-records "]."
-           DISPLAY "| Reported     : [" ws-reporting-records "]."
-           DISPLAY "| Repositioned : [" ws-repositioning-records "]."
-           DISPLAY "| Rewritten    : [" ws-rewritten-records "]."
-           DISPLAY "| Writings     : [" ws-written-records "]."
+           DISPLAY "| Eliminated  : [" ws-eliminated-records "]."
+           DISPLAY "| Pages       : [" ws-printed-pages "]."
+           DISPLAY "| Read        : [" ws-reading-records "]."
+           DISPLAY "| Records log : [" ws-reporting-read-records-sum
+                   "]."
+           DISPLAY "| Report rows : [" ws-reporting-written-records-sum
+                   "]."
+           DISPLAY "| Repositions : [" ws-repositioning-records "]."
+           DISPLAY "| Rewritten   : [" ws-rewritten-records "]."
+           DISPLAY "| Writings    : [" ws-written-records "]."
            DISPLAY "+---+----+---+----+---+----+"
            DISPLAY SPACE.
         330000-finish-view-statistics.
            EXIT.
 
-       END PROGRAM IdxFile.
+       END PROGRAM IdxDyn.
