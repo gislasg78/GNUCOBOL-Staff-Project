@@ -272,6 +272,7 @@
            03  ws-printed-pages                 PIC S9(04) VALUE ZEROES.
            03  ws-reading-records               PIC S9(04) VALUE ZEROES.
            03  ws-reporting-records             PIC S9(04) VALUE ZEROES.
+           03  ws-reporting-records-by-page     PIC S9(04) VALUE ZEROES.
            03  ws-repositioning-records         PIC S9(04) VALUE ZEROES.
            03  ws-rewritten-records             PIC S9(04) VALUE ZEROES.
            03  ws-written-records               PIC S9(04) VALUE ZEROES.
@@ -428,7 +429,7 @@
            03  ws-linage-bottom                 PIC 9(01)  VALUE 01.
            03  ws-linage-footing                PIC 9(02)  VALUE 23.
            03  ws-linage-top                    PIC 9(01)  VALUE 01.
-           03  ws-linage-totlines               PIC 9(02)  VALUE 24.
+           03  ws-linage-totlines               PIC 9(02)  VALUE 26.
 
        01  ws-reporting-lines.
            03  ws-reporting-main-header.
@@ -473,6 +474,15 @@
                05  FILLER                       PIC X(01)  VALUE X'5D'.
                05  FILLER                       PIC X(01)  VALUE X'2E'.
                05  FILLER                       PIC X(01)  VALUE SPACE.
+           03  ws-reporting-page-footing.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(01)  VALUE X'5B'.
+               05  ws-printed-records-reporting PIC +9(04) VALUE ZEROES.
+               05  FILLER                       PIC X(01)  VALUE X'5D'.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC A(17)  VALUE
+                   "records processed".
+               05  FILLER                       PIC X(06)  VALUE SPACES.
 
        01  ws-work-section-ends                 PIC X(42)  VALUE
            "The working storage section ends here...".
@@ -724,7 +734,6 @@
          121000-start-printout-headlines.
            MOVE SPACES                     TO f-OutFile-rec
                                               ws-f-OutFile-rec
-
            MOVE ws-reporting-main-header   TO f-OutFile-rec
                                               ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
@@ -779,9 +788,12 @@
                      THRU 121000-finish-printout-headlines
 
               NOT AT EOP
-                  ADD cte-01               TO ws-reporting-records
+                  ADD cte-01
+                   TO ws-reporting-records
+                      ws-reporting-records-by-page
+
                   DISPLAY asterisk
-                          " Inserted line: [" LINAGE-COUNTER "]. "
+                          "Inserted line: [" LINAGE-COUNTER "]."
                           asterisk
 
             END-WRITE
@@ -792,20 +804,40 @@
 
           121110-start-write-output-advance-page.
             ADD cte-01                     TO ws-printed-pages
+
             MOVE SPACES                    TO f-OutFile-rec
                                               ws-f-OutFile-rec
+            WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
+            DISPLAY "Writing. Status Code: [" fs-OutFile "]."
+
+            MOVE ws-reporting-records-by-page
+              TO ws-printed-records-reporting
+            MOVE ws-reporting-page-footing TO f-OutFile-rec
+                                              ws-f-OutFile-rec 
+            WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
+            DISPLAY "Writing. Status Code: [" fs-OutFile "]."
+
+            MOVE SPACES                    TO f-OutFile-rec
+                                              ws-f-OutFile-rec
+            WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
+            DISPLAY "Writing. Status Code: [" fs-OutFile "]."
 
             WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
                   AFTER ADVANCING PAGE
             END-WRITE
-
             DISPLAY "Writing. Status Code: [" fs-OutFile "]."
+
+            DISPLAY asterisk
+                    "Records inserted per page: ["
+                    ws-reporting-records-by-page "]."
+                    asterisk
 
             INITIALIZE f-OutFile-rec
                        ws-f-OutFile-rec
+            MOVE ZEROES                  TO ws-reporting-records-by-page
 
             DISPLAY asterisk
-                    " Inserted line: [" LINAGE-COUNTER "]. "
+                    "Inserted line: [" LINAGE-COUNTER "]."
                     asterisk
             DISPLAY asterisk "Page feed inserted!" asterisk.
           121110-finish-write-output-advance-page.
@@ -2456,6 +2488,9 @@
            EXIT.
 
         310000-start-close-IdxFile.
+           INITIALIZE f-IdxFile-rec
+                      ws-f-IdxFile-rec
+
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY "|   Indexed Sequential File.   |"
@@ -2471,10 +2506,18 @@
            EXIT.
 
         320000-start-close-OutFile.
+           INITIALIZE f-OutFile-rec
+                      ws-f-OutFile-rec
+
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+---+"
            DISPLAY "|      OutPut Report File.     |"
            DISPLAY "+---+----+---+----+---+----+---+"
+
+           IF (fs-OutFile IS EQUAL TO ZEROES OR SPACES)
+              PERFORM 321000-start-print-OutFile-Report-Footing
+                 THRU 321000-finish-print-OutFile-Report-Footing
+           END-IF
 
            SET sw-operation-class-CLOSE       TO TRUE
            CLOSE OutFile
@@ -2483,6 +2526,38 @@
 
            DISPLAY "Closing. Status Code: ["  fs-OutFile "].".
         320000-finish-close-OutFile.
+           EXIT.
+
+         321000-start-print-OutFile-Report-Footing.
+           MOVE SPACES                        TO f-OutFile-rec
+                                                 ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+            MOVE ws-reporting-records-by-page
+              TO ws-printed-records-reporting
+            MOVE ws-reporting-page-footing    TO f-OutFile-rec
+                                                 ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE SPACES                        TO f-OutFile-rec
+                                                 ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE ws-reporting-records
+             TO ws-printed-records-reporting
+           MOVE ws-reporting-page-footing     TO f-OutFile-rec
+                                                 ws-f-OutFile-rec 
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record
+
+           MOVE SPACES                        TO f-OutFile-rec
+                                                 ws-f-OutFile-rec
+           PERFORM 121100-start-write-output-report-record
+              THRU 121100-finish-write-output-report-record.
+         321000-finish-print-OutFile-Report-Footing.
            EXIT.
 
         330000-start-view-statistics.
