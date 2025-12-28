@@ -5,8 +5,7 @@
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
                   ALPHABET ascii-code IS STANDARD-1.
-                  CLASS alphabetic-and-numeric IS X'20'
-                                                  X'2E'
+                  CLASS alphabetic-and-numeric IS X'2E'
                                                   X'30' THRU X'39'
                                                   X'41' THRU X'5A'
                                                   X'61' THRU X'7A'.
@@ -35,7 +34,7 @@
        FD  IdxFile
            BLOCK  CONTAINS 05 TO 10 RECORDS
            RECORD CONTAINS 15 CHARACTERS
-           RECORDING MODE  IS FIXED.
+           RECORDING  MODE IS FIXED.
 
        01  f-IdxFile-rec.
            03  f-IdxFile-rec-cod-employee       PIC 9(06)  VALUE ZEROES.
@@ -58,6 +57,9 @@
        WORKING-STORAGE SECTION.
        01  ws-work-section-begins               PIC X(42)  VALUE
            "The working storage section begins here...".
+
+       77  fs-IdxFile                           PIC X(02)  VALUE SPACES.
+       77  fs-OutFile                           PIC X(02)  VALUE SPACES.
 
        78  cte-01                                          VALUE 01.
        78  cte-34                                          VALUE 34.
@@ -111,7 +113,7 @@
            03  ws-f-IdxFile-error-status-code-indicators.
                05  ws-f-error-status-code-table-aux.
                        07  ws-f-error-status-code-table-code-error-aux
-                                                PIC 9(02)  VALUE ZEROES.
+                                                PIC X(02)  VALUE SPACES.
                        07  ws-f-error-status-code-table-desc-error-aux
                                                 PIC X(25)  VALUE SPACES.
                05  ws-f-IdxFile-rec-salary-employee-ed
@@ -145,13 +147,9 @@
                    07  ws-f-OutFile-rec-salary-employee PIC -,---,--9.99
                                                            VALUE ZEROES.
 
-           03  ws-Files-names-status.
-               05  ws-IdxFile.
-                   07  fs-IdxFile               PIC X(02)  VALUE SPACES.
-                   07  ws-IdxFile-name          PIC X(12)  VALUE SPACES.
-               05  ws-OutFile.
-                   07  fs-OutFile               PIC X(02)  VALUE SPACES.
-                   07  ws-OutFile-name          PIC X(12)  VALUE SPACES.
+           03  ws-Files-names.
+               05  ws-IdxFile-name              PIC X(12)  VALUE SPACES.
+               05  ws-OutFile-name              PIC X(12)  VALUE SPACES.
                05  ws-TempFile-name             PIC X(12)  VALUE SPACES.
 
            03  ws-menu-standard-options-performance.
@@ -416,12 +414,12 @@
                05  FILLER                       PIC 9(02)  VALUE 91.
                05  FILLER                       PIC X(25)  VALUE 
                    "File Not Available".
-       01  ws-f-error-status-code-table-RED 
+       01  ws-f-error-status-code-table-RED
            REDEFINES ws-f-error-status-code-table.
            03  ws-f-error-status-code-table-OC  OCCURS cte-34 TIMES
                ASCENDING KEY ws-f-error-status-code-table-code-error
                INDEXED BY idx-error-status-code-table.
-               05  ws-f-error-status-code-table-code-error PIC 9(02).
+               05  ws-f-error-status-code-table-code-error PIC X(02).
                05  ws-f-error-status-code-table-desc-error PIC X(25).
 
        01  ws-f-error-status-code-table-desc-error-tag     PIC X(25)
@@ -495,14 +493,21 @@
            USE AFTER ERROR PROCEDURE ON IdxFile.
        000000-start-status-IdxFile-check.
            INITIALIZE ws-f-error-status-code-table-aux
+
+           DISPLAY SPACE
+           DISPLAY "+===+====+===+====+===+====+===+"
+           DISPLAY "|   Indexed Sequential File.   |"
+           DISPLAY "+===+====+===+====+===+====+===+"
+
             MOVE fs-IdxFile
               TO ws-f-error-status-code-table-code-error-aux
            PERFORM 000100-search-for-error-and-description-codes
 
            PERFORM 000200-get-current-date-and-time-record
 
-           MOVE ws-OutFile-name TO ws-TempFile-name
+           MOVE ws-IdxFile-name TO ws-TempFile-name
            PERFORM 000300-check-file-status-code
+
            PERFORM 000400-preliminary-review-employee-code-contents
            PERFORM 000500-preliminary-review-employee-salary-contents
            PERFORM 000600-press-enter-key-to-continue.
@@ -513,6 +518,12 @@
            USE AFTER ERROR PROCEDURE ON OutFile.
        000000-start-status-OutFile-check.
            INITIALIZE ws-f-error-status-code-table-aux
+
+           DISPLAY SPACE
+           DISPLAY "+===+====+===+====+===+====+===+"
+           DISPLAY "|      OutPut Report File.     |"
+           DISPLAY "+===+====+===+====+===+====+===+"
+
             MOVE fs-OutFile
               TO ws-f-error-status-code-table-code-error-aux
            PERFORM 000100-search-for-error-and-description-codes
@@ -778,8 +789,8 @@
 
           121100-start-write-output-report-record.
             DISPLAY asterisk asterisk asterisk asterisk asterisk
-            DISPLAY asterisk X'7C' f-OutFile-rec X'7C' asterisk
-            DISPLAY asterisk X'7C' ws-f-OutFile-rec X'7C' asterisk
+            DISPLAY asterisk X'5B' f-OutFile-rec X'5D' asterisk
+            DISPLAY asterisk X'5B' ws-f-OutFile-rec X'5D' asterisk
             DISPLAY asterisk asterisk asterisk asterisk asterisk
 
             WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
@@ -1148,7 +1159,7 @@
                   WITH TEST AFTER
                  UNTIL sw-carry-out-sure-Y OR sw-carry-out-sure-N
 
-               IF (sw-carry-out-sure-Y)  THEN
+               IF (sw-carry-out-sure-Y)   THEN
                    PERFORM 222100-start-eliminate-a-record
                       THRU 222100-finish-eliminate-a-record
                ELSE
@@ -2522,7 +2533,7 @@
            DISPLAY "|      OutPut Report File.     |"
            DISPLAY "+---+----+---+----+---+----+---+"
 
-           IF (fs-OutFile IS EQUAL TO ZEROES OR SPACES)
+           IF fs-OutFile IS EQUAL TO ZEROES
               PERFORM 321000-start-print-OutFile-Report-Footing
                  THRU 321000-finish-print-OutFile-Report-Footing
            END-IF
@@ -2553,18 +2564,6 @@
               TO ws-printed-records-reporting
             MOVE ws-reporting-page-footing    TO f-OutFile-rec
                                                  ws-f-OutFile-rec
-           PERFORM 121100-start-write-output-report-record
-              THRU 121100-finish-write-output-report-record
-
-           MOVE SPACES                        TO f-OutFile-rec
-                                                 ws-f-OutFile-rec
-           PERFORM 121100-start-write-output-report-record
-              THRU 121100-finish-write-output-report-record
-
-           MOVE ws-reporting-written-records-sum
-             TO ws-printed-records-reporting
-           MOVE ws-reporting-page-footing     TO f-OutFile-rec
-                                                 ws-f-OutFile-rec 
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
