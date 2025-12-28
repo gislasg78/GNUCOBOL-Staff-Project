@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. IdxFileSeq.
+       PROGRAM-ID. IdxSeq.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -181,4 +181,4 @@
 
            STOP RUN.
 
-       END PROGRAM IdxFileSeq.
+       END PROGRAM IdxSeq.
