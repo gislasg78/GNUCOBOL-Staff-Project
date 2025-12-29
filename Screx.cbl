@@ -3,7 +3,12 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  ws-cte-01                        PIC 9(01)  VALUE 01.
+       77  ws-key-pause                     PIC X(01)  VALUE SPACE.
+
+       01  ws-constants-symbolics.
+           03  ws-cte-01                    PIC 9(01)  VALUE 01.
+           03  ws-cte-25                    PIC 9(02)  VALUE 25.
+           03  ws-cte-35                    PIC 9(02)  VALUE 35.
 
        01  ws-screen-coords.
            03  ws-screen-bounds.
@@ -29,9 +34,10 @@
                        88  sw-char-dot-point           VALUE X'2E'.
                        88  sw-char-equal-sign          VALUE X'3D'.
                        88  sw-char-underscore          VALUE X'5F'.
-                       88  sw-char-pipe                VALUE X'7C'. 
-                   07  ws-col               PIC 9(02)  VALUE ZEROES.
-                   07  ws-row               PIC 9(02)  VALUE ZEROES.
+                       88  sw-char-pipe                VALUE X'7C'.
+                   07  ws-displacement-col-row.
+                       09  ws-col           PIC 9(02)  VALUE ZEROES.
+                       09  ws-row           PIC 9(02)  VALUE ZEROES.
                05  ws-position-initiatiors.
                    07  ws-finish-pos        PIC 9(02)  VALUE ZEROES.
                    07  ws-pos               PIC 9(02)  VALUE ZEROES.
@@ -46,7 +52,9 @@
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
-           DISPLAY SPACE WITH BLANK SCREEN
+           DISPLAY SPACE
+                AT LINE ws-cte-01 COLUMN ws-cte-01
+              WITH BLANK SCREEN
 
            SET sw-bottom-row-01             TO TRUE
            SET sw-top-row-24                TO TRUE
@@ -55,6 +63,11 @@
 
            PERFORM 100000-start-construct-text-window
               THRU 100000-finish-construct-text-window
+
+           DISPLAY "Press the ENTER key to continue..."
+                AT LINE ws-cte-25 COLUMN ws-cte-01
+           ACCEPT ws-key-pause
+               AT LINE ws-cte-25 COLUMN ws-cte-35 WITH PROMPT
 
            STOP RUN.
 
@@ -78,16 +91,13 @@
         110000-start-cleaning-window-frame-area.
            SET  sw-char-normal-space        TO TRUE
 
-           PERFORM VARYING ws-row
-              FROM ws-bottom-row            BY ws-cte-01
-             UNTIL ws-row           IS GREATER THAN ws-top-row
-                   PERFORM VARYING ws-col
-                      FROM ws-left-col      BY ws-cte-01
-                     UNTIL ws-col   IS GREATER THAN ws-right-col
-                           DISPLAY ws-char
-                                AT LINE ws-row COLUMN ws-col
-                           END-DISPLAY
-                   END-PERFORM
+           PERFORM VARYING ws-row FROM ws-bottom-row BY ws-cte-01
+             UNTIL ws-row  IS GREATER THAN ws-top-row
+             AFTER ws-col  FROM ws-left-col BY ws-cte-01
+             UNTIL ws-col  IS GREATER THAN ws-right-col
+                   DISPLAY ws-char
+                        AT LINE ws-row COLUMN ws-col
+                   END-DISPLAY
            END-PERFORM.
         110000-finish-cleaning-window-frame-area.
            EXIT.
@@ -119,7 +129,9 @@
                 DISPLAY ws-char AT LINE ws-pos COLUMN ws-fixed-col
             ELSE
                 IF (sw-switch-row-column-column)
-                    DISPLAY ws-char AT LINE ws-fixed-row COLUMN ws-pos.
+                    DISPLAY ws-char AT LINE ws-fixed-row COLUMN ws-pos
+                END-IF
+            END-IF.
          121000-finish-build-text-window-bricks.
             EXIT.
 
