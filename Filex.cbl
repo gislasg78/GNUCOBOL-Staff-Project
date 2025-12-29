@@ -5,6 +5,7 @@
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
             CLASS alphabetic-and-numeric IS X'20'
+                                            X'2E'
                                             X'30' THRU X'39'
                                             X'41' THRU X'5A'
                                             X'61' THRU X'7A'.
@@ -14,22 +15,25 @@
        FILE-CONTROL.
             SELECT OPTIONAL myFilex ASSIGN TO ws-f-name-myFilex
                    ORGANIZATION IS LINE SEQUENTIAL
-                   ACCESS MODE  IS SEQUENTIAL
                    FILE STATUS  IS fs-myFilex.
             
        DATA DIVISION.
        FILE SECTION.
        FD  myFilex
            BLOCK CONTAINS  05 TO 10 RECORDS
-           RECORDING MODE  IS F
+           RECORD IS VARYING   IN SIZE FROM 02 TO 31 CHARACTERS
+                     DEPENDING ON ws-f-rec-myFilex-size
+           RECORDING MODE  IS V
 
            LINAGE IS ws-linage-totlines LINES
              WITH FOOTING AT ws-linage-footing
             LINES AT TOP     ws-linage-top
             LINES AT BOTTOM  ws-linage-bottom.
 
-       01  f-rec-myFilex                   PIC X(31)  VALUE SPACES.
+       01  f-rec-myFilex.
            88  sw-f-rec-myFilex-empty                 VALUE SPACES.
+           03  f-rec-myFilex-size          PIC 9(02)  VALUE ZEROES.
+           03  f-rec-myFilex-content       PIC X(29)  VALUE SPACES.
        
        WORKING-STORAGE SECTION.
        77  fs-myFilex                      PIC X(02)  VALUE SPACES.
@@ -42,6 +46,7 @@
                                            SIGN  IS LEADING
                                            SEPARATE CHARACTER.
                05  ws-cte-01               PIC 9(01)  VALUE 1.
+               05  ws-cte-two-spaces       PIC X(02)  VALUE ALL X'20'.
 
            03  ws-linage-work-variables.
                05  ws-linage-bottom        PIC 9(02)  VALUE 01.
@@ -51,18 +56,23 @@
 
            03  ws-myFilex-vars.
                05  ws-f-name-myFilex       PIC X(12)  VALUE SPACES.
-               05  ws-f-rec-myFilex        PIC X(20)  VALUE SPACES.
+               05  ws-f-rec-myFilex.
+                   10  ws-f-rec-myFilex-size          PIC 9(02)
+                                                      VALUE ZEROES.
+                   10  ws-f-rec-myFilex-content       PIC X(29)
+                                                      VALUE SPACES.
        
        PROCEDURE DIVISION.
        DECLARATIVES.
        File-Handler SECTION.
            USE AFTER ERROR PROCEDURE ON myFilex.
        000000-status-check.
+           DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+---"
            DISPLAY "| Archive Status Information. |"
            DISPLAY "+---+----+---+----+---+----+---"
-           DISPLAY "| File name  : [" ws-f-name-myFilex "]."
-           DISPLAY "| Error code : [" fs-myFilex "]."
+           DISPLAY "| + File name  : [" ws-f-name-myFilex "]."
+           DISPLAY "| + Error code : [" fs-myFilex "]."
            DISPLAY "+---+----+---+----+---+----+---"
            DISPLAY "Press the ENTER key to continue..."
            ACCEPT OMITTED.
@@ -91,31 +101,48 @@
            STOP RUN.
 
        100000-begin-save-master-record.
-           DISPLAY "Enter a text line to be recorded: "
-             WITH NO ADVANCING
-           ACCEPT ws-f-rec-myFilex
+           INITIALIZE f-rec-myFilex
+                      ws-f-rec-myFilex
 
-           IF ws-f-rec-myFilex IS alphabetic-and-numeric
+           DISPLAY SPACE
+           DISPLAY "Enter a text line to be recorded: "
+              WITH NO ADVANCING
+           ACCEPT ws-f-rec-myFilex-content
+
+           IF ws-f-rec-myFilex-content IS alphabetic-and-numeric
+              DISPLAY SPACE
               DISPLAY "Validated content!"
+
+              INSPECT  ws-f-rec-myFilex-content
+              TALLYING ws-f-rec-myFilex-size
+                   FOR CHARACTERS BEFORE INITIAL ws-cte-two-spaces
+
+              ADD LENGTH OF ws-f-rec-myFilex-size
+               TO ws-f-rec-myFilex-size
 
               PERFORM 110000-begin-keep-a-record
                  THRU 110000-end-keep-a-record
            ELSE
+              DISPLAY SPACE
               DISPLAY "Operation not performed. File unchanged!"
-              DISPLAY "Input line contains other invalid characters."
+              DISPLAY "Input line contains other invalid characters!"
            END-IF
 
-           DISPLAY "[-> " ws-f-rec-myfilex " <-]"
-
+           DISPLAY SPACE
            DISPLAY "Do you want to capture more lines of text (y/n)? : "
               WITH NO ADVANCING
            ACCEPT ws-answer.
        100000-end-save-master-record.
            EXIT.
 
-
         110000-begin-keep-a-record.
            DISPLAY asterisk "Recording log in progress." asterisk
+           DISPLAY X'5B'
+                   ws-f-rec-myFilex-size
+                   X'5D' X'20'
+                   X'5B' X'2D' X'3E' X'20'
+                   ws-f-rec-myfilex-content
+                   X'20' X'3C' X'2D' X'5D'
 
            WRITE f-rec-myFilex            FROM ws-f-rec-myFilex
               AT END-OF-PAGE
