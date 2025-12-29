@@ -37,6 +37,7 @@
            RECORDING  MODE IS FIXED.
 
        01  f-IdxFile-rec.
+           88  sw-f-IdxFile-rec-empty                      VALUE ZEROES.
            03  f-IdxFile-rec-cod-employee       PIC 9(06)  VALUE ZEROES.
            03  f-IdxFile-rec-salary-employee    PIC S9(06)V9(02)
                                                 SIGN  IS LEADING
@@ -53,6 +54,7 @@
             LINES AT BOTTOM  ws-linage-bottom.
 
        01  f-OutFile-rec                        PIC X(31)  VALUE SPACES.
+           88  sw-f-OutFile-rec-empty                      VALUE SPACES.
 
        WORKING-STORAGE SECTION.
        01  ws-work-section-begins               PIC X(42)  VALUE
