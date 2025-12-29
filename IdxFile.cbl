@@ -5,7 +5,8 @@
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
                   ALPHABET ascii-code IS STANDARD-1.
-                  CLASS alphabetic-and-numeric IS X'2E'
+                  CLASS alphabetic-and-numeric IS X'20'
+                                                  X'2E'
                                                   X'30' THRU X'39'
                                                   X'41' THRU X'5A'
                                                   X'61' THRU X'7A'.
@@ -523,7 +524,7 @@
 
            DISPLAY SPACE
            DISPLAY "+===+====+===+====+===+====+===+"
-           DISPLAY "|      OutPut Report File.     |"
+           DISPLAY "|      Output Report File.     |"
            DISPLAY "+===+====+===+====+===+====+===+"
 
             MOVE fs-OutFile
@@ -651,6 +652,8 @@
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
+           DISPLAY "Basic maintenance to an indexed sequential file."
+
            PERFORM 100000-start-begin-program
               THRU 100000-finish-begin-program
 
@@ -722,7 +725,7 @@
 
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+---+"
-           DISPLAY "|      OutPut Report File.     |"
+           DISPLAY "|      Output Report File.     |"
            DISPLAY "+---+----+---+----+---+----+---+"
 
            MOVE SPACES                     TO ws-TempFile-name
@@ -974,13 +977,13 @@
             MOVE ws-f-IdxFile-rec-cod-employee
               TO f-IdxFile-rec-cod-employee
 
-            IF ws-f-IdxFile-rec-cod-employee IS POSITIVE
+            IF ws-f-IdxFile-rec-cod-employee IS GREATER THAN ZEROES
                DISPLAY asterisk asterisk
-                       "The employee code is positive. OK!"
+                       "The employee code is greater than zeroes. OK!"
                        asterisk asterisk
             ELSE
                DISPLAY asterisk asterisk
-                       "The employee code is not positive!"
+                       "The employee code is not greater than zeroes!"
                        asterisk asterisk
             END-IF.
           221100-finish-capture-key-field.
@@ -2582,7 +2585,7 @@
 
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+---+"
-           DISPLAY "|      OutPut Report File.     |"
+           DISPLAY "|      Output Report File.     |"
            DISPLAY "+---+----+---+----+---+----+---+"
 
            IF fs-OutFile IS EQUAL TO ZEROES
@@ -2605,16 +2608,16 @@
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
-            MOVE ws-reporting-read-records-page
-              TO ws-printed-records-reporting
-            MOVE ws-reporting-page-footing    TO f-OutFile-rec
+           MOVE ws-reporting-read-records-page
+             TO ws-printed-records-reporting
+           MOVE ws-reporting-page-footing     TO f-OutFile-rec
                                                  ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
-            MOVE ws-reporting-read-records-sum
-              TO ws-printed-records-reporting
-            MOVE ws-reporting-page-footing    TO f-OutFile-rec
+           MOVE ws-reporting-read-records-sum
+             TO ws-printed-records-reporting
+           MOVE ws-reporting-page-footing     TO f-OutFile-rec
                                                  ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
