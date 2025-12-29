@@ -970,7 +970,17 @@
             ACCEPT ws-f-IdxFile-rec-cod-employee
 
             MOVE ws-f-IdxFile-rec-cod-employee
-              TO f-IdxFile-rec-cod-employee.
+              TO f-IdxFile-rec-cod-employee
+
+            IF ws-f-IdxFile-rec-cod-employee IS POSITIVE
+               DISPLAY asterisk asterisk
+                       "The employee code is positive. OK!"
+                       asterisk asterisk
+            ELSE
+               DISPLAY asterisk asterisk
+                       "The employee code is not positive!"
+                       asterisk asterisk
+            END-IF.
           221100-finish-capture-key-field.
             EXIT.
 
@@ -1096,12 +1106,22 @@
             EXIT.
 
          221400-start-capture-salary-employee.
-           DISPLAY asterisk " Employee Salary : " WITH NO ADVANCING
-           ACCEPT ws-f-IdxFile-rec-salary-employee
+            DISPLAY asterisk " Employee Salary : " WITH NO ADVANCING
+            ACCEPT ws-f-IdxFile-rec-salary-employee
 
-           MOVE ws-f-IdxFile-rec-salary-employee
-             TO ws-f-IdxFile-rec-salary-employee-ed
-                f-IdxFile-rec-salary-employee.
+            MOVE ws-f-IdxFile-rec-salary-employee
+              TO ws-f-IdxFile-rec-salary-employee-ed
+                 f-IdxFile-rec-salary-employee
+
+            IF ws-f-IdxFile-rec-salary-employee IS POSITIVE
+               DISPLAY asterisk asterisk
+                       "The salary of employee is positive. OK!"
+                       asterisk asterisk
+            ELSE
+               DISPLAY asterisk asterisk
+                       "The salary of employee is not positive!"
+                       asterisk asterisk
+            END-IF.
          221400-finish-capture-salary-employee.
             EXIT.
 
@@ -1568,7 +1588,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           22422121-finish-routine-mode-locate-for-sal.
             EXIT.
 
@@ -1702,6 +1724,7 @@
 
             END-START
 
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "]."
             PERFORM 000600-press-enter-key-to-continue.
           225210-finish-menu-mode-start-position.
             EXIT.
@@ -1779,7 +1802,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           2252211-finish-menu-mode-code-pos-eq.
             EXIT.
 
@@ -1927,7 +1952,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231121-finish-menu-mode-code-pos-ngt.
             EXIT.
 
@@ -1963,7 +1990,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231122-finish-menu-mode-code-pos-gt.
             EXIT.
 
@@ -1999,7 +2028,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231123-finish-menu-mode-code-pos-gteq.
             EXIT.
 
@@ -2035,7 +2066,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231124-finish-menu-mode-code-pos-nlt.
             EXIT.
 
@@ -2071,7 +2104,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231125-finish-menu-mode-code-pos-lt.
             EXIT.
 
@@ -2107,7 +2142,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231126-finish-menu-mode-code-pos-lteq.
             EXIT.
 
@@ -2200,7 +2237,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231211-finish-locate-salary-key-ngt.
             EXIT.
 
@@ -2237,7 +2276,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231212-finish-locate-salary-key-gt.
             EXIT.
 
@@ -2276,7 +2317,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231213-finish-locate-salary-key-gteq.
             EXIT.
 
@@ -2313,7 +2356,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231214-finish-locate-salary-key-nlt.
             EXIT.
 
@@ -2350,7 +2395,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231215-finish-locate-salary-key-lt.
             EXIT.
 
@@ -2389,7 +2436,9 @@
                           asterisk
                   PERFORM 000600-press-enter-key-to-continue
 
-            END-START.
+            END-START
+
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "].".
           225231216-finish-locate-salary-key-lteq.
             EXIT.
 
@@ -2411,6 +2460,7 @@
 
             END-START
 
+            DISPLAY "Starting. Status Code: [" fs-IdxFile "]."
             PERFORM 000600-press-enter-key-to-continue.
           225240-finish-menu-mode-finish-position.
             EXIT.
