@@ -11,7 +11,7 @@
        77  ws-key-pause         PIC X(01)       VALUE SPACE.
 
        78  cte-01                               VALUE 1.
-       78  cte-10                               VALUE 10.
+       78  cte-11                               VALUE 11.
 
        01  ws-lines.
            03  ws-line-add      PIC 9(02)       VALUE ZEROES COMP-3.
@@ -35,12 +35,14 @@
            05  FILLER           PIC 9(02)       VALUE 08.
            05  FILLER           PIC A(15)       VALUE "Patricia Davis".
            05  FILLER           PIC 9(02)       VALUE 09.
-           05  FILLER           PIC A(15)       VALUE "Sophia Bennett".
+           05  FILLER           PIC A(15)       VALUE "Rachael Glass".
            05  FILLER           PIC 9(02)       VALUE 10.
+           05  FILLER           PIC A(15)       VALUE "Sophia Bennett".
+           05  FILLER           PIC 9(02)       VALUE 11.
            05  FILLER           PIC A(15)       VALUE "Victoria Parker".
 
        01  ws-names-red-occ     REDEFINES ws-names-table
-                                OCCURS  cte-10  TIMES
+                                OCCURS  cte-11  TIMES
                                 INDEXED BY idx-names-array.
            05  ws-numbers-array PIC 9(02).
            05  ws-names-array   PIC A(15).
@@ -50,9 +52,9 @@
            05  ws-code          PIC 9(06)       VALUE ZEROES.
            05  ws-date-num      PIC 9(08)       VALUE ZEROES.
            05  ws-date          REDEFINES ws-date-num.
-               10  ws-year      PIC 9(04)       VALUE ZEROES.
-               10  ws-month     PIC 9(02)       VALUE ZEROES.
-               10  ws-day       PIC 9(02)       VALUE ZEROES.
+               10  ws-year      PIC 9(04).
+               10  ws-month     PIC 9(02).
+               10  ws-day       PIC 9(02).
            05  ws-name          PIC A(20)       VALUE SPACES.
            05  ws-phone         PIC 9(10)       VALUE ZEROES.
            05  ws-salary        PIC 9(06)V9(02) VALUE ZEROES.
@@ -106,7 +108,7 @@
        01  scr-screen-04.
            05  LINE ws-line-pos.
                10  COLUMN 03    VALUE "Press ENTER to continue...".
-               10  COLUMN 29    TO ws-key-pause. 
+               10  COLUMN 29    PIC X(01) TO ws-key-pause. 
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
@@ -121,7 +123,7 @@
            DISPLAY scr-screen-02
 
            PERFORM VARYING idx-names-array FROM cte-01  BY cte-01
-                     UNTIL idx-names-array IS GREATER THAN cte-10
+                     UNTIL idx-names-array IS GREATER THAN cte-11
 
                      SET ws-line-add TO idx-names-array
                      DISPLAY scr-screen-03
@@ -131,4 +133,5 @@
             ACCEPT scr-screen-04
 
            GOBACK.
+
        END PROGRAM ScreenOC.
