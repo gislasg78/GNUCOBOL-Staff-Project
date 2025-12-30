@@ -5,6 +5,8 @@
        WORKING-STORAGE SECTION.
        77  ws-key-pause                         PIC X(01)  VALUE SPACE.
 
+       78  cte-11                                          VALUE 11.
+
        01  ws-constants-symbolics.
            03  ws-cte-01                        PIC 9(01)  VALUE 01.
            03  ws-cte-25                        PIC 9(02)  VALUE 25.
@@ -70,14 +72,153 @@
                    88  sw-switch-row-column-row            VALUE 1.
                    88  sw-switch-row-column-column         VALUE 2.
 
+       01  ws-screen-contents-inside.
+           03  ws-current-date.
+               05  ws-current-date-year         PIC 9(04)  VALUE ZEROES.
+               05  ws-current-date-month        PIC 9(02)  VALUE ZEROES.
+               05  ws-current-date-day          PIC 9(02)  VALUE ZEROES.
+           03  ws-employee-data.
+               05  ws-address-employee          PIC X(30)  VALUE SPACES.
+               05  ws-admission-date-employee   PIC 9(08)  VALUE ZEROES.
+               05  ws-code-employee             PIC 9(06)  VALUE ZEROES.
+               05  ws-full-name-employee        PIC A(20)  VALUE SPACES.
+               05  ws-phone-employee            PIC 9(10)  VALUE ZEROES.
+               05  ws-salary-employee           PIC S9(06)V9(02)
+                                                VALUE ZEROES.
+               05  ws-status-employee           PIC A(01)  VALUE SPACE.
+               05  ws-type-of-employee          PIC 9(01)  VALUE ZERO.
+           03  ws-final-questions.
+               05  ws-line-employee-list        PIC 9(02)  VALUE ZEROES.
+               05  ws-line-question             PIC 9(02)  VALUE 22.
+               05  ws-question-response         PIC A(01)  VALUE SPACE.
+                   88  sw-question-response-N   VALUES ARE 'N', 'n'.
+                   88  sw-question-response-Y   VALUES ARE 'Y' 'y'.
+
+       01  ws-names-table-example.
+           03  FILLER                 PIC 9(02) VALUE 01.
+           03  FILLER                 PIC A(15) VALUE "Betty Lewis".
+           03  FILLER                 PIC 9(02) VALUE 02.
+           03  FILLER                 PIC A(15) VALUE "Cynthia Turner".
+           03  FILLER                 PIC 9(02) VALUE 03.
+           03  FILLER                 PIC A(15) VALUE "Debra Watson".
+           03  FILLER                 PIC 9(02) VALUE 04.
+           03  FILLER                 PIC A(15) VALUE "Dorothy Collins".
+           03  FILLER                 PIC 9(02) VALUE 05.
+           03  FILLER                 PIC A(15) VALUE "Heather Wood".
+           03  FILLER                 PIC 9(02) VALUE 06.
+           03  FILLER                 PIC A(15) VALUE "Kimberly James".
+           03  FILLER                 PIC 9(02) VALUE 07.
+           03  FILLER                 PIC A(15) VALUE "Lauren Marshall".
+           03  FILLER                 PIC 9(02) VALUE 08.
+           03  FILLER                 PIC A(15) VALUE "Patricia Davis".
+           03  FILLER                 PIC 9(02) VALUE 09.
+           03  FILLER                 PIC A(15) VALUE "Rachael Glass".
+           03  FILLER                 PIC 9(02) VALUE 10.
+           03  FILLER                 PIC A(15) VALUE "Sophia Bennett".
+           03  FILLER                 PIC 9(02) VALUE 11.
+           03  FILLER                 PIC A(15) VALUE "Victoria Parker".
+       01  ws-names-table-example-occ REDEFINES ws-names-table-example
+           OCCURS cte-11 TIMES ASCENDING KEY ws-names-table-example-code 
+           INDEXED BY idx-names-table-example-occ.
+           03  ws-names-table-example-code      PIC 9(02).
+           03  ws-names-table-example-name      PIC A(15).
+
+       SCREEN SECTION.
+       01  scr-main-content-screen.
+           03  LINE 02 COLUMN 28 VALUE "Capture of employee data.".
+           03  LINE 03 COLUMN 28 
+                       PIC X(25) VALUE "=========================".
+
+           03  LINE 05.
+               05  COLUMN 03     VALUE "Code:".
+               05  COLUMN 21     PIC 9(06) TO ws-code-employee.
+           03  LINE 06.
+               05  COLUMN 03     VALUE "Admission date:".
+               05  COLUMN 21     PIC 9(08)
+                                 TO ws-admission-date-employee.
+               05  COLUMN 35     PIC 9999/99/99
+                                 FROM ws-admission-date-employee.
+           03  LINE 07.
+               05  COLUMN 03     VALUE "Full name:".
+               05  COLUMN 21     PIC A(20) TO ws-full-name-employee.
+           03  LINE 08.
+               05  COLUMN 03     VALUE "Address:".
+               05  COLUMN 21     PIC X(30) TO ws-address-employee.
+           03  LINE 09.
+               05  COLUMN 03     VALUE "Phone number:".
+               05  COLUMN 21     PIC 9(10) TO ws-phone-employee.
+               05  COLUMN 35     PIC 9(02)B9(02)B9(03)B9(03)
+                                 FROM ws-phone-employee.
+           03  LINE 10.
+               05  COLUMN 03     VALUE "Type:".
+               05  COLUMN 21     PIC 9(01) TO ws-type-of-employee.
+           03  LINE 11.
+               05  COLUMN 03     VALUE "State:".
+               05  COLUMN 21     PIC A(01) TO ws-status-employee.
+           03  LINE 12 COLUMN 03 VALUE "Salary received:".
+           03  LINE 12 COLUMN 21 PIC S9(06)V9(02)
+                                 TO ws-salary-employee.
+           03  LINE 12 COLUMN 35 PIC +$(04),$(02)9.9(02)
+                                 FROM ws-salary-employee.
+
+       01  scr-display-employee-list.
+           03  scr-display-employee-list-header.
+               05  LINE 04 COLUMN 53  PIC A(22)
+                                      VALUE "List of employee names".
+               05  LINE 05 COLUMN 53  PIC X(22)
+                                      VALUE "======================".
+           03  scr-display-employee-list-detail.
+               05  LINE 05.
+                    07  LINE PLUS ws-line-employee-list.
+                        09  COLUMN 53 PIC 9(02)
+                            FROM ws-names-table-example-code
+                                (idx-names-table-example-occ).
+                        09  COLUMN 56 PIC A(15)
+                            FROM ws-names-table-example-name
+                                (idx-names-table-example-occ).
+
+       01  scr-main-content-screen-question.
+           03  LINE ws-line-question.
+               05  COLUMN 02     PIC X(43)
+                   VALUE "-------------------------------------------".
+               05  COLUMN 45     PIC X(35)
+                   VALUE "-----------------------------------".
+               05  LINE PLUS 01.
+                   05  COLUMN 18
+                   VALUE "Do you want to correct this record? (y/n) :".
+                   05  COLUMN 62     PIC X(01) TO ws-question-response.
+
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
            DISPLAY SPACE
                 AT LINE ws-cte-01 COLUMN ws-cte-01
               WITH BLANK SCREEN
+           ACCEPT ws-current-date FROM DATE YYYYMMDD
 
            PERFORM 100000-start-construct-main-text-window
               THRU 100000-finish-construct-main-text-window
+
+           MOVE ws-current-date     TO ws-admission-date-employee
+           PERFORM UNTIL sw-question-response-N
+                   DISPLAY scr-main-content-screen
+                           scr-display-employee-list-header
+
+                   PERFORM VARYING idx-names-table-example-occ
+                              FROM ws-cte-01 BY ws-cte-01
+                             UNTIL idx-names-table-example-occ
+                                IS GREATER THAN cte-11
+
+                           SET ws-line-employee-list
+                            TO idx-names-table-example-occ
+                           DISPLAY scr-display-employee-list-detail
+                   END-PERFORM
+
+                   ACCEPT scr-main-content-screen
+                   DISPLAY scr-main-content-screen
+
+                   DISPLAY scr-main-content-screen-question
+                   ACCEPT scr-main-content-screen-question
+           END-PERFORM
 
            DISPLAY "Press the ENTER key to continue..."
                 AT LINE ws-cte-25 COLUMN ws-cte-01
