@@ -5,10 +5,14 @@
        WORKING-STORAGE SECTION.
        77  ws-key-pause                         PIC X(01)  VALUE SPACE.
 
-       78  cte-11                                          VALUE 11.
+       78  cte-13                                          VALUE 13.
 
        01  ws-constants-symbolics.
            03  ws-cte-01                        PIC 9(01)  VALUE 01.
+           03  ws-cte-03                        PIC 9(01)  VALUE 03.
+           03  ws-cte-14                        PIC 9(02)  VALUE 14.
+           03  ws-cte-15                        PIC 9(02)  VALUE 15.
+           03  ws-cte-16                        PIC 9(02)  VALUE 16.
            03  ws-cte-25                        PIC 9(02)  VALUE 25.
            03  ws-cte-35                        PIC 9(02)  VALUE 35.
 
@@ -73,10 +77,25 @@
                    88  sw-switch-row-column-column         VALUE 2.
 
        01  ws-screen-contents-inside.
-           03  ws-current-date.
-               05  ws-current-date-year         PIC 9(04)  VALUE ZEROES.
-               05  ws-current-date-month        PIC 9(02)  VALUE ZEROES.
-               05  ws-current-date-day          PIC 9(02)  VALUE ZEROES.
+           03  ws-current-date-formats.
+               05  ws-current-date.
+                   07  ws-current-date-year     PIC 9(04)  VALUE ZEROES.
+                   07  ws-current-date-month    PIC 9(02)  VALUE ZEROES.
+                   07  ws-current-date-day      PIC 9(02)  VALUE ZEROES.
+               05  ws-current-date-num
+                   REDEFINES ws-current-date    PIC 9(08).
+               05  ws-current-time.
+                   07  ws-current-time-hour     PIC 9(02)  VALUE ZEROES.
+                   07  ws-current-time-minute   PIC 9(02)  VALUE ZEROES.
+                   07  ws-current-time-second   PIC 9(02)  VALUE ZEROES.
+               05  ws-current-time-num
+                   REDEFINES ws-current-time    PIC 9(06).
+               05  ws-current-date-time-formats.
+                   07  ws-current-date-fmt      PIC 9999/99/99
+                                                VALUE ZEROES.
+                   07  ws-current-time-fmt      PIC 99B99B99
+                                                VALUE ZEROES.
+
            03  ws-employee-data.
                05  ws-address-employee          PIC X(30)  VALUE SPACES.
                05  ws-admission-date-employee   PIC 9(08)  VALUE ZEROES.
@@ -96,29 +115,33 @@
 
        01  ws-names-table-example.
            03  FILLER                 PIC 9(02) VALUE 01.
-           03  FILLER                 PIC A(15) VALUE "Betty Lewis".
+           03  FILLER                 PIC A(15) VALUE "Andrea Skeldon".
            03  FILLER                 PIC 9(02) VALUE 02.
-           03  FILLER                 PIC A(15) VALUE "Cynthia Turner".
+           03  FILLER                 PIC A(15) VALUE "Betty Lewis".
            03  FILLER                 PIC 9(02) VALUE 03.
-           03  FILLER                 PIC A(15) VALUE "Debra Watson".
+           03  FILLER                 PIC A(15) VALUE "Cynthia Turner".
            03  FILLER                 PIC 9(02) VALUE 04.
-           03  FILLER                 PIC A(15) VALUE "Dorothy Collins".
+           03  FILLER                 PIC A(15) VALUE "Debra Watson".
            03  FILLER                 PIC 9(02) VALUE 05.
-           03  FILLER                 PIC A(15) VALUE "Heather Wood".
+           03  FILLER                 PIC A(15) VALUE "Dorothy Collins".
            03  FILLER                 PIC 9(02) VALUE 06.
-           03  FILLER                 PIC A(15) VALUE "Kimberly James".
+           03  FILLER                 PIC A(15) VALUE "Heather Wood".
            03  FILLER                 PIC 9(02) VALUE 07.
-           03  FILLER                 PIC A(15) VALUE "Lauren Marshall".
+           03  FILLER                 PIC A(15) VALUE "Julia Fletcher".
            03  FILLER                 PIC 9(02) VALUE 08.
-           03  FILLER                 PIC A(15) VALUE "Patricia Davis".
+           03  FILLER                 PIC A(15) VALUE "Kimberly James".
            03  FILLER                 PIC 9(02) VALUE 09.
-           03  FILLER                 PIC A(15) VALUE "Rachael Glass".
+           03  FILLER                 PIC A(15) VALUE "Lauren Marshall".
            03  FILLER                 PIC 9(02) VALUE 10.
-           03  FILLER                 PIC A(15) VALUE "Sophia Bennett".
+           03  FILLER                 PIC A(15) VALUE "Patricia Davis".
            03  FILLER                 PIC 9(02) VALUE 11.
+           03  FILLER                 PIC A(15) VALUE "Rachael Glass".
+           03  FILLER                 PIC 9(02) VALUE 12.
+           03  FILLER                 PIC A(15) VALUE "Sophia Bennett".
+           03  FILLER                 PIC 9(02) VALUE 13.
            03  FILLER                 PIC A(15) VALUE "Victoria Parker".
        01  ws-names-table-example-occ REDEFINES ws-names-table-example
-           OCCURS cte-11 TIMES ASCENDING KEY ws-names-table-example-code 
+           OCCURS cte-13 TIMES ASCENDING KEY ws-names-table-example-code 
            INDEXED BY idx-names-table-example-occ.
            03  ws-names-table-example-code      PIC 9(02).
            03  ws-names-table-example-name      PIC A(15).
@@ -193,12 +216,15 @@
            DISPLAY SPACE
                 AT LINE ws-cte-01 COLUMN ws-cte-01
               WITH BLANK SCREEN
+
            ACCEPT ws-current-date FROM DATE YYYYMMDD
+           ACCEPT ws-current-time FROM TIME
 
            PERFORM 100000-start-construct-main-text-window
               THRU 100000-finish-construct-main-text-window
 
-           MOVE ws-current-date     TO ws-admission-date-employee
+           MOVE ws-current-date-num TO ws-admission-date-employee
+
            PERFORM UNTIL sw-question-response-N
                    DISPLAY scr-main-content-screen
                            scr-display-employee-list-header
@@ -206,7 +232,7 @@
                    PERFORM VARYING idx-names-table-example-occ
                               FROM ws-cte-01 BY ws-cte-01
                              UNTIL idx-names-table-example-occ
-                                IS GREATER THAN cte-11
+                                IS GREATER THAN cte-13
 
                            SET ws-line-employee-list
                             TO idx-names-table-example-occ
@@ -219,6 +245,19 @@
                    DISPLAY scr-main-content-screen-question
                    ACCEPT scr-main-content-screen-question
            END-PERFORM
+
+
+           DISPLAY "Record saved successfully!"
+                AT LINE ws-cte-14 COLUMN ws-cte-03
+
+           MOVE ws-current-date-num   TO ws-current-date-fmt
+           DISPLAY ws-current-date-fmt
+                AT LINE ws-cte-15 COLUMN ws-cte-03
+
+           MOVE ws-current-time-num   TO ws-current-time-fmt
+           DISPLAY ws-current-time-fmt
+                AT LINE ws-cte-16 COLUMN ws-cte-03
+
 
            DISPLAY "Press the ENTER key to continue..."
                 AT LINE ws-cte-25 COLUMN ws-cte-01
