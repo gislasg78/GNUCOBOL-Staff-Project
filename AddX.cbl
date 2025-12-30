@@ -4,13 +4,19 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        78  cte-01                  VALUE 01.
+       78  cte-02                  VALUE 02.
 
        01  ws-var-group.
            03  ws-sum-group.
-               05  ws-sum          PIC 9(09)       VALUE ZEROES.
-               05  ws-sum-edited   PIC ZZZ,ZZZ,ZZZ VALUE ZEROES.
+               05  ws-sum          PIC 9(12)           VALUE ZEROES.
+               05  ws-sum-edited   PIC ZZZ,ZZZ,ZZZ,ZZZ VALUE ZEROES.
+               05  ws-sum-formula  PIC 9(12)           VALUE ZEROES.
+               05  ws-sum-product  PIC 9(12)           VALUE ZEROES.
            03  ws-idx              USAGE INDEX.
-           03  ws-max              PIC 9(09)       VALUE ZEROES.
+           03  ws-max-group.
+               05  ws-max          PIC 9(12)           VALUE ZEROES.
+               05  ws-max-formula  PIC 9(12)           VALUE ZEROES.
+               05  ws-max-product  PIC 9(12)           VALUE ZEROES.
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
@@ -24,9 +30,18 @@
                     ADD ws-idx TO ws-sum
            END-PERFORM
 
-           MOVE ws-sum         TO ws-sum-edited
+           ADD cte-01 TO ws-max GIVING ws-max-formula
+           MULTIPLY ws-max BY ws-max-formula GIVING ws-max-product
+           DIVIDE cte-02 INTO ws-max-product GIVING ws-sum-product
 
-           DISPLAY "Sum: [" ws-sum-edited "]."
+           DISPLAY SPACE
+           DISPLAY "Results."
+
+           MOVE ws-sum         TO ws-sum-edited
+           DISPLAY "+ Sum: [" ws-sum-edited "]."
+
+           MOVE ws-sum-product TO ws-sum-edited
+           DISPLAY "+ Sum: [" ws-sum-edited "]."
 
            STOP RUN.
 
