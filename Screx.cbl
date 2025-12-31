@@ -13,6 +13,8 @@
            03  ws-cte-14                        PIC 9(02)  VALUE 14.
            03  ws-cte-15                        PIC 9(02)  VALUE 15.
            03  ws-cte-16                        PIC 9(02)  VALUE 16.
+           03  ws-cte-17                        PIC 9(02)  VALUE 17.
+           03  ws-cte-22                        PIC 9(02)  VALUE 22.
            03  ws-cte-25                        PIC 9(02)  VALUE 25.
            03  ws-cte-35                        PIC 9(02)  VALUE 35.
 
@@ -84,6 +86,8 @@
                    07  ws-current-date-day      PIC 9(02)  VALUE ZEROES.
                05  ws-current-date-num
                    REDEFINES ws-current-date    PIC 9(08).
+               05  ws-current-date-str
+                   REDEFINES ws-current-date    PIC X(08).
                05  ws-current-time.
                    07  ws-current-time-hour     PIC 9(02)  VALUE ZEROES.
                    07  ws-current-time-minute   PIC 9(02)  VALUE ZEROES.
@@ -91,11 +95,12 @@
                05  ws-current-time-num
                    REDEFINES ws-current-time    PIC 9(06).
                05  ws-current-date-time-formats.
+                   07  ws-current-date-edt      PIC XXXX/XX/XX
+                                                VALUE SPACES.
                    07  ws-current-date-fmt      PIC 9999/99/99
                                                 VALUE ZEROES.
                    07  ws-current-time-fmt      PIC 99B99B99
                                                 VALUE ZEROES.
-
            03  ws-employee-data.
                05  ws-address-employee          PIC X(30)  VALUE SPACES.
                05  ws-admission-date-employee   PIC 9(08)  VALUE ZEROES.
@@ -108,7 +113,7 @@
                05  ws-type-of-employee          PIC 9(01)  VALUE ZERO.
            03  ws-final-questions.
                05  ws-line-employee-list        PIC 9(02)  VALUE ZEROES.
-               05  ws-line-question             PIC 9(02)  VALUE 22.
+               05  ws-line-question             PIC 9(02)  VALUE ZEROES.
                05  ws-question-response         PIC A(01)  VALUE SPACE.
                    88  sw-question-response-N   VALUES ARE 'N', 'n'.
                    88  sw-question-response-Y   VALUES ARE 'Y' 'y'.
@@ -217,47 +222,11 @@
                 AT LINE ws-cte-01 COLUMN ws-cte-01
               WITH BLANK SCREEN
 
-           ACCEPT ws-current-date FROM DATE YYYYMMDD
-           ACCEPT ws-current-time FROM TIME
-
            PERFORM 100000-start-construct-main-text-window
               THRU 100000-finish-construct-main-text-window
 
-           MOVE ws-current-date-num TO ws-admission-date-employee
-
-           PERFORM UNTIL sw-question-response-N
-                   DISPLAY scr-main-content-screen
-                           scr-display-employee-list-header
-
-                   PERFORM VARYING idx-names-table-example-occ
-                              FROM ws-cte-01 BY ws-cte-01
-                             UNTIL idx-names-table-example-occ
-                                IS GREATER THAN cte-13
-
-                           SET ws-line-employee-list
-                            TO idx-names-table-example-occ
-                           DISPLAY scr-display-employee-list-detail
-                   END-PERFORM
-
-                   ACCEPT scr-main-content-screen
-                   DISPLAY scr-main-content-screen
-
-                   DISPLAY scr-main-content-screen-question
-                   ACCEPT scr-main-content-screen-question
-           END-PERFORM
-
-
-           DISPLAY "Record saved successfully!"
-                AT LINE ws-cte-14 COLUMN ws-cte-03
-
-           MOVE ws-current-date-num   TO ws-current-date-fmt
-           DISPLAY ws-current-date-fmt
-                AT LINE ws-cte-15 COLUMN ws-cte-03
-
-           MOVE ws-current-time-num   TO ws-current-time-fmt
-           DISPLAY ws-current-time-fmt
-                AT LINE ws-cte-16 COLUMN ws-cte-03
-
+           PERFORM 200000-start-construct-main-content-screen
+              THRU 200000-finish-construct-main-content-screen
 
            DISPLAY "Press the ENTER key to continue..."
                 AT LINE ws-cte-25 COLUMN ws-cte-01
@@ -408,6 +377,52 @@
            DISPLAY ws-char-right-upper-corner
                 AT LINE ws-top-row    COLUMN ws-right-col.
          141000-finish-build-set-window-frame-corners.
+           EXIT.
+
+       200000-start-construct-main-content-screen.
+           INITIALIZE ws-screen-contents-inside
+
+           ACCEPT ws-current-date FROM DATE YYYYMMDD
+           ACCEPT ws-current-time FROM TIME
+
+           MOVE ws-cte-22           TO ws-line-question
+           MOVE ws-current-date-num TO ws-admission-date-employee
+           DISPLAY scr-main-content-screen-question
+
+           PERFORM UNTIL sw-question-response-N
+                   DISPLAY scr-main-content-screen
+                           scr-display-employee-list-header
+
+                   PERFORM VARYING idx-names-table-example-occ
+                      FROM ws-cte-01 BY ws-cte-01
+                     UNTIL idx-names-table-example-occ
+                        IS GREATER THAN cte-13
+                           SET ws-line-employee-list
+                            TO idx-names-table-example-occ
+                           DISPLAY scr-display-employee-list-detail
+                   END-PERFORM
+
+                   ACCEPT scr-main-content-screen
+                   DISPLAY scr-main-content-screen
+
+                   ACCEPT scr-main-content-screen-question
+           END-PERFORM
+
+           DISPLAY "Record saved successfully!"
+                AT LINE ws-cte-14 COLUMN ws-cte-03
+
+           MOVE ws-current-date-num   TO ws-current-date-fmt
+           DISPLAY ws-current-date-fmt
+                AT LINE ws-cte-15 COLUMN ws-cte-03
+
+           MOVE ws-current-date-str   TO ws-current-date-edt
+           DISPLAY ws-current-date-edt
+                AT LINE ws-cte-16 COLUMN ws-cte-03
+
+           MOVE ws-current-time-num   TO ws-current-time-fmt
+           DISPLAY ws-current-time-fmt
+                AT LINE ws-cte-17 COLUMN ws-cte-03.
+       200000-finish-construct-main-content-screen.
            EXIT.
 
        END PROGRAM Screx.
