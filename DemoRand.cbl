@@ -3,54 +3,86 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  ws-cte-01                         USAGE COMP-1 VALUE 1.
+       78  cte-01                                           VALUE 01.
 
        01  ws-random-number-generator-vars.
-           03  ws-amount-rnd-numbers         USAGE COMP-1 VALUE ZEROES.
-           03  ws-idx-rnd-numbers            USAGE COMP-1 VALUE ZEROES.
-           03  ws-max-idx-rnd-numbers        USAGE COMP-1 VALUE 100000.
-           03  ws-pseudo-random-number       USAGE COMP-1 VALUE ZEROES.
-           03  ws-seed-rnd-numbers           USAGE COMP-1 VALUE ZEROES.
+           03  ws-amounts-tickets.
+               05  ws-amount-num-tickets       USAGE COMP-1 VALUE ZEROS.
+               05  ws-amount-srs-by-ticket     USAGE COMP-1 VALUE ZEROS.
+               05  ws-amount-num-srs-by-ticket USAGE COMP-1 VALUE ZEROS.
+           03  ws-indexes-tickets.
+               05  ws-idx-num-tickets          USAGE COMP-1 VALUE ZEROS.
+               05  ws-idx-srs-by-ticket        USAGE COMP-1 VALUE ZEROS.
+               05  ws-idx-num-srs-by-ticket    USAGE COMP-1 VALUE ZEROS.
+           03  ws-range-random-values.
+               05  ws-difference-range-value   USAGE COMP-1 VALUE ZEROS.
+               05  ws-final-range-value        USAGE COMP-1 VALUE ZEROS.
+               05  ws-format-final-range-value PIC -Z(10)   VALUE ZEROS.
+               05  ws-product-range-value      USAGE COMP-1 VALUE ZEROS.
+           03  ws-regenerated-values.
+               05  ws-counter-random-numbers   SIGNED-INT   VALUE ZEROS.
+               05  ws-maximum-random-value     USAGE COMP-1 VALUE ZEROS.
+               05  ws-minimum-random-value     USAGE COMP-1 VALUE ZEROS.
+               05  ws-pseudo-random-number     USAGE COMP-1 VALUE ZEROS.
+               05  ws-seed-rnd-numbers         USAGE COMP-1 VALUE ZEROS.
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
            DISPLAY "Random Number Generator Program."
 
-           PERFORM 100000-start-request-performance-dat
-              THRU 100000-finish-request-performance-dat
+           PERFORM 100000-start-request-performance-data
+              THRU 100000-finish-request-performance-data
 
            PERFORM 200000-start-set-random-seed
               THRU 200000-finish-set-random-seed
 
-           PERFORM 300000-start-random-number-germinator
-              THRU 300000-finish-random-number-germinator
-           VARYING ws-idx-rnd-numbers
-              FROM ws-cte-01 BY ws-cte-01
-             UNTIL ws-idx-rnd-numbers
-                IS GREATER THAN ws-amount-rnd-numbers
-                OR ws-amount-rnd-numbers
-                IS GREATER THAN ws-max-idx-rnd-numbers
+           PERFORM 300000-start-ticket-generator
+              THRU 300000-finish-ticket-generator
+           VARYING ws-idx-num-tickets
+              FROM cte-01 BY cte-01
+             UNTIL ws-idx-num-tickets
+                IS GREATER THAN ws-amount-num-tickets
 
-           STOP "This program has ended..."
+           DISPLAY X"5B" ws-counter-random-numbers X"5D"
+                   X"20" "Output results generated" X"2E"
+
+           DISPLAY SPACE
+           DISPLAY "This program has ended..."
+              WITH NO ADVANCING
+           ACCEPT OMITTED
+
            STOP RUN.
 
-       100000-start-request-performance-dat.
+       100000-start-request-performance-data.
            DISPLAY SPACE
            DISPLAY "+---+----+---+----+---+----+"
-           DISPLAY "| Random Number Stabilizer.|"
+           DISPLAY "|Random Number Stabilizer. |"
            DISPLAY "+---+----+---+----+---+----+"
-           DISPLAY "Enter only ranges between: ["
-                   ws-cte-01 "] and [" ws-max-idx-rnd-numbers 
-                   "] numbers."
 
-           DISPLAY "How many random numbers do you want? : "
+           DISPLAY "How many tickets do you want to generate? : "
               WITH NO ADVANCING
-            ACCEPT ws-amount-rnd-numbers
+            ACCEPT ws-amount-num-tickets
+
+           DISPLAY "How many series per ticket do you want to generate?"
+                   " : "
+              WITH NO ADVANCING
+            ACCEPT ws-amount-srs-by-ticket
+
+           DISPLAY "How many numbers per series for each ticket "
+                   "do you want to generate? : "
+              WITH NO ADVANCING 
+            ACCEPT ws-amount-num-srs-by-ticket
+
+           DISPLAY "Minimum value: " WITH NO ADVANCING
+            ACCEPT ws-minimum-random-value
+
+           DISPLAY "Maximum value: " WITH NO ADVANCING
+            ACCEPT ws-maximum-random-value
 
            DISPLAY "Seed number to generate the numbers  : "
               WITH NO ADVANCING
             ACCEPT ws-seed-rnd-numbers.
-       100000-finish-request-performance-dat.
+       100000-finish-request-performance-data.
            EXIT.
 
        200000-start-set-random-seed.
@@ -74,14 +106,57 @@
        200000-finish-set-random-seed.
            EXIT.
 
-       300000-start-random-number-germinator.
+       300000-start-ticket-generator.
+           DISPLAY "Ticket" X"20" X"23" X"3A" X"20" X"5B"
+                   ws-idx-num-tickets X"5D" X"20" "of"
+                   X"3A" X"20" X"5B"
+                   ws-amount-num-tickets X"5D" X"2E"
+
+           PERFORM 310000-start-series-by-ticket-generator
+              THRU 310000-finish-series-by-ticket-generator
+            VARYING ws-idx-srs-by-ticket
+               FROM cte-01 BY cte-01
+              UNTIL ws-idx-srs-by-ticket
+                 IS GREATER THAN ws-amount-srs-by-ticket
+
+           DISPLAY SPACE.
+       300000-finish-ticket-generator.
+           EXIT.
+
+        310000-start-series-by-ticket-generator.
+           DISPLAY X"23" X"3A" X"20" X"5B"
+                   ws-idx-srs-by-ticket
+                   X"5D" X"20" "of" X"3A" X"20" X"5B"
+                   ws-amount-srs-by-ticket X"5D" X"2E" X"09"
+              WITH NO ADVANCING
+
+           PERFORM 311000-start-nums-by-series-by-ticket-generator
+              THRU 311000-finish-nums-by-series-by-ticket-generator
+           VARYING ws-idx-num-srs-by-ticket
+              FROM cte-01 BY cte-01
+             UNTIL ws-idx-num-srs-by-ticket
+                IS GREATER THAN ws-amount-num-srs-by-ticket
+
+           DISPLAY SPACE.
+        310000-finish-series-by-ticket-generator.
+           EXIT.
+
+         311000-start-nums-by-series-by-ticket-generator.
+           ADD cte-01           TO ws-counter-random-numbers
            MOVE FUNCTION RANDOM TO ws-pseudo-random-number
 
-           DISPLAY "# ["    ws-idx-rnd-numbers
-                   "] of [" ws-amount-rnd-numbers 
-                   "] = {"  ws-pseudo-random-number
-                   "}.".
-       300000-finish-random-number-germinator.
+           SUBTRACT ws-minimum-random-value FROM ws-maximum-random-value
+             GIVING ws-difference-range-value
+           ADD cte-01 TO ws-difference-range-value
+           MULTIPLY ws-difference-range-value BY ws-pseudo-random-number
+             GIVING ws-product-range-value
+           ADD ws-product-range-value, ws-minimum-random-value
+           GIVING ws-final-range-value ROUNDED,
+                  ws-format-final-range-value ROUNDED
+
+           DISPLAY X"5B" FUNCTION TRIM(ws-format-final-range-value)
+                   X"5D" X"2E" X"09" WITH NO ADVANCING.
+         311000-finish-nums-by-series-by-ticket-generator.
            EXIT.
 
        END PROGRAM DemoRand.
