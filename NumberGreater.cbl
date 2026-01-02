@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. NumGrTrT.
+       PROGRAM-ID. NumberGreater.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -60,4 +60,4 @@
 
            STOP RUN.
 
-       END PROGRAM NumGrTrT.
+       END PROGRAM NumberGreater.
