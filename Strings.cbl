@@ -7,6 +7,14 @@
        78  cte-07                            VALUE 07.
        78  cte-12                            VALUE 12.
 
+       01  ws-accountants-date-fmt.
+           03  ws-accountants-field-string.
+               05  ws-account-field-length   PIC 9(02) VALUE ZEROES.
+               05  ws-account-string-length  PIC 9(02) VALUE ZEROES.
+           03  ws-accountants-spaces.
+               05  ws-account-backspace-len  PIC 9(02) VALUE ZEROES.
+               05  ws-account-frontspace-len PIC 9(02) VALUE ZEROES.
+
        01  ws-comma-type-delimiters.
            03  ws-comma-and-normal-space     PIC X(02) VALUE X'2C20'.
            03  ws-comma-punctuation-mark     PIC X(01) VALUE X'2C'.
@@ -84,11 +92,14 @@
            PERFORM 100000-begin-format-current-date
               THRU 100000-end-format-current-date
 
-           PERFORM 200000-begin-trigger-chain
-              THRU 200000-end-trigger-chain
+           PERFORM 200000-begin-string-check-length
+              THRU 200000-end-string-check-length
 
-           PERFORM 300000-begin-display-breakdowns
-              THRU 300000-end-display-breakdowns
+           PERFORM 300000-begin-trigger-chain
+              THRU 300000-end-trigger-chain
+
+           PERFORM 400000-begin-display-breakdowns
+              THRU 400000-end-display-breakdowns
 
            STOP RUN.
 
@@ -132,14 +143,47 @@
        100000-end-format-current-date.
            EXIT.
 
-       200000-begin-trigger-chain.
+       200000-begin-string-check-length.
+           INITIALIZE ws-account-backspace-len
+                      ws-account-frontspace-len
+                      ws-account-string-length
+
+           INSPECT ws-current-date-str-formatted
+                   TALLYING ws-account-backspace-len
+                        FOR LEADING SPACE
+                            ws-account-frontspace-len
+                        FOR TRAILING SPACE
+                            ws-account-string-length
+                        FOR CHARACTERS.
+
+           MOVE LENGTH OF ws-current-date-str-formatted
+             TO ws-account-field-length
+
+           DISPLAY SPACE
+           DISPLAY "Field Accounting Statistics."
+           DISPLAY "Lengths:"
+           DISPLAY "+ Field:     [" ws-account-field-length "]."
+           DISPLAY "+ String:    [" ws-account-string-length "]."
+
+           DISPLAY SPACE
+           DISPLAY "Spaces:"
+           DISPLAY "+ Back:      [" ws-account-backspace-len "]."
+           DISPLAY "+ Front:     [" ws-account-frontspace-len "]."
+
+           DISPLAY SPACE
+           DISPLAY "[" FUNCTION TRIM(ws-current-date-str-formatted) "]."
+           DISPLAY SPACE.
+       200000-end-string-check-length.
+           EXIT.
+
+       300000-begin-trigger-chain.
            MOVE cte-01                       TO ws-date-pointer-unstring
            MOVE SPACES                       TO ws-date-dayname
                                                 ws-date-monthname
            MOVE ZEROES                       TO ws-date-numday
                                                 ws-date-year
 
-           UNSTRING ws-current-date-str-formatted
+           UNSTRING FUNCTION TRIM(ws-current-date-str-formatted)
                     DELIMITED BY SPACE OR ws-comma-and-normal-space
                INTO ws-date-dayname
                         DELIMITER IN ws-date-delimit-dayname
@@ -157,21 +201,21 @@
                     TALLYING ws-date-counter-fields
 
                  ON OVERFLOW
-                    DISPLAY "The destination fields are of "
-                            "insufficient length."
+                    DISPLAY "The destination fields are too short."
                 NOT ON OVERFLOW
                     DISPLAY "The target fields were successfully "
                             "constructed."
            END-UNSTRING.
-       200000-end-trigger-chain.
+       300000-end-trigger-chain.
            EXIT.
 
-       300000-begin-display-breakdowns.
+       400000-begin-display-breakdowns.
            MOVE ws-current-date-num TO ws-current-date-num-formatted
 
            DISPLAY SPACE
+           DISPLAY "Date formats generated."
            DISPLAY "[" ws-current-date-num-formatted "]."
-           DISPLAY "[" ws-current-date-str-formatted "]."
+           DISPLAY "[" FUNCTION TRIM(ws-current-date-str-formatted) "]."
 
            DISPLAY SPACE
            DISPLAY "Extraction Statistics."
@@ -205,7 +249,7 @@
            DISPLAY "+ Value:     [" ws-date-year "]."
            DISPLAY "+ Delimiter: [" ws-date-delimit-year "]."
            DISPLAY "+ Count:     [" ws-date-count-year "].".
-       300000-end-display-breakdowns.
+       400000-end-display-breakdowns.
            EXIT.
 
        END PROGRAM Strings.
