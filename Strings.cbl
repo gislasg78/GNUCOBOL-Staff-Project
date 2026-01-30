@@ -171,7 +171,7 @@
 
            DISPLAY SPACE
            DISPLAY "[" ws-current-date-num-formatted "]."
-	   DISPLAY "[" ws-current-date-str-formatted "]."
+           DISPLAY "[" ws-current-date-str-formatted "]."
 
            DISPLAY SPACE
            DISPLAY "Extraction Statistics."
