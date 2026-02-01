@@ -51,7 +51,7 @@
                    X'20' 'Generated output numbers' X'2E'
 
            DISPLAY SPACE
-           DISPLAY "This program has ended..."
+           DISPLAY "This program has ended."
            DISPLAY "Press the ENTER key to end the program..."
               WITH NO ADVANCING
            ACCEPT OMITTED
@@ -156,12 +156,12 @@
 
            SUBTRACT ws-minimum-random-value FROM ws-maximum-random-value
              GIVING ws-difference-range-value
-           ADD cte-01 TO ws-difference-range-value
+           ADD cte-01                      TO ws-difference-range-value
            MULTIPLY ws-difference-range-value BY ws-pseudo-random-number
              GIVING ws-product-range-value
-           ADD ws-product-range-value, ws-minimum-random-value
-           GIVING ws-final-range-value ROUNDED,
-                  ws-format-final-range-value ROUNDED
+           ADD ws-product-range-value         TO ws-minimum-random-value
+           GIVING ws-final-range-value
+                  ws-format-final-range-value
 
            DISPLAY X"5B" FUNCTION TRIM(ws-format-final-range-value)
                    X"5D" X"2E" X"09" WITH NO ADVANCING.
