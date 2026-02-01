@@ -24,11 +24,15 @@
            03  ws-current-date-month         PIC 9(02) VALUE ZEROES.
            03  ws-current-date-day           PIC 9(02) VALUE ZEROES.
        01  ws-current-date-num     REDEFINES ws-current-date PIC 9(08).
+       01  ws-current-date-str     REDEFINES ws-current-date PIC X(08).
 
        01  ws-current-date-chains-formatted.
+           03  ws-current-date-msg-formatted PIC X(29) VALUE SPACES.
            03  ws-current-date-num-formatted PIC 9999/99/99
                                              VALUE ZEROES.
-           03  ws-current-date-str-formatted PIC X(29) VALUE SPACES.
+           03  ws-current-date-str-formatted
+               REDEFINES ws-current-date-num-formatted
+                                             PIC XXXX/XX/XX.
 
        01  ws-date-counters-delimiters.
            03  ws-date-counter-fields        PIC 9(02) VALUE ZEROES.
@@ -105,7 +109,7 @@
 
        100000-begin-format-current-date.
            MOVE SPACES
-             TO ws-current-date-str-formatted
+             TO ws-current-date-msg-formatted
            MOVE cte-01                       TO ws-date-pointer-string
 
            SET idx-date-name-of-days-array   TO ws-date-dayofweek
@@ -131,7 +135,7 @@
                   DELIMITED BY SIZE
                   ws-current-date-year
                   DELIMITED BY SIZE
-             INTO ws-current-date-str-formatted
+             INTO ws-current-date-msg-formatted
              WITH POINTER ws-date-pointer-string
 
                ON OVERFLOW
@@ -148,7 +152,7 @@
                       ws-account-frontspace-len
                       ws-account-string-length
 
-           INSPECT ws-current-date-str-formatted
+           INSPECT ws-current-date-msg-formatted
                    TALLYING ws-account-backspace-len
                         FOR LEADING SPACE
                             ws-account-frontspace-len
@@ -156,7 +160,7 @@
                             ws-account-string-length
                         FOR CHARACTERS.
 
-           MOVE LENGTH OF ws-current-date-str-formatted
+           MOVE LENGTH OF ws-current-date-msg-formatted
              TO ws-account-field-length
 
            DISPLAY SPACE
@@ -171,7 +175,7 @@
            DISPLAY "+ Front:     [" ws-account-frontspace-len "]."
 
            DISPLAY SPACE
-           DISPLAY "[" FUNCTION TRIM(ws-current-date-str-formatted) "]."
+           DISPLAY "[" FUNCTION TRIM(ws-current-date-msg-formatted) "]."
            DISPLAY SPACE.
        200000-end-string-check-length.
            EXIT.
@@ -183,7 +187,7 @@
            MOVE ZEROES                       TO ws-date-numday
                                                 ws-date-year
 
-           UNSTRING FUNCTION TRIM(ws-current-date-str-formatted)
+           UNSTRING FUNCTION TRIM(ws-current-date-msg-formatted)
                     DELIMITED BY SPACE OR ws-comma-and-normal-space
                INTO ws-date-dayname
                         DELIMITER IN ws-date-delimit-dayname
@@ -210,12 +214,15 @@
            EXIT.
 
        400000-begin-display-breakdowns.
-           MOVE ws-current-date-num TO ws-current-date-num-formatted
-
            DISPLAY SPACE
            DISPLAY "Date formats generated."
+
+           MOVE ws-current-date-num TO ws-current-date-num-formatted
            DISPLAY "[" ws-current-date-num-formatted "]."
-           DISPLAY "[" FUNCTION TRIM(ws-current-date-str-formatted) "]."
+
+           MOVE ws-current-date-str TO ws-current-date-str-formatted
+           DISPLAY "[" ws-current-date-str-formatted "]."
+           DISPLAY "[" FUNCTION TRIM(ws-current-date-msg-formatted) "]."
 
            DISPLAY SPACE
            DISPLAY "Extraction Statistics."
@@ -239,7 +246,7 @@
            DISPLAY "+ Count:     [" ws-date-count-monthname "]."
 
            DISPLAY SPACE
-           DISPLAY "Num Day."
+           DISPLAY "Day Number."
            DISPLAY "+ Value:     [" ws-date-numday "]."
            DISPLAY "+ Delimiter: [" ws-date-delimit-numday "]."
            DISPLAY "+ Count:     [" ws-date-count-numday "]."
