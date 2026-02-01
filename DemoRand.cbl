@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. DemoRand.
+       PROGRAM-ID. RandomNumbers.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -21,6 +21,7 @@
                05  ws-product-range-value      USAGE COMP-1 VALUE ZEROS.
            03  ws-regenerated-values.
                05  ws-counter-random-numbers   SIGNED-INT   VALUE ZEROS.
+               05  ws-counter-series-by-ticket SIGNED-INT   VALUE ZEROS.
                05  ws-maximum-random-value     USAGE COMP-1 VALUE ZEROS.
                05  ws-minimum-random-value     USAGE COMP-1 VALUE ZEROS.
                05  ws-pseudo-random-number     USAGE COMP-1 VALUE ZEROS.
@@ -43,11 +44,15 @@
              UNTIL ws-idx-num-tickets
                 IS GREATER THAN ws-amount-num-tickets
 
-           DISPLAY X"5B" ws-counter-random-numbers X"5D"
-                   X"20" "Output results generated" X"2E"
+           DISPLAY "Final accounting statistics."
+           DISPLAY X'5B' ws-counter-series-by-ticket X'5D'
+                   X'20' 'Accumulated series created' X'2E'
+           DISPLAY X'5B' ws-counter-random-numbers X'5D'
+                   X'20' 'Generated output numbers' X'2E'
 
            DISPLAY SPACE
            DISPLAY "This program has ended..."
+           DISPLAY "Press the ENTER key to end the program..."
               WITH NO ADVANCING
            ACCEPT OMITTED
 
@@ -110,7 +115,8 @@
            DISPLAY "Ticket" X"20" X"23" X"3A" X"20" X"5B"
                    ws-idx-num-tickets X"5D" X"20" "of"
                    X"3A" X"20" X"5B"
-                   ws-amount-num-tickets X"5D" X"2E"
+                   ws-amount-num-tickets
+                   X"5D" X"2E"
 
            PERFORM 310000-start-series-by-ticket-generator
               THRU 310000-finish-series-by-ticket-generator
@@ -124,10 +130,13 @@
            EXIT.
 
         310000-start-series-by-ticket-generator.
+           ADD cte-01           TO ws-counter-series-by-ticket
+
            DISPLAY X"23" X"3A" X"20" X"5B"
                    ws-idx-srs-by-ticket
                    X"5D" X"20" "of" X"3A" X"20" X"5B"
-                   ws-amount-srs-by-ticket X"5D" X"2E" X"09"
+                   ws-amount-srs-by-ticket
+                   X"5D" X"2E" X"09"
               WITH NO ADVANCING
 
            PERFORM 311000-start-nums-by-series-by-ticket-generator
@@ -159,4 +168,4 @@
          311000-finish-nums-by-series-by-ticket-generator.
            EXIT.
 
-       END PROGRAM DemoRand.
+       END PROGRAM RandomNumbers.
