@@ -44,11 +44,8 @@
              UNTIL ws-idx-num-tickets
                 IS GREATER THAN ws-amount-num-tickets
 
-           DISPLAY "Final accounting statistics."
-           DISPLAY X'5B' ws-counter-series-by-ticket X'5D'
-                   X'20' 'Accumulated series created' X'2E'
-           DISPLAY X'5B' ws-counter-random-numbers X'5D'
-                   X'20' 'Generated output numbers' X'2E'
+           PERFORM 400000-start-final-accounting-statistics
+              THRU 400000-finish-final-accounting-statistics
 
            DISPLAY SPACE
            DISPLAY "This program has ended."
@@ -112,7 +109,8 @@
            EXIT.
 
        300000-start-ticket-generator.
-           DISPLAY "Ticket" X"20" X"23" X"3A" X"20" X"5B"
+           DISPLAY "Ticket"
+                   X"20" X"23" X"3A" X"20" X"5B"
                    ws-idx-num-tickets
                    X"5D" X"20"
                    "of"
@@ -160,7 +158,7 @@
 
            SUBTRACT ws-minimum-random-value FROM ws-maximum-random-value
              GIVING ws-difference-range-value
-           ADD cte-01                      TO ws-difference-range-value
+           ADD cte-01           TO ws-difference-range-value
            MULTIPLY ws-difference-range-value BY ws-pseudo-random-number
              GIVING ws-product-range-value
            ADD ws-product-range-value         TO ws-minimum-random-value
@@ -170,6 +168,15 @@
            DISPLAY X"5B" FUNCTION TRIM(ws-format-final-range-value)
                    X"5D" X"2E" X"09" WITH NO ADVANCING.
          311000-finish-nums-by-series-by-ticket-generator.
+           EXIT.
+
+       400000-start-final-accounting-statistics.
+           DISPLAY "Final accounting statistics."
+           DISPLAY X'5B' ws-counter-series-by-ticket X'5D'
+                   X'20' 'Accumulated series created' X'2E'
+           DISPLAY X'5B' ws-counter-random-numbers X'5D'
+                   X'20' 'Generated output numbers' X'2E'.
+       400000-finish-final-accounting-statistics.
            EXIT.
 
        END PROGRAM RandomNumbers.
