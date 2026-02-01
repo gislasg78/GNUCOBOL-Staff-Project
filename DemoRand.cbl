@@ -17,7 +17,7 @@
            03  ws-range-random-values.
                05  ws-difference-range-value   USAGE COMP-1 VALUE ZEROS.
                05  ws-final-range-value        USAGE COMP-1 VALUE ZEROS.
-               05  ws-format-final-range-value PIC -(10)    VALUE ZEROS.
+               05  ws-format-final-range-value PIC -(11)    VALUE ZEROS.
                05  ws-product-range-value      USAGE COMP-1 VALUE ZEROS.
            03  ws-regenerated-values.
                05  ws-counter-random-numbers   SIGNED-INT   VALUE ZEROS.
