@@ -232,6 +232,9 @@
                                                 ws-date-monthname
            MOVE ZEROES                       TO ws-date-numday
                                                 ws-date-year
+                                                ws-time-hour
+                                                ws-time-minute
+                                                ws-time-second
 
            UNSTRING ws-current-date-msg-formatted
                     DELIMITED BY ws-comma-and-normal-space
