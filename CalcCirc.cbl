@@ -5,37 +5,40 @@
        WORKING-STORAGE SECTION.
        01   ws-circle-group-outcomes.
             03  ws-alterante-results.
-                05  ws-circumference      FLOAT-LONG       VALUE ZEROES.
-                05  ws-diameter           FLOAT-LONG       VALUE ZEROES.
-                05  ws-surface            FLOAT-LONG       VALUE ZEROES.
+                05  ws-circumference       FLOAT-LONG      VALUE ZEROES.
+                05  ws-diameter            FLOAT-LONG      VALUE ZEROES.
+                05  ws-surface             FLOAT-LONG      VALUE ZEROES.
             03  ws-area-group.
-                05  ws-area-middle        FLOAT-LONG       VALUE ZEROES.
-                05  ws-area-final         FLOAT-LONG       VALUE ZEROES.
+                05  ws-area-middle         FLOAT-LONG      VALUE ZEROES.
+                05  ws-area-final          FLOAT-LONG      VALUE ZEROES.
             03  ws-coefficients-group.
-                05  ws-cte-two            FLOAT-SHORT      VALUE 2.
-                05  ws-show-PI            FLOAT-LONG       VALUE ZEROES.
+                05  ws-cte-two             FLOAT-SHORT     VALUE 2.
+                05  ws-show-PI             FLOAT-LONG      VALUE ZEROES.
             03  ws-perimeter-group.
-                05  ws-perimeter-middle   FLOAT-LONG       VALUE ZEROES.
-                05  ws-perimeter-final    FLOAT-LONG       VALUE ZEROES.
+                05  ws-perimeter-middle    FLOAT-LONG      VALUE ZEROES.
+                05  ws-perimeter-final     FLOAT-LONG      VALUE ZEROES.
             03  ws-radius-group.
-                05  ws-radius-numeric     FLOAT-LONG       VALUE ZEROES.
-                05  ws-radius-string      PIC X(29)        VALUE SPACES.
+                05  ws-radius-numeric      FLOAT-LONG      VALUE ZEROES.
+                05  ws-radius-string       PIC X(29)       VALUE SPACES.
 
        01   ws-date-and-time-groups.
             03  ws-date-group.
-                05  ws-date-today-now     PIC 9(08)        VALUE ZEROES.
-                05  ws-date-formatted     PIC 9999/99/99   VALUE ZEROES.
+                05  ws-date-today-now      PIC 9(08)       VALUE ZEROES.
+                05  ws-date-formatted      PIC 9999/99/99  VALUE ZEROES.
             03  ws-time-group.
                 05  ws-time-today-now.
-                    07  ws-time-hour      PIC 9(02)        VALUE ZEROES.
-                    07  ws-time-minute    PIC 9(02)        VALUE ZEROES.
-                    07  ws-time-second    PIC 9(02)        VALUE ZEROES.
+                    07  ws-time-hour       PIC 9(02)       VALUE ZEROES.
+                    07  ws-time-minute     PIC 9(02)       VALUE ZEROES.
+                    07  ws-time-second     PIC 9(02)       VALUE ZEROES.
+                    07  ws-time-hundredths PIC 9(02)       VALUE ZEROES.
                 05  ws-time-formatted.
-                    07  ws-time-hour      PIC 9(02)        VALUE ZEROES.
-                    07  FILLER            PIC X(01)        VALUE X"3A".
-                    07  ws-time-minute    PIC 9(02)        VALUE ZEROES.
-                    07  FILLER            PIC X(01)        VALUE X"3A".
-                    07  ws-time-second    PIC 9(02)        VALUE ZEROES.
+                    07  ws-time-hour       PIC 9(02)       VALUE ZEROES.
+                    07  FILLER             PIC X(01)       VALUE X"3A".
+                    07  ws-time-minute     PIC 9(02)       VALUE ZEROES.
+                    07  FILLER             PIC X(01)       VALUE X"3A".
+                    07  ws-time-second     PIC 9(02)       VALUE ZEROES.
+                    07  FILLER             PIC X(01)       VALUE X"2E".
+                    07  ws-time-hundredths PIC 9(02)       VALUE ZEROES.
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
@@ -56,12 +59,24 @@
        100000-start-get-string-radius.
            DISPLAY "Calculation of the area and perimeter of a circle."
            DISPLAY "Enter radius: " WITH NO ADVANCING
-            ACCEPT  ws-radius-string.
+            ACCEPT  ws-radius-string
+
+           DISPLAY SPACE
+
+           IF FUNCTION TEST-NUMVAL-C (ws-radius-string) EQUAL ZERO THEN
+                 DISPLAY "Value entered: "
+                         "[" FUNCTION TRIM (ws-radius-string) "] OK!"
+           ELSE
+                 DISPLAY "The entered value: "
+                         "[" FUNCTION TRIM (ws-radius-string)
+                         "] is not numeric."
+           END-IF.
        100000-finish-get-string-radius.
            EXIT.
 
        200000-start-obtain-circle-calculations.
-           MOVE FUNCTION NUMVAL(ws-radius-string) TO ws-radius-numeric
+           MOVE FUNCTION NUMVAL-C (ws-radius-string)
+             TO ws-radius-numeric
            MOVE FUNCTION PI()                     TO ws-show-PI
 
            MULTIPLY ws-cte-two                    BY ws-radius-numeric
