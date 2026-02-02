@@ -21,9 +21,21 @@
                 05  ws-radius-numeric     FLOAT-LONG       VALUE ZEROES.
                 05  ws-radius-string      PIC X(29)        VALUE SPACES.
 
-       01   ws-dates-group.
-            03  ws-date-today-now         PIC 9(08)        VALUE ZEROES.
-            03  ws-date-formatted         PIC 9999/99/99   VALUE ZEROES.
+       01   ws-date-and-time-groups.
+            03  ws-date-group.
+                05  ws-date-today-now     PIC 9(08)        VALUE ZEROES.
+                05  ws-date-formatted     PIC 9999/99/99   VALUE ZEROES.
+            03  ws-time-group.
+                05  ws-time-today-now.
+                    07  ws-time-hour      PIC 9(02)        VALUE ZEROES.
+                    07  ws-time-minute    PIC 9(02)        VALUE ZEROES.
+                    07  ws-time-second    PIC 9(02)        VALUE ZEROES.
+                05  ws-time-formatted.
+                    07  ws-time-hour      PIC 9(02)        VALUE ZEROES.
+                    07  FILLER            PIC X(01)        VALUE X"3A".
+                    07  ws-time-minute    PIC 9(02)        VALUE ZEROES.
+                    07  FILLER            PIC X(01)        VALUE X"3A".
+                    07  ws-time-second    PIC 9(02)        VALUE ZEROES.
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
@@ -86,11 +98,15 @@
            EXIT.
 
        300000-start-review-circle-calculations-results.
-           ACCEPT ws-date-today-now          FROM DATE YYYYMMDD
-             MOVE ws-date-today-now            TO ws-date-formatted
+           ACCEPT ws-date-today-now           FROM DATE YYYYMMDD
+             MOVE ws-date-today-now             TO ws-date-formatted
+
+           ACCEPT ws-time-today-now           FROM TIME
+           MOVE CORRESPONDING ws-time-today-now TO ws-time-formatted
 
            DISPLAY SPACE
-           DISPLAY "[" ws-date-formatted "]."
+           DISPLAY "[" ws-date-formatted "] - "
+                   "[" ws-time-formatted "]."
            DISPLAY "Circle information details."
 
            DISPLAY "+ Coefficient   : [" ws-cte-two "]."
