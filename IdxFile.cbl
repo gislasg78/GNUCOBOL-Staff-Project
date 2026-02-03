@@ -41,8 +41,8 @@
            88  sw-f-IdxFile-rec-empty                      VALUE ZEROES.
            03  f-IdxFile-rec-cod-employee       PIC 9(06)  VALUE ZEROES.
            03  f-IdxFile-rec-salary-employee    PIC S9(06)V9(02)
-                                                SIGN  IS LEADING
-                                                SEPARATE CHARACTER
+                                                    SIGN  IS LEADING
+                                                    SEPARATE CHARACTER
                                                            VALUE ZEROES.
 
        FD  OutFile
@@ -139,7 +139,7 @@
                                                 SEPARATE CHARACTER
                                                            VALUE ZEROES.
                05  ws-f-OutFile-rec.
-                   07  ws-f-OutFile-rec-linage-counter     PIC +9(10)
+                   07  ws-f-OutFile-rec-record-counter     PIC Z(11)
                                                            VALUE ZEROES.
                    07  FILLER                              PIC X(01)
                                                            VALUE SPACE.
@@ -414,12 +414,28 @@
            03  ws-linage-totlines               PIC 9(02)  VALUE 26.
 
        01  ws-reporting-lines.
-           03  ws-reporting-main-header.
+           03  ws-rep-page-heading-first-line.
                05  FILLER                       PIC X(08)  VALUE SPACES.
                05  FILLER                       PIC A(15)
                                                 VALUE "Employee Report".
                05  FILLER                       PIC X(08)  VALUE SPACES.
-           03  ws-reporting-headlines.
+           03  ws-rep-page-heading-second-line.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(15)
+                                                VALUE ALL X'2D'.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(05)
+                                                VALUE "Page:".
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+               05  FILLER                       PIC X(01)  VALUE X'5B'.
+               05  ws-rep-p-sec-l-pages-rep     PIC S9(04)
+                                                SIGN IS LEADING
+                                                SEPARATE CHARACTER
+                                                VALUE ZEROES.
+               05  FILLER                       PIC X(01)  VALUE X'5D'.
+               05  FILLER                       PIC X(01)  VALUE X'2E'.
+               05  FILLER                       PIC X(01)  VALUE SPACE.
+           03  ws-rep-page-heading-third-line.
                05  FILLER                       PIC X(03)  VALUE SPACES.
                05  FILLER                       PIC A(06)
                                                 VALUE "Record".
@@ -429,7 +445,7 @@
                05  FILLER                       PIC A(06)
                                                 VALUE "Salary".
                05  FILLER                       PIC X(52)  VALUE SPACES.
-           03  ws-reporting-underlines.
+           03  ws-rep-page-heading-fourth-underlines.
                05  FILLER                       PIC X(01)  VALUE SPACE.
                05  FILLER                       PIC X(10)
                                                 VALUE ALL X'3D'.
@@ -440,26 +456,10 @@
                05  FILLER                       PIC X(12)
                                                 VALUE ALL X'3D'.
                05  FILLER                       PIC X(48)  VALUE SPACES.
-           03  ws-reporting-page-numbered.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(15)
-                                                VALUE ALL X'2D'.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(05)
-                                                VALUE "Page:".
+           03  ws-rep-page-footing.
                05  FILLER                       PIC X(01)  VALUE SPACE.
                05  FILLER                       PIC X(01)  VALUE X'5B'.
-               05  ws-printed-pages-reporting   PIC S9(04) 
-                                                SIGN IS LEADING
-                                                SEPARATE CHARACTER
-                                                VALUE ZEROES.
-               05  FILLER                       PIC X(01)  VALUE X'5D'.
-               05  FILLER                       PIC X(01)  VALUE X'2E'.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-           03  ws-reporting-page-footing.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(01)  VALUE X'5B'.
-               05  ws-printed-records-reporting PIC +9(04) VALUE ZEROES.
+               05  ws-rep-page-foot-recs-rep    PIC +9(04) VALUE ZEROES.
                05  FILLER                       PIC X(01)  VALUE X'5D'.
                05  FILLER                       PIC X(01)  VALUE SPACE.
                05  FILLER                       PIC A(17)  VALUE
@@ -739,14 +739,16 @@
          121000-start-printout-headlines.
            MOVE SPACES                     TO f-OutFile-rec
                                               ws-f-OutFile-rec
-           MOVE ws-reporting-main-header   TO f-OutFile-rec
-                                              ws-f-OutFile-rec
+           MOVE ws-rep-page-heading-first-line
+             TO f-OutFile-rec
+                ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
-           MOVE ws-printed-pages           TO ws-printed-pages-reporting
-           MOVE ws-reporting-page-numbered TO f-OutFile-rec
-                                              ws-f-OutFile-rec
+           MOVE ws-printed-pages           TO ws-rep-p-sec-l-pages-rep
+           MOVE ws-rep-page-heading-second-line
+             TO f-OutFile-rec
+                ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
@@ -764,13 +766,15 @@
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
-           MOVE ws-reporting-headlines     TO f-OutFile-rec
-                                              ws-f-OutFile-rec
+           MOVE ws-rep-page-heading-third-line
+             TO f-OutFile-rec
+                ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
-           MOVE ws-reporting-underlines    TO f-OutFile-rec
-                                              ws-f-OutFile-rec
+           MOVE ws-rep-page-heading-fourth-underlines
+             TO f-OutFile-rec
+                ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
@@ -780,7 +784,7 @@
            EXIT.
 
           121100-start-write-output-report-record.
-            WRITE f-OutFile-rec        FROM ws-f-OutFile-rec
+            WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
                AT END-OF-PAGE
                   PERFORM 121110-start-write-output-advance-page
                      THRU 121110-finish-write-output-advance-page
@@ -809,8 +813,8 @@
             DISPLAY "Writing. Status Code: [" fs-OutFile "]."
 
             MOVE ws-reporting-read-records-page
-              TO ws-printed-records-reporting
-            MOVE ws-reporting-page-footing TO f-OutFile-rec
+              TO ws-rep-page-foot-recs-rep
+            MOVE ws-rep-page-footing       TO f-OutFile-rec
                                               ws-f-OutFile-rec 
             WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
             DISPLAY "Writing. Status Code: [" fs-OutFile "]."
@@ -823,6 +827,7 @@
             WRITE f-OutFile-rec          FROM ws-f-OutFile-rec
                   AFTER ADVANCING PAGE
             END-WRITE
+            DISPLAY asterisk "Turn the page!" asterisk
             DISPLAY "Writing. Status Code: [" fs-OutFile "]."
 
             DISPLAY asterisk
@@ -1009,9 +1014,11 @@
             DISPLAY "|     Employee Information.    |"
             DISPLAY "+---+----+---+----+---+----+---+"
             DISPLAY "| Code   : ["
-                    ws-f-IdxFile-rec-cod-employee "]."
+                    ws-f-IdxFile-rec-cod-employee
+                    "].           |"
             DISPLAY "| Salary : ["
-                    ws-f-IdxFile-rec-salary-employee-ed "]."
+                    ws-f-IdxFile-rec-salary-employee-ed
+                    "].    |"
             DISPLAY "+---+----+---+----+---+----+---+"
 
             PERFORM 000600-press-enter-key-to-continue
@@ -1037,7 +1044,7 @@
                                       ws-reporting-read-records-sum
 
                MOVE ws-reporting-read-records-page
-                 TO ws-f-OutFile-rec-linage-counter
+                 TO ws-f-OutFile-rec-record-counter
 
                MOVE LINAGE-COUNTER TO ws-last-printed-report-line
 
@@ -1078,7 +1085,9 @@
                        "Invalid answer: [" ws-captured-answer "]. "
                        "Please correct it now!"
                        asterisk
-            END-IF.
+            END-IF
+
+            DISPLAY SPACE.
           221221-finish-display-captured-selected-option.
             EXIT.
 
@@ -2622,15 +2631,15 @@
               THRU 121100-finish-write-output-report-record
 
            MOVE ws-reporting-read-records-page
-             TO ws-printed-records-reporting
-           MOVE ws-reporting-page-footing     TO f-OutFile-rec
+             TO ws-rep-page-foot-recs-rep
+           MOVE ws-rep-page-footing     TO f-OutFile-rec
                                                  ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
 
            MOVE ws-reporting-read-records-sum
-             TO ws-printed-records-reporting
-           MOVE ws-reporting-page-footing     TO f-OutFile-rec
+             TO ws-rep-page-foot-recs-rep
+           MOVE ws-rep-page-footing     TO f-OutFile-rec
                                                  ws-f-OutFile-rec
            PERFORM 121100-start-write-output-report-record
               THRU 121100-finish-write-output-report-record
