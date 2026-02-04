@@ -414,48 +414,49 @@
            03  ws-linage-totlines               PIC 9(02)  VALUE 26.
 
        01  ws-reporting-lines.
-           03  ws-rep-page-heading-first-line.
-               05  FILLER                       PIC X(08)  VALUE SPACES.
-               05  FILLER                       PIC A(15)
+           03  ws-reporting-page-heading.
+               05  ws-rep-page-heading-first-line.
+                   07  FILLER                   PIC X(08)  VALUE SPACES.
+                   07  FILLER                   PIC A(15)
                                                 VALUE "Employee Report".
-               05  FILLER                       PIC X(08)  VALUE SPACES.
-           03  ws-rep-page-heading-second-line.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(15)
+                   07  FILLER                   PIC X(08)  VALUE SPACES.
+               05  ws-rep-page-heading-second-line.
+                   07  FILLER                   PIC X(01)  VALUE SPACE.
+                   07  FILLER                   PIC X(15)
                                                 VALUE ALL X'2D'.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(05)
+                   07  FILLER                   PIC X(01)  VALUE SPACE.
+                   07  FILLER                   PIC X(05)
                                                 VALUE "Page:".
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(01)  VALUE X'5B'.
-               05  ws-rep-p-sec-l-pages-rep     PIC S9(04)
+                   07  FILLER                   PIC X(01)  VALUE SPACE.
+                   07  FILLER                   PIC X(01)  VALUE X'5B'.
+                   07  ws-rep-p-sec-l-pages-rep PIC S9(04)
                                                 SIGN IS LEADING
                                                 SEPARATE CHARACTER
                                                 VALUE ZEROES.
-               05  FILLER                       PIC X(01)  VALUE X'5D'.
-               05  FILLER                       PIC X(01)  VALUE X'2E'.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-           03  ws-rep-page-heading-third-line.
-               05  FILLER                       PIC X(03)  VALUE SPACES.
-               05  FILLER                       PIC A(06)
+                   07  FILLER                   PIC X(01)  VALUE X'5D'.
+                   07  FILLER                   PIC X(01)  VALUE X'2E'.
+                   07  FILLER                   PIC X(01)  VALUE SPACE.
+               05  ws-rep-page-heading-third-line.
+                   07  FILLER                   PIC X(03)  VALUE SPACES.
+                   07  FILLER                   PIC A(06)
                                                 VALUE "Record".
-               05  FILLER                       PIC X(04)  VALUE SPACES.
-               05  FILLER                       PIC A(04)  VALUE "Code".
-               05  FILLER                       PIC X(05)  VALUE SPACES.
-               05  FILLER                       PIC A(06)
+                   07  FILLER                   PIC X(04)  VALUE SPACES.
+                   07  FILLER                   PIC A(04)  VALUE "Code".
+                   07  FILLER                   PIC X(05)  VALUE SPACES.
+                   07  FILLER                   PIC A(06)
                                                 VALUE "Salary".
-               05  FILLER                       PIC X(52)  VALUE SPACES.
-           03  ws-rep-page-heading-fourth-underlines.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(10)
+                   07  FILLER                   PIC X(52)  VALUE SPACES.
+               05  ws-rep-page-heading-fourth-underlines.
+                   07  FILLER                   PIC X(01)  VALUE SPACE.
+                   07  FILLER                   PIC X(10)
                                                 VALUE ALL X'3D'.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(06)
+                   07  FILLER                   PIC X(01)  VALUE SPACE.
+                   07  FILLER                   PIC X(06)
                                                 VALUE ALL X'3D'.
-               05  FILLER                       PIC X(01)  VALUE SPACE.
-               05  FILLER                       PIC X(12)
+                   07  FILLER                   PIC X(01)  VALUE SPACE.
+                   07  FILLER                   PIC X(12)
                                                 VALUE ALL X'3D'.
-               05  FILLER                       PIC X(48)  VALUE SPACES.
+                   07  FILLER                   PIC X(48)  VALUE SPACES.
            03  ws-rep-page-footing.
                05  FILLER                       PIC X(01)  VALUE SPACE.
                05  FILLER                       PIC X(01)  VALUE X'5B'.
@@ -491,7 +492,13 @@
            PERFORM 000300-check-file-status-code
 
            PERFORM 000400-preliminary-review-employee-code-contents
-           PERFORM 000500-preliminary-review-employee-salary-contents.
+           PERFORM 000500-preliminary-review-employee-salary-contents
+
+           DISPLAY SPACE
+           DISPLAY "Final Validation Control."
+           DISPLAY "+ File name:   [" ws-IdxFile-name "]."
+           DISPLAY "+ Status code: [" fs-IdxFile "]."
+           PERFORM 000600-press-enter-key-to-continue.
        000000-finish-status-IdxFile-check.
            EXIT SECTION.
 
@@ -515,7 +522,13 @@
            PERFORM 000300-check-file-status-code
 
            PERFORM 000400-preliminary-review-employee-code-contents
-           PERFORM 000500-preliminary-review-employee-salary-contents.
+           PERFORM 000500-preliminary-review-employee-salary-contents
+
+           DISPLAY SPACE
+           DISPLAY "Final Validation Control."
+           DISPLAY "+ File name:   [" ws-OutFile-name "]."
+           DISPLAY "+ Status code: [" fs-OutFile "]."
+           PERFORM 000600-press-enter-key-to-continue.
        000000-finish-status-OutFile-check.
            EXIT SECTION.
 
@@ -1557,11 +1570,11 @@
             SET sw-op-class-STARTEQ       TO TRUE
 
             PERFORM 000500-preliminary-review-employee-salary-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS EQUAL TO f-IdxFile-rec-salary-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary could not be located for an "
                           "exactly equal or identical value from the "
@@ -1576,7 +1589,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The salary: ["
                            ws-f-IdxFile-rec-salary-employee
@@ -1708,7 +1720,7 @@
             EXIT.
 
           225210-start-menu-mode-start-position.
-            SET sw-op-class-STARTFRST  TO TRUE
+            SET sw-op-class-STARTFRST      TO TRUE
 
             START IdxFile FIRST
                   INVALID KEY
@@ -1772,11 +1784,11 @@
             SET sw-op-class-STARTEQ       TO TRUE
 
             PERFORM 000400-preliminary-review-employee-code-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS EQUAL TO f-IdxFile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
                           "The value could not be located for an "
@@ -1793,7 +1805,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The value: [" ws-f-IdxFile-rec-cod-employee
                           "] was found for a key that was exactly the "
@@ -1926,12 +1937,12 @@
           225231121-start-menu-mode-code-pos-ngt.
             SET sw-op-class-STARTNGT   TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-code-contents.
+            PERFORM 000400-preliminary-review-employee-code-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS NOT GREATER THAN f-IdxFile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
                           "The value could not be located for a key "
@@ -1945,7 +1956,6 @@
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The value: [" ws-f-IdxFile-rec-cod-employee
                           "] was found for a key that wasn't "
@@ -1966,12 +1976,12 @@
           225231122-start-menu-mode-code-pos-gt.
             SET sw-op-class-STARTGT TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-code-contents.
+            PERFORM 000400-preliminary-review-employee-code-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS GREATER THAN f-IdxFile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
                           "The value could not be located for a key "
@@ -1985,7 +1995,6 @@
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The value: [" ws-f-IdxFile-rec-cod-employee
                           "] was found for a key that was "
@@ -2006,12 +2015,12 @@
           225231123-start-menu-mode-code-pos-gteq.
             SET sw-op-class-STARTGTEQ  TO TRUE
 
-            PERFORM 000400-preliminary-review-employee-code-contents.
+            PERFORM 000400-preliminary-review-employee-code-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS GREATER THAN OR EQUAL TO f-IdxFile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
                           "The value could not be located for a key "
@@ -2025,7 +2034,6 @@
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The value: [" ws-f-IdxFile-rec-cod-employee
                           "] was found for a key that was greater than "
@@ -2047,11 +2055,11 @@
             SET sw-op-class-STARTNLT   TO TRUE
 
             PERFORM 000400-preliminary-review-employee-code-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS NOT LESS THAN f-IdxFile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
                           "The value could not be located for a key "
@@ -2065,7 +2073,6 @@
              NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The value: [" ws-f-IdxFile-rec-cod-employee
                           "] was found for a key that wasn't less than "
@@ -2087,11 +2094,11 @@
             SET sw-op-class-STARTLT    TO TRUE
 
             PERFORM 000400-preliminary-review-employee-code-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS LESS THAN f-IdxFile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
                           "The value could not be located for a key "
@@ -2105,7 +2112,6 @@
              NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The value: [" ws-f-IdxFile-rec-cod-employee
                           "] was found for a key that was less than "
@@ -2127,11 +2133,11 @@
             SET sw-op-class-STARTLTEQ  TO TRUE
 
             PERFORM 000400-preliminary-review-employee-code-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS LESS THAN OR EQUAL TO f-IdxFile-rec-cod-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY asterisk asterisk
                           "The value could not be located for a key "
@@ -2145,7 +2151,6 @@
               NOT INVALID KEY
                   ADD  cte-01              TO ws-repositioning-records
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The value: [" ws-f-IdxFile-rec-cod-employee
                           "] was found for a key that was less than "
@@ -2222,11 +2227,11 @@
             SET sw-op-class-STARTNGT      TO TRUE
 
             PERFORM 000500-preliminary-review-employee-salary-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS NOT GREATER THAN f-IdxFile-rec-salary-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is not greater than that of the existing "
@@ -2241,7 +2246,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The salary: ["
                            ws-f-IdxFile-rec-salary-employee
@@ -2264,11 +2268,11 @@
             SET sw-op-class-STARTGT       TO TRUE
 
             PERFORM 000500-preliminary-review-employee-salary-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS GREATER THAN f-IdxFile-rec-salary-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is greater than that of the existing ones."
@@ -2282,7 +2286,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The salary: ["
                            ws-f-IdxFile-rec-salary-employee
@@ -2305,11 +2308,11 @@
             SET sw-op-class-STARTGTEQ     TO TRUE
 
             PERFORM 000500-preliminary-review-employee-salary-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS GREATER OR EQUAL TO f-IdxFile-rec-salary-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is greater than or equal to that of the "
@@ -2324,7 +2327,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The salary: ["
                            ws-f-IdxFile-rec-salary-employee
@@ -2348,11 +2350,11 @@
             SET sw-op-class-STARTNLT      TO TRUE
 
             PERFORM 000500-preliminary-review-employee-salary-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS NOT LESS THAN f-IdxFile-rec-salary-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is not less than that of the existing ones."
@@ -2366,7 +2368,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The salary: ["
                            ws-f-IdxFile-rec-salary-employee
@@ -2389,11 +2390,11 @@
             SET sw-op-class-STARTLT       TO TRUE
 
             PERFORM 000500-preliminary-review-employee-salary-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS LESS THAN f-IdxFile-rec-salary-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is less than that of the existing ones."
@@ -2407,7 +2408,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The salary: ["
                            ws-f-IdxFile-rec-salary-employee
@@ -2430,11 +2430,11 @@
             SET sw-op-class-STARTLTEQ     TO TRUE
 
             PERFORM 000500-preliminary-review-employee-salary-contents
+            DISPLAY SPACE
 
             START IdxFile
               KEY IS LESS THAN OR EQUAL TO f-IdxFile-rec-salary-employee
                   INVALID KEY
-                  DISPLAY SPACE
                   DISPLAY "Invalid Key!"
                   DISPLAY "The salary cannot be allocated for a value "
                           "is less than or equal to that of the "
@@ -2449,7 +2449,6 @@
                   ADD cte-01              TO ws-repositioning-records
                   SET sw-IdxFile-record-found-Y  TO TRUE
 
-                  DISPLAY SPACE
                   DISPLAY asterisk
                           "The salary: ["
                            ws-f-IdxFile-rec-salary-employee
