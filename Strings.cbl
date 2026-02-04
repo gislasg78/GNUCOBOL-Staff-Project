@@ -319,6 +319,24 @@
            EXIT.
 
        500000-begin-display-breakdowns.
+           PERFORM 510000-begin-display-current-date-and-time
+              THRU 510000-end-display-current-date-and-time
+
+           PERFORM 520000-begin-display-statistics-extraction
+              THRU 520000-end-display-statistics-extraction
+
+           PERFORM 530000-begin-display-current-date-extractions
+              THRU 530000-end-display-current-date-extractions
+
+           PERFORM 540000-begin-display-current-time-extractions
+              THRU 540000-end-display-current-time-extractions
+
+           PERFORM 550000-begin-translate-current-date-time-char-by-char
+              THRU 550000-end-translate-current-date-time-char-by-char.
+       500000-end-display-breakdowns.
+           EXIT.
+
+        510000-begin-display-current-date-and-time.
            DISPLAY SPACE
            DISPLAY "Date formats generated."
 
@@ -332,8 +350,11 @@
            DISPLAY "[" FUNCTION TRIM(ws-current-date-msg-formatted) "]."
 
            PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue
+              THRU 000000-end-press-enter-key-to-continue.
+        510000-end-display-current-date-and-time.
+           EXIT.
 
+        520000-begin-display-statistics-extraction.
            DISPLAY SPACE
            DISPLAY "Extraction Statistics."
            DISPLAY "Pointers."
@@ -342,8 +363,11 @@
            DISPLAY "+ Fields:    [" ws-date-time-counter-fields "]."   
 
            PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue
+              THRU 000000-end-press-enter-key-to-continue.
+        520000-end-display-statistics-extraction.
+           EXIT.
 
+        530000-begin-display-current-date-extractions.
            DISPLAY SPACE
            DISPLAY "Date."
            DISPLAY "Day Name."
@@ -367,8 +391,11 @@
            DISPLAY "+ Count:     [" ws-date-count-year "]."
 
            PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue
+              THRU 000000-end-press-enter-key-to-continue.
+        530000-end-display-current-date-extractions.
+           EXIT.
 
+        540000-begin-display-current-time-extractions.
            DISPLAY SPACE
            DISPLAY "Time."
            DISPLAY "Hour."
@@ -392,9 +419,14 @@
            DISPLAY "+ Count:     [" ws-time-count-hundredths "]."
 
            PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue
+              THRU 000000-end-press-enter-key-to-continue.
+        540000-end-display-current-time-extractions.
+           EXIT.
 
+        550000-begin-translate-current-date-time-char-by-char.
            DISPLAY SPACE
+           DISPLAY "Current Date."
+
            PERFORM WITH TEST AFTER
            VARYING idx-current-date-msg-charbychar
               FROM cte-01 BY cte-01
@@ -404,11 +436,12 @@
                            (idx-current-date-msg-charbychar)
                       WITH NO ADVANCING
            END-PERFORM
-           DISPLAY SPACE
 
+           DISPLAY SPACE
            PERFORM 000000-begin-press-enter-key-to-continue
               THRU 000000-end-press-enter-key-to-continue.
-       500000-end-display-breakdowns.
+
+        550000-end-translate-current-date-time-char-by-char.
            EXIT.
 
        600000-begin-program-completion.
