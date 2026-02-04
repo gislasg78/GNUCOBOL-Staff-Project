@@ -6,6 +6,7 @@
        78  cte-01                                          VALUE 01.
        78  cte-07                                          VALUE 07.
        78  cte-12                                          VALUE 12.
+       78  cte-43                                          VALUE 43.
 
        01  ws-accountants-date-and-time-fmt.
            03  ws-accountants-field-string.
@@ -29,7 +30,6 @@
                05  ws-current-time-hundredths    PIC 9(02) VALUE ZEROES.
 
        01  ws-current-date-and-time-chains-formatted.
-           03  ws-current-date-msg-formatted     PIC X(43) VALUE SPACES.
            03  ws-current-date-num-formatted     PIC 9999/99/99
                                                  VALUE ZEROES.
            03  ws-current-date-str-formatted     REDEFINES
@@ -81,6 +81,12 @@
                05  ws-time-minute            PIC 9(02) VALUE ZEROES.
                05  ws-time-second            PIC 9(02) VALUE ZEROES.
                05  ws-time-hundredths        PIC 9(02) VALUE ZEROES.
+
+       01  ws-current-date-messages.
+           03  ws-current-date-msg-formatted PIC X(43) VALUE SPACES.
+           03  ws-current-date-msg-charbychar    REDEFINES
+               ws-current-date-msg-formatted OCCURS cte-43 TIMES
+               INDEXED BY idx-current-date-msg-charbychar  PIC X(01).
 
        01  ws-names-days-and-months-arrays.
            03  ws-date-name-of-days.
@@ -384,6 +390,21 @@
            DISPLAY "+ Value:     [" ws-time-hundredths "]."
            DISPLAY "+ Delimiter: [" ws-time-delimit-hundredths "]."
            DISPLAY "+ Count:     [" ws-time-count-hundredths "]."
+
+           PERFORM 000000-begin-press-enter-key-to-continue
+              THRU 000000-end-press-enter-key-to-continue
+
+           DISPLAY SPACE
+           PERFORM WITH TEST AFTER
+           VARYING idx-current-date-msg-charbychar
+              FROM cte-01 BY cte-01
+             UNTIL idx-current-date-msg-charbychar
+                IS GREATER THAN OR EQUAL TO cte-43
+                   DISPLAY ws-current-date-msg-charbychar
+                           (idx-current-date-msg-charbychar)
+                      WITH NO ADVANCING
+           END-PERFORM
+           DISPLAY SPACE
 
            PERFORM 000000-begin-press-enter-key-to-continue
               THRU 000000-end-press-enter-key-to-continue.
