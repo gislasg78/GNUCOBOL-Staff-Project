@@ -425,8 +425,19 @@
 
         550000-begin-translate-current-date-time-char-by-char.
            DISPLAY SPACE
-           DISPLAY "Current Date."
+           DISPLAY "Current date strings."
 
+           PERFORM WITH TEST BEFORE
+           VARYING idx-current-date-msg-charbychar
+              FROM cte-01 BY cte-01
+             UNTIL idx-current-date-msg-charbychar
+                IS GREATER THAN cte-43
+                   DISPLAY ws-current-date-msg-charbychar
+                           (idx-current-date-msg-charbychar)
+                      WITH NO ADVANCING
+           END-PERFORM
+
+           DISPLAY SPACE
            PERFORM WITH TEST AFTER
            VARYING idx-current-date-msg-charbychar
               FROM cte-01 BY cte-01
@@ -440,7 +451,6 @@
            DISPLAY SPACE
            PERFORM 000000-begin-press-enter-key-to-continue
               THRU 000000-end-press-enter-key-to-continue.
-
         550000-end-translate-current-date-time-char-by-char.
            EXIT.
 
