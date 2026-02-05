@@ -97,7 +97,6 @@
                                  ws-f-IdxFile-rec-salary-employee
                                  "] = ["
                                  f-IdxFile-rec-salary-employee "]"
-
                    END-WRITE
                    DISPLAY "Writing. Status Code: [" fs-IdxFile "]."
 
@@ -107,41 +106,51 @@
                    ACCEPT ws-continue-response
            END-PERFORM
 
+           CLOSE IdxFile
+           DISPLAY "Closing. Status Code: [" fs-IdxFile "]."
+
+           DISPLAY SPACE
+           DISPLAY "Random read to an indexed sequential file."
+
+           OPEN INPUT IdxFile
+           DISPLAY "Opening. Status Code: [" fs-IdxFile "]."
+
            MOVE SPACE TO ws-continue-response
            PERFORM UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
                       OR sw-continue-response-N
-                         DISPLAY SPACE
-                         DISPLAY "Employee code to fetch: "
-                            WITH NO ADVANCING
-                          ACCEPT ws-f-IdxFile-rec-code-employee
-                            MOVE ws-f-IdxFile-rec-code-employee
-                              TO f-IdxFile-rec-code-employee
+                   DISPLAY SPACE
+                   DISPLAY "Employee code to locate: "
+                      WITH NO ADVANCING
+                    ACCEPT ws-f-IdxFile-rec-code-employee
+                      MOVE ws-f-IdxFile-rec-code-employee
+                        TO f-IdxFile-rec-code-employee
 
-                         DISPLAY SPACE
-                         READ IdxFile RECORD   INTO ws-f-IdxFile-rec
-                          KEY IS f-IdxFile-rec-code-employee
-                              INVALID KEY
-                              DISPLAY "Employee code: ["
-                                       ws-f-IdxFile-rec-code-employee
-                                       "] not located."
+                   DISPLAY SPACE
+                   READ IdxFile RECORD         INTO ws-f-IdxFile-rec
+                    KEY IS f-IdxFile-rec-code-employee
+                        INVALID KEY
+                        DISPLAY "Employee code: ["
+                                ws-f-IdxFile-rec-code-employee
+                                "] not located."
 
-                          NOT INVALID KEY
-                              DISPLAY "Record retrieved successfully!"
-                              DISPLAY "+ Employee code   : [" 
-                                      ws-f-IdxFile-rec-code-employee
-                                      "] = ["
-                                      f-IdxFile-rec-code-employee "]."
-                              DISPLAY "+ Salary Employee : ["
-                                      ws-f-IdxFile-rec-salary-employee
-                                      "] = ["
-                                      f-IdxFile-rec-salary-employee "]"
-
-                         END-READ
+                    NOT INVALID KEY
+                        DISPLAY "Record retrieved successfully!"
+                        DISPLAY "+ Employee code   : ["
+                                ws-f-IdxFile-rec-code-employee
+                                "] = ["
+                                f-IdxFile-rec-code-employee "]."
+                        DISPLAY "+ Salary Employee : ["
+                                ws-f-IdxFile-rec-salary-employee
+                                "] = ["
+                                f-IdxFile-rec-salary-employee "]"
+                   END-READ
+                   DISPLAY "Reading. Status Code: [" fs-IdxFile "]."
 
                    DISPLAY SPACE
                    DISPLAY "Do you want to continue viewing more "
-                          "records? (y/n) : " WITH NO ADVANCING
-                   ACCEPT ws-continue-response
+                           "records? (y/n) : "
+                      WITH NO ADVANCING
+                    ACCEPT ws-continue-response
            END-PERFORM
 
            CLOSE IdxFile
