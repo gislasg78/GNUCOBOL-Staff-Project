@@ -10,6 +10,7 @@
        FILE-CONTROL.
            SELECT OPTIONAL IdxFile ASSIGN TO ws-name-IdxFile
                   ORGANIZATION IS INDEXED
+                  ACCESS MODE  IS SEQUENTIAL
                   RECORD   KEY IS f-IdxFile-rec-code-employee
                   ALTERNATE RECORD KEY IS f-IdxFile-rec-salary-employee
                             WITH DUPLICATES
@@ -76,16 +77,16 @@
                    DISPLAY SPACE
                    DISPLAY "Employee data capture."
                    DISPLAY "Employee code   : " WITH NO ADVANCING
-                   ACCEPT ws-f-IdxFile-rec-code-employee
-                   MOVE ws-f-IdxFile-rec-code-employee
-                     TO f-IdxFile-rec-code-employee
+                    ACCEPT ws-f-IdxFile-rec-code-employee
+                      MOVE ws-f-IdxFile-rec-code-employee
+                        TO f-IdxFile-rec-code-employee
 
                    DISPLAY "Salary Employee : " WITH NO ADVANCING
-                   ACCEPT ws-f-IdxFile-rec-salary-employee
-                   MOVE ws-f-IdxFile-rec-salary-employee
-                     TO f-IdxFile-rec-salary-employee
+                    ACCEPT ws-f-IdxFile-rec-salary-employee
+                      MOVE ws-f-IdxFile-rec-salary-employee
+                        TO f-IdxFile-rec-salary-employee
 
-                   WRITE f-IdxFile-rec        FROM ws-f-IdxFile-rec
+                   WRITE f-IdxFile-rec          FROM ws-f-IdxFile-rec
                          INVALID KEY
                          DISPLAY "Invalid Key!"
 
@@ -100,7 +101,6 @@
                                  ws-f-IdxFile-rec-salary-employee
                                  "] = ["
                                  f-IdxFile-rec-salary-employee "]"
-
                    END-WRITE
                    DISPLAY "Writing. Status Code: [" fs-IdxFile "]."
 
@@ -113,8 +113,6 @@
            CLOSE IdxFile
            DISPLAY "Closing. Status Code: [" fs-IdxFile "]."
 
-
-
            DISPLAY SPACE
            DISPLAY "Sequential read to an indexed sequential file."
 
@@ -123,12 +121,12 @@
 
            IF fs-IdxFile IS EQUAL TO ZEROES
               DISPLAY SPACE
-              DISPLAY "Employee code to start: "
-                      WITH NO ADVANCING
+              DISPLAY "Employee code to start: " WITH NO ADVANCING
               ACCEPT ws-f-IdxFile-rec-code-employee
-              MOVE ws-f-IdxFile-rec-code-employee
-                TO f-IdxFile-rec-code-employee
+                MOVE ws-f-IdxFile-rec-code-employee
+                  TO f-IdxFile-rec-code-employee
 
+              DISPLAY SPACE
               START IdxFile
                 KEY IS GREATER THAN OR EQUAL TO 
                     f-IdxFile-rec-code-employee
@@ -143,7 +141,6 @@
                     DISPLAY "+ Employee code: ["
                             ws-f-IdxFile-rec-code-employee
                             "] OK!"
-
               END-START
               DISPLAY "Starting. Status Code: [" fs-IdxFile "]."
            END-IF
@@ -151,35 +148,34 @@
            MOVE SPACE TO ws-continue-response
            PERFORM UNTIL fs-IdxFile IS NOT EQUAL TO ZEROES
                       OR sw-IdxFile-EOF-Y  OR sw-continue-response-N
-
-                    READ IdxFile NEXT RECORD   INTO ws-f-IdxFile-rec
-                        AT END
-                           SET sw-IdxFile-EOF-Y  TO TRUE
-                           DISPLAY "End Of File!"
+                   DISPLAY SPACE
+                   READ IdxFile NEXT RECORD   INTO ws-f-IdxFile-rec
+                     AT END
+                        SET sw-IdxFile-EOF-Y  TO TRUE
+                        DISPLAY "End Of File!"
 
                     NOT AT END
-                           SET sw-IdxFile-EOF-N TO TRUE
+                       SET sw-IdxFile-EOF-N TO TRUE
 
-                           DISPLAY SPACE
-                           DISPLAY "Record retrieved successfully!"
-                           DISPLAY "+ Employee code   : [" 
-                                   ws-f-IdxFile-rec-code-employee
-                                   "] = ["
-                                   f-IdxFile-rec-code-employee
-                                   "]."
-                           DISPLAY "+ Salary Employee : ["
-                                   ws-f-IdxFile-rec-salary-employee
-                                   "] = ["
-                                   f-IdxFile-rec-salary-employee
-                                   "]."
-
-                  END-READ
-                  DISPLAY "Reading. Status Code: [" fs-IdxFile "]."
+                       DISPLAY "Record retrieved successfully!"
+                       DISPLAY "+ Employee code   : [" 
+                               ws-f-IdxFile-rec-code-employee
+                               "] = ["
+                               f-IdxFile-rec-code-employee
+                               "]."
+                       DISPLAY "+ Salary Employee : ["
+                               ws-f-IdxFile-rec-salary-employee
+                               "] = ["
+                               f-IdxFile-rec-salary-employee
+                               "]."
+                   END-READ
+                   DISPLAY "Reading. Status Code: [" fs-IdxFile "]."
  
-                  DISPLAY SPACE
-                  DISPLAY "Do you want to continue viewing more "
-                          "records? (y/n) : " WITH NO ADVANCING
-                   ACCEPT ws-continue-response
+                   DISPLAY SPACE
+                   DISPLAY "Do you want to continue viewing more "
+                           "records? (y/n) : "
+                      WITH NO ADVANCING
+                    ACCEPT ws-continue-response
            END-PERFORM
 
            CLOSE IdxFile
