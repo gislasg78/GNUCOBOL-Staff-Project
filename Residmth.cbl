@@ -3,16 +3,16 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       78  cte-100                          VALUE 100.
+       78  cte-100                            VALUE 100.
 
-       01  ws-code-data          PIC 9(06)  VALUE ZEROES.
-       01  ws-quottient          PIC 9(06)  VALUE ZEROES.
+       01  ws-code-data          UNSIGNED-INT VALUE ZEROES.
+       01  ws-quottient          UNSIGNED-INT VALUE ZEROES.
 
-       01  ws-key-sat-perc       PIC 9(02)  VALUE ZEROES.
-       01  ws-key-max-sat        PIC 9(06)  VALUE ZEROES.
+       01  ws-key-sat-perc       PIC 9(02)    VALUE ZEROES.
+       01  ws-key-max-sat        UNSIGNED-INT VALUE ZEROES.
 
-       01  ws-fac-pos-addr       PIC 9(06)  VALUE ZEROES.
-       01  ws-rel-pos-addr       PIC 9(06)  VALUE ZEROES.
+       01  ws-fac-pos-addr       UNSIGNED-INT VALUE ZEROES.
+       01  ws-rel-pos-addr       UNSIGNED-INT VALUE ZEROES.
 
        PROCEDURE DIVISION.
        MAIN-PARAGRAPH.
@@ -21,7 +21,7 @@
             ACCEPT ws-key-max-sat
            DISPLAY "Key saturation percentage : " WITH NO ADVANCING
             ACCEPT ws-key-sat-perc
-           DISPLAY "Enter a six-digit code    : " WITH NO ADVANCING
+           DISPLAY "Enter a numeric int code  : " WITH NO ADVANCING
             ACCEPT ws-code-data
 
            DISPLAY SPACE
