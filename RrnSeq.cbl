@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. RrnFileSeq.
+       PROGRAM-ID. RrnSeq.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -17,7 +17,6 @@
        DATA DIVISION.
        FILE SECTION.
        FD  RrnFile
-           DATA RECORD IS RrnFile-rec
            RECORD CONTAINS 15 CHARACTERS.
 
        01  RrnFile-rec.
@@ -28,7 +27,7 @@
                                                            VALUE ZEROES.
 
        WORKING-STORAGE SECTION.
-       77  fs-RrnFile                     PIC 9(02)        VALUE ZEROES.
+       77  fs-RrnFile                     PIC X(02)        VALUE SPACES.
 
        77  ws-continue-response           PIC A(01)        VALUE SPACE.
            88  sw-continue-response-N     VALUES ARE 'N' 'n'.
@@ -52,13 +51,11 @@
        DECLARATIVES.
        File-Handler SECTION.
            USE AFTER ERROR PROCEDURE ON RrnFile.
-
        Status-Check.
            DISPLAY SPACE
            DISPLAY "File status information."
-           DISPLAY "File   Name: [" ws-name-RrnFile "]."
-           DISPLAY "Status Code: [" fs-RrnFile "].".
-
+           DISPLAY "+ File   Name: [" ws-name-RrnFile "]."
+           DISPLAY "+ Status Code: [" fs-RrnFile "].".
        END DECLARATIVES.
 
        MAIN-PARAGRAPH.
@@ -69,9 +66,9 @@
            OPEN EXTEND RrnFile
            DISPLAY "Opening. Status Code: [" fs-RrnFile "]."
 
+           MOVE SPACE TO ws-continue-response
            PERFORM UNTIL sw-continue-response-N
                       OR fs-RrnFile IS NOT EQUAL TO ZEROES
-
                    INITIALIZE RrnFile-rec
                               ws-RrnFile-rec
                               ws-key-RrnFile
@@ -79,22 +76,22 @@
                    DISPLAY SPACE
                    DISPLAY "Employee data capture."
                    DISPLAY "Employee code   : " WITH NO ADVANCING
-                   ACCEPT ws-RrnFile-rec-code-employee
-                   MOVE ws-RrnFile-rec-code-employee 
-                     TO RrnFile-rec-code-employee
+                    ACCEPT ws-RrnFile-rec-code-employee
+                      MOVE ws-RrnFile-rec-code-employee 
+                        TO RrnFile-rec-code-employee
 
                    DISPLAY "Salary Employee : " WITH NO ADVANCING
-                   ACCEPT ws-RrnFile-rec-salary-employee
-                   MOVE ws-RrnFile-rec-salary-employee
-                     TO RrnFile-rec-salary-employee
+                    ACCEPT ws-RrnFile-rec-salary-employee
+                      MOVE ws-RrnFile-rec-salary-employee
+                        TO RrnFile-rec-salary-employee
 
+                   DISPLAY SPACE
                    WRITE RrnFile-rec        FROM ws-RrnFile-rec
                          INVALID KEY
                          DISPLAY "Invalid Key!"
 
                      NOT INVALID KEY
                          DISPLAY "Record saved successfully."
-                         DISPLAY SPACE
                          DISPLAY "Record Number # : [" ws-key-RrnFile
                                  "]."
                          DISPLAY "Employee code   : [" 
@@ -107,6 +104,7 @@
                    END-WRITE
                    DISPLAY "Writing. Status Code: [" fs-RrnFile "]."
 
+                   DISPLAY SPACE
                    DISPLAY "Do you want to capture more records? (y/n) "
                            ": " WITH NO ADVANCING
                    ACCEPT ws-continue-response
@@ -115,38 +113,38 @@
            CLOSE RrnFile
            DISPLAY "Closing. Status Code: [" fs-RrnFile "]."
 
-
            DISPLAY SPACE
            DISPLAY "Reading sequential file."
 
            OPEN INPUT RrnFile
            DISPLAY "Opening. Status Code: [" fs-RrnFile "]."
 
+           DISPLAY SPACE
            DISPLAY "Record number to start: "
               WITH NO ADVANCING
             ACCEPT ws-key-RrnFile
 
+           DISPLAY SPACE
            START RrnFile
              KEY IS GREATER THAN OR EQUAL TO ws-key-RrnFile
                  INVALID KEY
-                         DISPLAY "Record Number: ["
-                                  ws-key-RrnFile
-                                 "] was not found."
+                 DISPLAY "Record Number: [" ws-key-RrnFile "]"
+                         " was not found."
              NOT INVALID KEY
-                         DISPLAY "Record Number: ["
-                                  ws-key-RrnFile
-                                 "] found successfully."
-
+                 DISPLAY "Record Number: [" ws-key-RrnFile "]"
+                         " found successfully."
            END-START
            DISPLAY "Starting. Status Code: [" fs-RrnFile "]."
 
-           PERFORM UNTIL sw-RrnFile-EOF-Y
-                      OR fs-RrnFile IS NOT EQUAL TO ZEROES
-
+           MOVE SPACE TO ws-continue-response
+           PERFORM UNTIL fs-RrnFile IS NOT EQUAL TO ZEROES
+                      OR sw-RrnFile-EOF-Y
+                      OR sw-continue-response-N
                    INITIALIZE RrnFile-rec
                               ws-RrnFile-rec
                               ws-key-RrnFile
 
+                   DISPLAY SPACE
                    READ RrnFile NEXT RECORD    INTO ws-RrnFile-rec
                         AT END
                            SET sw-RrnFile-EOF-Y  TO TRUE
@@ -155,8 +153,8 @@
                     NOT AT END
                            SET sw-RrnFile-EOF-N TO TRUE
 
-                           DISPLAY SPACE
-                           DISPLAY "Record # [" ws-key-RrnFile "]."
+                           DISPLAY "Record Number # : [" ws-key-RrnFile
+                                   "]."
                            DISPLAY "Employee code   : [" 
                                    ws-RrnFile-rec-code-employee
                                    "] = ["
@@ -167,12 +165,13 @@
                                    "] = ["
                                    RrnFile-rec-salary-employee
                                    "]."
-
                    END-READ
                    DISPLAY "Reading. Status Code: [" fs-RrnFile "]."
 
-                   DISPLAY "Press ENTER to continue..."
-                   ACCEPT OMITTED
+                   DISPLAY SPACE
+                   DISPLAY "Do you want to retrieve more records? (y/n)"
+                           " : " WITH NO ADVANCING
+                   ACCEPT ws-continue-response
            END-PERFORM
 
            CLOSE RrnFile
@@ -180,4 +179,4 @@
 
            STOP RUN.
 
-       END PROGRAM RrnFileSeq.
+       END PROGRAM RrnSeq.
