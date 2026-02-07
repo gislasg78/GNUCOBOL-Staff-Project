@@ -216,6 +216,7 @@
                   ws-dot-punctuation-mark
                   DELIMITED BY SIZE
                   ws-current-time-hundredths OF ws-current-time
+                  DELIMITED BY SIZE
              INTO ws-current-date-msg-formatted
              WITH POINTER ws-date-pointer-string
                ON OVERFLOW
@@ -246,6 +247,12 @@
                             ws-account-string-length
                         FOR CHARACTERS.
 
+           PERFORM 310000-begin-show-inspection-results
+              THRU 310000-end-show-inspection-results.
+       300000-end-inspect-current-date.
+           EXIT.
+
+        310000-begin-show-inspection-results.
            MOVE LENGTH   OF ws-current-date-msg-formatted
              TO ws-account-field-length
 
@@ -260,7 +267,7 @@
 
            PERFORM 000000-begin-press-enter-key-to-continue
               THRU 000000-end-press-enter-key-to-continue.
-       300000-end-inspect-current-date.
+        310000-end-show-inspection-results.
            EXIT.
 
        400000-begin-unstring-current-date.
