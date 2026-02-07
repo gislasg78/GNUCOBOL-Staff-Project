@@ -438,6 +438,10 @@
            END-PERFORM
 
            DISPLAY SPACE
+           PERFORM 000000-begin-press-enter-key-to-continue
+              THRU 000000-end-press-enter-key-to-continue
+
+           DISPLAY SPACE
            PERFORM WITH TEST AFTER
            VARYING idx-current-date-msg-charbychar
               FROM cte-01 BY cte-01
