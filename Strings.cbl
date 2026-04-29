@@ -467,6 +467,7 @@
 
        600000-begin-program-completion.
            DISPLAY SPACE
+           DISPLAY "Done!"
            DISPLAY "This program has ended."
 
            PERFORM 000000-begin-press-enter-key-to-continue
