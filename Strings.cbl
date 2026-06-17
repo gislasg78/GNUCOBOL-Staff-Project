@@ -117,6 +117,90 @@
                REDEFINES ws-date-name-of-months.
                05  ws-date-name-of-months-array    OCCURS cte-12 TIMES
                    INDEXED BY idx-date-name-of-months-array  PIC A(09).
+           03  ws-zodiac-signs-name-of-signs.
+               05  ws-zodiac-signs-aries.
+                   07  FILLER      PIC A(12) VALUE "Aries".
+                   07  FILLER      PIC 9(02) VALUE 03.
+                   07  FILLER      PIC 9(02) VALUE 21.
+                   07  FILLER      PIC 9(02) VALUE 04.
+                   07  FILLER      PIC 9(02) VALUE 19.
+               05  ws-zodiac-signs-taurus.
+                   07  FILLER      PIC A(12) VALUE "Taurus".
+                   07  FILLER      PIC 9(02) VALUE 04.
+                   07  FILLER      PIC 9(02) VALUE 20.
+                   07  FILLER      PIC 9(02) VALUE 05.
+                   07  FILLER      PIC 9(02) VALUE 20.
+               05  ws-zodiac-signs-gemini.
+                   07  FILLER      PIC A(12) VALUE "Gemini".
+                   07  FILLER      PIC 9(02) VALUE 05.
+                   07  FILLER      PIC 9(02) VALUE 21.
+                   07  FILLER      PIC 9(02) VALUE 06.
+                   07  FILLER      PIC 9(02) VALUE 20.
+               05  ws-zodiac-signs-cancer.
+                   07  FILLER      PIC A(12) VALUE "Cancer".
+                   07  FILLER      PIC 9(02) VALUE 06.
+                   07  FILLER      PIC 9(02) VALUE 21.
+                   07  FILLER      PIC 9(02) VALUE 07.
+                   07  FILLER      PIC 9(02) VALUE 22.
+               05  ws-zodiac-signs-leo.
+                   07  FILLER      PIC A(12) VALUE "Leo".
+                   07  FILLER      PIC 9(02) VALUE 07.
+                   07  FILLER      PIC 9(02) VALUE 23.
+                   07  FILLER      PIC 9(02) VALUE 08.
+                   07  FILLER      PIC 9(02) VALUE 22.
+               05  ws-zodiac-signs-virgo.
+                   07  FILLER      PIC A(12) VALUE "Virgo".
+                   07  FILLER      PIC 9(02) VALUE 08.
+                   07  FILLER      PIC 9(02) VALUE 23.
+                   07  FILLER      PIC 9(02) VALUE 09.
+                   07  FILLER      PIC 9(02) VALUE 22.
+               05  ws-zodiac-signs-libra.
+                   07  FILLER      PIC A(12) VALUE "Libra".
+                   07  FILLER      PIC 9(02) VALUE 09.
+                   07  FILLER      PIC 9(02) VALUE 23.
+                   07  FILLER      PIC 9(02) VALUE 10.
+                   07  FILLER      PIC 9(02) VALUE 22.
+               05  ws-zodiac-signs-scorpio.
+                   07  FILLER      PIC A(12) VALUE "Scorpio".
+                   07  FILLER      PIC 9(02) VALUE 10.
+                   07  FILLER      PIC 9(02) VALUE 23.
+                   07  FILLER      PIC 9(02) VALUE 11.
+                   07  FILLER      PIC 9(02) VALUE 21.
+               05  ws-zodiac-signs-sagittarius.
+                   07  FILLER      PIC A(12) VALUE "Sagittarius".
+                   07  FILLER      PIC 9(02) VALUE 11.
+                   07  FILLER      PIC 9(02) VALUE 22.
+                   07  FILLER      PIC 9(02) VALUE 12.
+                   07  FILLER      PIC 9(02) VALUE 21.
+               05  ws-zodiac-signs-capricorn.
+                   07  FILLER      PIC A(12) VALUE "Capricorn".
+                   07  FILLER      PIC 9(02) VALUE 12.
+                   07  FILLER      PIC 9(02) VALUE 22.
+                   07  FILLER      PIC 9(02) VALUE 01.
+                   07  FILLER      PIC 9(02) VALUE 19.
+               05  ws-zodiac-signs-aquarius.
+                   07  FILLER      PIC A(12) VALUE "Aquarius".
+                   07  FILLER      PIC 9(02) VALUE 01.
+                   07  FILLER      PIC 9(02) VALUE 20.
+                   07  FILLER      PIC 9(02) VALUE 02.
+                   07  FILLER      PIC 9(02) VALUE 18.
+               05  ws-zodiac-signs-pisces.
+                   07  FILLER      PIC A(12) VALUE "Pisces".
+                   07  FILLER      PIC 9(02) VALUE 02.
+                   07  FILLER      PIC 9(02) VALUE 19.
+                   07  FILLER      PIC 9(02) VALUE 03.
+                   07  FILLER      PIC 9(02) VALUE 20.
+           03  ws-zodiac-signs-name-of-signs-red
+               REDEFINES ws-zodiac-signs-name-of-signs.
+               05  ws-zodiac-signs-array     OCCURS cte-12 TIMES
+                   INDEXED BY idx-zodiac-signs-array.
+                   07  ws-zodiac-name                  PIC A(12).
+                   07  ws-start-zodiac-date.
+                       09  ws-start-zodiac-month       PIC 9(02).
+                       09  ws-start-zodiac-day         PIC 9(02).
+                   07  ws-finish-zodiac-date.
+                       09  ws-finish-zodiac-month      PIC 9(02).
+                       09  ws-finish-zodiac-day        PIC 9(02).
 
        01  ws-punctuation-mark-delimiters.
            03  ws-punctuations-marks.
@@ -258,10 +342,10 @@
 
            DISPLAY SPACE
            DISPLAY "Field Accounting Statistics."
-           DISPLAY "Lengths:"
+           DISPLAY "Lengths."
            DISPLAY "+ Field:     [" ws-account-field-length "]."
            DISPLAY "+ String:    [" ws-account-string-length "]."
-           DISPLAY "Spaces:"
+           DISPLAY "Spaces."
            DISPLAY "+ Back:      [" ws-account-backspace-len "]."
            DISPLAY "+ Front:     [" ws-account-frontspace-len "]."
 
@@ -461,8 +545,75 @@
 
            DISPLAY SPACE
            PERFORM 000000-begin-press-enter-key-to-continue
+              THRU 000000-end-press-enter-key-to-continue
+
+           DISPLAY SPACE
+           PERFORM 551000-begin-find-zodiac-sign-based-on-date
+              THRU 551000-end-find-zodiac-sign-based-on-date
+           VARYING idx-zodiac-signs-array
+              FROM cte-01 BY cte-01
+             UNTIL idx-zodiac-signs-array
+                IS GREATER THAN cte-12
+
+           DISPLAY SPACE
+           PERFORM 000000-begin-press-enter-key-to-continue
               THRU 000000-end-press-enter-key-to-continue.
         550000-end-translate-current-date-time-char-by-char.
+           EXIT.
+
+         551000-begin-find-zodiac-sign-based-on-date.
+           IF  (ws-current-date-month IS EQUAL TO
+                ws-start-zodiac-month  (idx-zodiac-signs-array)
+           AND  ws-current-date-day   IS GREATER OR EQUAL TO
+                ws-start-zodiac-day    (idx-zodiac-signs-array))
+            OR (ws-current-date-month IS EQUAL TO
+                ws-finish-zodiac-month (idx-zodiac-signs-array)
+           AND  ws-current-date-day   IS LESS OR EQUAL TO
+                ws-finish-zodiac-day   (idx-zodiac-signs-array))
+            OR (ws-current-date-month IS GREATER THAN
+                ws-start-zodiac-month  (idx-zodiac-signs-array)
+           AND  ws-current-date-month IS LESS THAN
+                ws-finish-zodiac-month (idx-zodiac-signs-array))
+                DISPLAY "Zodiac Sign."
+                DISPLAY "+ Name:  ["
+                         FUNCTION TRIM(
+                         ws-zodiac-name (idx-zodiac-signs-array))
+                        "]."
+
+                DISPLAY "Start."
+                SET idx-date-name-of-months-array
+                 TO ws-start-zodiac-month (idx-zodiac-signs-array)
+                DISPLAY "+ Month: ["
+                        ws-start-zodiac-month
+                        (idx-zodiac-signs-array)
+                        "] = ["
+                        FUNCTION TRIM(
+                        ws-date-name-of-months-array
+                        (idx-date-name-of-months-array))
+                        "]."
+                DISPLAY "+ Day:   ["
+                         ws-start-zodiac-day (idx-zodiac-signs-array)
+                        "]."
+
+                DISPLAY "Finish."
+                SET idx-date-name-of-months-array
+                 TO ws-finish-zodiac-month (idx-zodiac-signs-array)
+                DISPLAY "- Month: ["
+                        ws-finish-zodiac-month
+                        (idx-zodiac-signs-array)
+                        "] = ["
+                        FUNCTION TRIM(
+                        ws-date-name-of-months-array
+                        (idx-date-name-of-months-array))
+                        "]."
+                DISPLAY "- Day:   ["
+                        ws-finish-zodiac-day
+                        (idx-zodiac-signs-array)
+                        "]."
+
+                SET idx-zodiac-signs-array TO cte-12
+           END-IF.
+         551000-end-find-zodiac-sign-based-on-date.
            EXIT.
 
        600000-begin-program-completion.
