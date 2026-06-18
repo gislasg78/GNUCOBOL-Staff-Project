@@ -120,76 +120,100 @@
            03  ws-zodiac-signs-name-of-signs.
                05  ws-zodiac-signs-aries.
                    07  FILLER      PIC A(12) VALUE "Aries".
-                   07  FILLER      PIC 9(02) VALUE 03.
-                   07  FILLER      PIC 9(02) VALUE 21.
-                   07  FILLER      PIC 9(02) VALUE 04.
-                   07  FILLER      PIC 9(02) VALUE 19.
+                   07  ws-zodiac-signs-aries-start.
+                       09  FILLER  PIC 9(02) VALUE 03.
+                       09  FILLER  PIC 9(02) VALUE 21.
+                   07  ws-zodiac-signs-aries-finish.
+                       09  FILLER  PIC 9(02) VALUE 04.
+                       09  FILLER  PIC 9(02) VALUE 19.
                05  ws-zodiac-signs-taurus.
                    07  FILLER      PIC A(12) VALUE "Taurus".
-                   07  FILLER      PIC 9(02) VALUE 04.
-                   07  FILLER      PIC 9(02) VALUE 20.
-                   07  FILLER      PIC 9(02) VALUE 05.
-                   07  FILLER      PIC 9(02) VALUE 20.
+                   07  ws-zodiac-signs-taurus-start.
+                       09  FILLER  PIC 9(02) VALUE 04.
+                       09  FILLER  PIC 9(02) VALUE 20.
+                   07  ws-zodiac-signs-aries-finish.
+                       09  FILLER  PIC 9(02) VALUE 05.
+                       09  FILLER  PIC 9(02) VALUE 20.
                05  ws-zodiac-signs-gemini.
                    07  FILLER      PIC A(12) VALUE "Gemini".
-                   07  FILLER      PIC 9(02) VALUE 05.
-                   07  FILLER      PIC 9(02) VALUE 21.
-                   07  FILLER      PIC 9(02) VALUE 06.
-                   07  FILLER      PIC 9(02) VALUE 20.
+                   07  ws-zodiac-signs-gemini-start.
+                       09  FILLER  PIC 9(02) VALUE 05.
+                       09  FILLER  PIC 9(02) VALUE 21.
+                   07  ws-zodiac-signs-gemini-finish.
+                       09  FILLER  PIC 9(02) VALUE 06.
+                       09  FILLER  PIC 9(02) VALUE 20.
                05  ws-zodiac-signs-cancer.
                    07  FILLER      PIC A(12) VALUE "Cancer".
-                   07  FILLER      PIC 9(02) VALUE 06.
-                   07  FILLER      PIC 9(02) VALUE 21.
-                   07  FILLER      PIC 9(02) VALUE 07.
-                   07  FILLER      PIC 9(02) VALUE 22.
+                   07  ws-zodiac-signs-cancer-start.
+                       09  FILLER  PIC 9(02) VALUE 06.
+                       09  FILLER  PIC 9(02) VALUE 21.
+                   07  ws-zodiac-signs-cancer-finish.
+                       09  FILLER  PIC 9(02) VALUE 07.
+                       09  FILLER  PIC 9(02) VALUE 22.
                05  ws-zodiac-signs-leo.
                    07  FILLER      PIC A(12) VALUE "Leo".
-                   07  FILLER      PIC 9(02) VALUE 07.
-                   07  FILLER      PIC 9(02) VALUE 23.
-                   07  FILLER      PIC 9(02) VALUE 08.
-                   07  FILLER      PIC 9(02) VALUE 22.
+                   07  ws-zodiac-signs-leo-start.
+                       09  FILLER  PIC 9(02) VALUE 07.
+                       09  FILLER  PIC 9(02) VALUE 23.
+                   07  ws-zodiac-signs-leo-finish.
+                       09  FILLER  PIC 9(02) VALUE 08.
+                       09  FILLER  PIC 9(02) VALUE 22.
                05  ws-zodiac-signs-virgo.
                    07  FILLER      PIC A(12) VALUE "Virgo".
-                   07  FILLER      PIC 9(02) VALUE 08.
-                   07  FILLER      PIC 9(02) VALUE 23.
-                   07  FILLER      PIC 9(02) VALUE 09.
-                   07  FILLER      PIC 9(02) VALUE 22.
+                   07  ws-zodiac-signs-virgo-start.
+                       09  FILLER  PIC 9(02) VALUE 08.
+                       09  FILLER  PIC 9(02) VALUE 23.
+                   07  ws-zodiac-signs-virgo-finish.
+                       09  FILLER  PIC 9(02) VALUE 09.
+                       09  FILLER  PIC 9(02) VALUE 22.
                05  ws-zodiac-signs-libra.
                    07  FILLER      PIC A(12) VALUE "Libra".
-                   07  FILLER      PIC 9(02) VALUE 09.
-                   07  FILLER      PIC 9(02) VALUE 23.
-                   07  FILLER      PIC 9(02) VALUE 10.
-                   07  FILLER      PIC 9(02) VALUE 22.
+                   07  ws-zodiac-signs-libra-start.
+                       09  FILLER  PIC 9(02) VALUE 09.
+                       09  FILLER  PIC 9(02) VALUE 23.
+                   07  ws-zodiac-signs-libra-finish.
+                       09  FILLER  PIC 9(02) VALUE 10.
+                       09  FILLER  PIC 9(02) VALUE 22.
                05  ws-zodiac-signs-scorpio.
                    07  FILLER      PIC A(12) VALUE "Scorpio".
-                   07  FILLER      PIC 9(02) VALUE 10.
-                   07  FILLER      PIC 9(02) VALUE 23.
-                   07  FILLER      PIC 9(02) VALUE 11.
-                   07  FILLER      PIC 9(02) VALUE 21.
+                   07  ws-zodiac-signs-scorpio-start.
+                       09  FILLER  PIC 9(02) VALUE 10.
+                       09  FILLER  PIC 9(02) VALUE 23.
+                   07  ws-zodiac-signs-scorpio-finish.
+                       09  FILLER  PIC 9(02) VALUE 11.
+                       09  FILLER  PIC 9(02) VALUE 21.
                05  ws-zodiac-signs-sagittarius.
                    07  FILLER      PIC A(12) VALUE "Sagittarius".
-                   07  FILLER      PIC 9(02) VALUE 11.
-                   07  FILLER      PIC 9(02) VALUE 22.
-                   07  FILLER      PIC 9(02) VALUE 12.
-                   07  FILLER      PIC 9(02) VALUE 21.
+                   07  ws-zodiac-signs-sagittarius-start.
+                       09  FILLER  PIC 9(02) VALUE 11.
+                       09  FILLER  PIC 9(02) VALUE 22.
+                   07  ws-zodiac-signs-sagittarius-finish.
+                       09  FILLER  PIC 9(02) VALUE 12.
+                       09  FILLER  PIC 9(02) VALUE 21.
                05  ws-zodiac-signs-capricorn.
                    07  FILLER      PIC A(12) VALUE "Capricorn".
-                   07  FILLER      PIC 9(02) VALUE 12.
-                   07  FILLER      PIC 9(02) VALUE 22.
-                   07  FILLER      PIC 9(02) VALUE 01.
-                   07  FILLER      PIC 9(02) VALUE 19.
+                   07  ws-zodiac-signs-capricorn-start.
+                       09  FILLER  PIC 9(02) VALUE 12.
+                       09  FILLER  PIC 9(02) VALUE 22.
+                   07  ws-zodiac-signs-capricorn-finish.
+                       09  FILLER  PIC 9(02) VALUE 01.
+                       09  FILLER  PIC 9(02) VALUE 19.
                05  ws-zodiac-signs-aquarius.
                    07  FILLER      PIC A(12) VALUE "Aquarius".
-                   07  FILLER      PIC 9(02) VALUE 01.
-                   07  FILLER      PIC 9(02) VALUE 20.
-                   07  FILLER      PIC 9(02) VALUE 02.
-                   07  FILLER      PIC 9(02) VALUE 18.
+                   07  ws-zodiac-signs-aquarius-start.
+                       09  FILLER  PIC 9(02) VALUE 01.
+                       09  FILLER  PIC 9(02) VALUE 20.
+                   07  ws-zodiac-signs-aquarius-finish.
+                       09  FILLER  PIC 9(02) VALUE 02.
+                       09  FILLER  PIC 9(02) VALUE 18.
                05  ws-zodiac-signs-pisces.
                    07  FILLER      PIC A(12) VALUE "Pisces".
-                   07  FILLER      PIC 9(02) VALUE 02.
-                   07  FILLER      PIC 9(02) VALUE 19.
-                   07  FILLER      PIC 9(02) VALUE 03.
-                   07  FILLER      PIC 9(02) VALUE 20.
+                   07  ws-zodiac-signs-pisces-start.
+                       09  FILLER  PIC 9(02) VALUE 02.
+                       09  FILLER  PIC 9(02) VALUE 19.
+                   07  ws-zodiac-signs-pisces-finish.
+                       09  FILLER  PIC 9(02) VALUE 03.
+                       09  FILLER  PIC 9(02) VALUE 20.
            03  ws-zodiac-signs-name-of-signs-red
                REDEFINES ws-zodiac-signs-name-of-signs.
                05  ws-zodiac-signs-array     OCCURS cte-12 TIMES
@@ -575,7 +599,7 @@
            AND  ws-current-date-month IS LESS THAN
                 ws-finish-zodiac-month (idx-zodiac-signs-array))
                 DISPLAY "Zodiac Sign."
-                DISPLAY "+ Name:  ["
+                DISPLAY "+ Name:      ["
                          FUNCTION TRIM(
                          ws-zodiac-name (idx-zodiac-signs-array))
                         "]."
@@ -583,7 +607,7 @@
                 DISPLAY "Start."
                 SET idx-date-name-of-months-array
                  TO ws-start-zodiac-month (idx-zodiac-signs-array)
-                DISPLAY "+ Month: ["
+                DISPLAY "+ Month:     ["
                         ws-start-zodiac-month
                         (idx-zodiac-signs-array)
                         "] = ["
@@ -591,14 +615,14 @@
                         ws-date-name-of-months-array
                         (idx-date-name-of-months-array))
                         "]."
-                DISPLAY "+ Day:   ["
+                DISPLAY "+ Day:       ["
                          ws-start-zodiac-day (idx-zodiac-signs-array)
                         "]."
 
                 DISPLAY "Finish."
                 SET idx-date-name-of-months-array
                  TO ws-finish-zodiac-month (idx-zodiac-signs-array)
-                DISPLAY "- Month: ["
+                DISPLAY "+ Month:     ["
                         ws-finish-zodiac-month
                         (idx-zodiac-signs-array)
                         "] = ["
@@ -606,7 +630,7 @@
                         ws-date-name-of-months-array
                         (idx-date-name-of-months-array))
                         "]."
-                DISPLAY "- Day:   ["
+                DISPLAY "+ Day:       ["
                         ws-finish-zodiac-day
                         (idx-zodiac-signs-array)
                         "]."
