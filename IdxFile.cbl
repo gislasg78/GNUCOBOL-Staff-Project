@@ -61,11 +61,17 @@
        01  ws-work-section-begins               PIC X(42)  VALUE
            "The working storage section begins here...".
 
-       77  fs-IdxFile                           PIC X(02)  VALUE SPACES.
-       77  fs-OutFile                           PIC X(02)  VALUE SPACES.
-
        78  cte-01                                          VALUE 01.
        78  cte-34                                          VALUE 34.
+
+       01  ws-Files-Info.
+           03  ws-Files-names.
+               05  ws-IdxFile-name              PIC X(12)  VALUE SPACES.
+               05  ws-OutFile-name              PIC X(12)  VALUE SPACES.
+               05  ws-TempFile-name             PIC X(12)  VALUE SPACES.
+           03  ws-Files-status.
+               05  fs-IdxFile                   PIC X(02)  VALUE SPACES.
+               05  fs-OutFile                   PIC X(02)  VALUE SPACES.
 
        01  ws-environmental-variables.
            03  ws-current-date-and-time.
@@ -149,11 +155,6 @@
                                                            VALUE SPACE.
                    07  ws-f-OutFile-rec-salary-employee PIC -,---,--9.99
                                                            VALUE ZEROES.
-
-           03  ws-Files-names.
-               05  ws-IdxFile-name              PIC X(12)  VALUE SPACES.
-               05  ws-OutFile-name              PIC X(12)  VALUE SPACES.
-               05  ws-TempFile-name             PIC X(12)  VALUE SPACES.
 
            03  ws-menu-standard-options-performance.
                05  ws-menu-option               PIC 9(01)  VALUE ZERO.
@@ -405,7 +406,7 @@
                                                            PIC X(25).
 
        01  ws-f-error-status-code-table-desc-error-tag     PIC X(25)
-               VALUE "Unknown File Status".
+           VALUE "Unknown File Status".
 
        01  ws-linage-work-variables.
            03  ws-linage-bottom                 PIC 9(01)  VALUE 01.
