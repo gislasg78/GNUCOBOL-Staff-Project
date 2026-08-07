@@ -23,6 +23,9 @@
                05  ws-current-date-day           PIC 9(02) VALUE ZEROES.
            03  ws-current-date-num REDEFINES ws-current-date PIC 9(08).
            03  ws-current-date-str REDEFINES ws-current-date PIC X(08).
+           03  ws-current-date-julianday.
+               05  ws-current-date-julian-year   PIC 9(04) VALUE ZEROES.
+               05  ws-current-date-julian-day    PIC 9(03) VALUE ZEROES.
            03  ws-current-time.
                05  ws-current-time-hour          PIC 9(02) VALUE ZEROES.
                05  ws-current-time-minute        PIC 9(02) VALUE ZEROES.
@@ -258,21 +261,43 @@
 
            STOP RUN.
 
-       000000-begin-press-enter-key-to-continue.
-           DISPLAY "Press the ENTER key to continue..."
-              WITH NO ADVANCING
-            ACCEPT OMITTED.
-       000000-end-press-enter-key-to-continue.
-           EXIT.
-
        100000-begin-get-date-time-system.
            DISPLAY "Program that dismantles a given string of "
                    "characters."
 
-           ACCEPT ws-current-date   FROM DATE YYYYMMDD
-           ACCEPT ws-date-dayofweek FROM DAY-OF-WEEK
-           ACCEPT ws-current-time   FROM TIME.
+           ACCEPT ws-current-date            FROM DATE YYYYMMDD
+           ACCEPT ws-date-dayofweek          FROM DAY-OF-WEEK
+           ACCEPT ws-current-date-julianday  FROM DAY YYYYDDD
+           ACCEPT ws-current-time            FROM TIME
+
+           DISPLAY SPACE
+           DISPLAY "Preliminary values obtained."
+           DISPLAY "Currently."
+           DISPLAY X"2B" X"20" "Compilation:  "
+                   X"20" X"5B" FUNCTION WHEN-COMPILED    X"5D" X"2E"
+           DISPLAY X"2B" X"20" "Date and time:"
+                   X"20" X"5B" FUNCTION CURRENT-DATE     X"5D" X"2E"
+           DISPLAY X"2B" X"20" "Date:         "
+                   X"20" X"5B" ws-current-date           X"5D" X"2E"
+           DISPLAY X"2B" X"20" "Time:         "
+                   X"20" X"5B" ws-current-time           X"5D" X"2E"
+
+           DISPLAY "Extra info."
+           DISPLAY X"2B" X"20" "Day of week:  "
+                   X"20" X"5B" ws-date-dayofweek         X"5D" X"2E"
+           DISPLAY X"2B" X"20" "Julian day:   "
+                   X"20" X"5B" ws-current-date-julianday X"5D" X"2E"
+
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
        100000-end-get-date-time-system.
+           EXIT.
+
+        110000-begin-press-enter-key-to-continue.
+           DISPLAY "Press the ENTER key to continue..."
+              WITH NO ADVANCING
+            ACCEPT OMITTED.
+        110000-end-press-enter-key-to-continue.
            EXIT.
 
        200000-begin-string-current-date.
@@ -337,8 +362,8 @@
            DISPLAY SPACE
            DISPLAY "[" FUNCTION TRIM(ws-current-date-msg-formatted)"]."
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
        200000-end-string-current-date.
            EXIT.
 
@@ -373,8 +398,8 @@
            DISPLAY "+ Back:      [" ws-account-backspace-len "]."
            DISPLAY "+ Front:     [" ws-account-frontspace-len "]."
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
         310000-end-show-inspection-results.
            EXIT.
 
@@ -428,8 +453,8 @@
                             "constructed."
            END-UNSTRING
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
        400000-end-unstring-current-date.
            EXIT.
 
@@ -464,8 +489,8 @@
 
            DISPLAY "[" FUNCTION TRIM(ws-current-date-msg-formatted) "]."
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
         510000-end-display-current-date-and-time.
            EXIT.
 
@@ -477,8 +502,8 @@
            DISPLAY "+ Unstring:  [" ws-date-pointer-unstring "]."
            DISPLAY "+ Fields:    [" ws-date-time-counter-fields "]."   
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
         520000-end-display-statistics-extraction.
            EXIT.
 
@@ -505,8 +530,8 @@
            DISPLAY "+ Delimiter: [" ws-date-delimit-year "]."
            DISPLAY "+ Count:     [" ws-date-count-year "]."
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
         530000-end-display-current-date-extractions.
            EXIT.
 
@@ -533,8 +558,8 @@
            DISPLAY "+ Delimiter: [" ws-time-delimit-hundredths "]."
            DISPLAY "+ Count:     [" ws-time-count-hundredths "]."
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
         540000-end-display-current-time-extractions.
            EXIT.
 
@@ -553,8 +578,8 @@
            END-PERFORM
 
            DISPLAY SPACE
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue
 
            DISPLAY SPACE
            PERFORM WITH TEST AFTER
@@ -568,8 +593,8 @@
            END-PERFORM
 
            DISPLAY SPACE
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue
 
            DISPLAY SPACE
            PERFORM 551000-begin-find-zodiac-sign-based-on-date
@@ -580,8 +605,8 @@
                 IS GREATER THAN cte-12
 
            DISPLAY SPACE
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
         550000-end-translate-current-date-time-char-by-char.
            EXIT.
 
@@ -645,8 +670,8 @@
            DISPLAY "Done!"
            DISPLAY "This program has ended."
 
-           PERFORM 000000-begin-press-enter-key-to-continue
-              THRU 000000-end-press-enter-key-to-continue.
+           PERFORM 110000-begin-press-enter-key-to-continue
+              THRU 110000-end-press-enter-key-to-continue.
        600000-end-program-completion.
            EXIT.
 
