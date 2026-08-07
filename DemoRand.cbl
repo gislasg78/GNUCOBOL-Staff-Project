@@ -47,12 +47,6 @@
            PERFORM 400000-start-final-accounting-statistics
               THRU 400000-finish-final-accounting-statistics
 
-           DISPLAY SPACE
-           DISPLAY "This program has ended."
-           DISPLAY "Press the ENTER key to end the program..."
-              WITH NO ADVANCING
-           ACCEPT OMITTED
-
            STOP RUN.
 
        100000-start-request-performance-data.
@@ -172,11 +166,24 @@
 
        400000-start-final-accounting-statistics.
            DISPLAY "Final accounting statistics."
-           DISPLAY X'5B' ws-counter-series-by-ticket X'5D'
-                   X'20' 'Accumulated series created' X'2E'
-           DISPLAY X'5B' ws-counter-random-numbers X'5D'
-                   X'20' 'Generated output numbers' X'2E'.
+           DISPLAY X"5B" ws-counter-series-by-ticket  X"5D"
+                   X"20" 'Accumulated series created' X"2E"
+           DISPLAY X"5B" ws-counter-random-numbers    X"5D"
+                   X"20" 'Generated output numbers'   X"2E"
+
+           PERFORM 410000-start-program-termination-message
+              THRU 410000-finish-program-termination-message.
        400000-finish-final-accounting-statistics.
+           EXIT.
+
+        410000-start-program-termination-message.
+           DISPLAY SPACE
+           DISPLAY "Done!"
+           DISPLAY "This program has ended."
+           DISPLAY "Press the ENTER key to end the program..."
+              WITH NO ADVANCING
+           ACCEPT OMITTED.
+        410000-finish-program-termination-message.
            EXIT.
 
        END PROGRAM RandomNumbers.
