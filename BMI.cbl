@@ -28,7 +28,10 @@
            DISPLAY "Enter your height (m): "  WITH NO ADVANCING
             ACCEPT ws-height
            DISPLAY "Enter your weight (kg): " WITH NO ADVANCING
-            ACCEPT ws-weight.
+            ACCEPT ws-weight
+
+           PERFORM 110000-start-request-a-pause-at-the-entrance
+              THRU 110000-finish-request-a-pause-at-the-entrance.
        100000-finish-request-preliminary-input-data.
            EXIT.
 
