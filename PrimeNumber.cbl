@@ -13,6 +13,9 @@
                    07  ws-idx-acc-prime-numbers USAGE INDEX  VALUE ZERO.
                    07  ws-idx-cnt-prime-numbers USAGE INDEX  VALUE ZERO.
                    07  ws-idx-num-prime-numbers USAGE INDEX  VALUE ZERO.
+               05  ws-group-print-prime-numbers.
+                   07  ws-print-prime-index     PIC -Z(11)   VALUE ZERO.
+                   07  ws-print-prime-number    PIC -Z(11)   VALUE ZERO.
                05  ws-quantity-prime-numbers    UNSIGNED-INT VALUE ZERO.
                05  ws-quottients-prime-numbers  UNSIGNED-INT VALUE ZERO.
            03  ws-prime-numbers-division-results.
@@ -43,17 +46,31 @@
            SET idx-array-prime-numbers TO cte-01
 
            DISPLAY "Prime Number Generator."
-           DISPLAY "Number of primes to generate: "
+           DISPLAY "Number of primes to generate ("
+                   cte-01 " - " cte-1000 "): "
               WITH NO ADVANCING
-            ACCEPT ws-quantity-prime-numbers.
+            ACCEPT ws-quantity-prime-numbers
+
+           PERFORM 110000-start-press-enter-key-to-continue
+              THRU 110000-finish-press-enter-key-to-continue.           
        100000-finish-begin-program.
+           EXIT.
+
+        110000-start-press-enter-key-to-continue.
+           DISPLAY "Press the ENTER key to continue..."
+              WITH NO ADVANCING
+           ACCEPT OMITTED.
+        110000-finish-press-enter-key-to-continue.
            EXIT.
 
        200000-start-process-program.
            DISPLAY SPACE
            DISPLAY "Prime Numbers List."
 
+           DISPLAY SPACE
            DISPLAY "Creating list..."
+           SET ws-idx-acc-prime-numbers TO ZERO
+
            PERFORM 210000-start-prime-numbers-generator
               THRU 210000-finish-prime-numbers-generator
            VARYING ws-idx-cnt-prime-numbers
@@ -67,8 +84,8 @@
            DISPLAY X"5B" ws-idx-acc-prime-numbers   X"5D"
                    X"20" "Output results generated" X"2E"
 
-            PERFORM 230000-start-press-enter-key-to-continue
-               THRU 230000-finish-press-enter-key-to-continue
+            PERFORM 110000-start-press-enter-key-to-continue
+               THRU 110000-finish-press-enter-key-to-continue
 
            DISPLAY SPACE
            DISPLAY "Viewing list..."
@@ -86,8 +103,8 @@
            DISPLAY X"5B" ws-idx-acc-prime-numbers   X"5D"
                    X"20" "Output results generated" X"2E"
 
-            PERFORM 230000-start-press-enter-key-to-continue
-               THRU 230000-finish-press-enter-key-to-continue.
+            PERFORM 110000-start-press-enter-key-to-continue
+               THRU 110000-finish-press-enter-key-to-continue.
        200000-finish-process-program.
            EXIT.
 
@@ -101,17 +118,25 @@
              UNTIL ws-idx-num-prime-numbers
                 IS GREATER THAN ws-idx-cnt-prime-numbers
 
-           IF (ws-quottients-prime-numbers IS EQUAL TO cte-02)
-               DISPLAY X"28" idx-array-prime-numbers X"29"  X"20" X"3A"
-                       X"20" X"5B" ws-idx-cnt-prime-numbers X"5D" X"2E"
+           IF (ws-quottients-prime-numbers   IS EQUAL TO cte-02)
+               SET ws-idx-acc-prime-numbers  UP BY cte-01
+
+               MOVE idx-array-prime-numbers  TO ws-print-prime-index
+               MOVE ws-idx-cnt-prime-numbers TO ws-print-prime-number
+
+               DISPLAY X"28"
+                       FUNCTION TRIM(ws-print-prime-index)
+                       X"29" X"20" X"3A"
+                       X"20" X"5B"
+                       FUNCTION TRIM(ws-print-prime-number)
+                       X"5D" X"2E"
+               END-DISPLAY
 
                MOVE ws-idx-cnt-prime-numbers
                  TO ws-array-prime-numbers-value
                     (idx-array-prime-numbers)
 
-                SET idx-array-prime-numbers,
-                    ws-idx-acc-prime-numbers
-                 UP BY cte-01
+                SET idx-array-prime-numbers  UP BY cte-01
            END-IF.
         210000-finish-prime-numbers-generator.
            EXIT.
@@ -132,17 +157,18 @@
         220000-start-print-array-prime-numbers.
            ADD cte-01                    TO ws-idx-acc-prime-numbers
 
-           DISPLAY X"28" idx-array-prime-numbers X"29"  X"20" X"3A"
-                   X"20" X"5B" ws-array-prime-numbers-value 
-                              (idx-array-prime-numbers) X"5D" X"2E".
-        220000-finish-print-array-prime-numbers.
-           EXIT.
+           MOVE idx-array-prime-numbers  TO ws-print-prime-index
+           MOVE ws-array-prime-numbers-value
+               (idx-array-prime-numbers) TO ws-print-prime-number
 
-        230000-start-press-enter-key-to-continue.
-           DISPLAY "Press the ENTER key to continue..."
-              WITH NO ADVANCING
-           ACCEPT OMITTED.
-        230000-finish-press-enter-key-to-continue.
+           DISPLAY X"28"
+                   FUNCTION TRIM(ws-print-prime-index)
+                   X"29" X"20" X"3A"
+                   X"20" X"5B"
+                   FUNCTION TRIM(ws-print-prime-number)
+                   X"5D" X"2E"
+           END-DISPLAY.
+        220000-finish-print-array-prime-numbers.
            EXIT.
 
        300000-start-end-program.
@@ -150,8 +176,8 @@
            DISPLAY "Done" X"21"	
            DISPLAY "This program has ended" X"2E"
 
-            PERFORM 230000-start-press-enter-key-to-continue
-               THRU 230000-finish-press-enter-key-to-continue.
+            PERFORM 110000-start-press-enter-key-to-continue
+               THRU 110000-finish-press-enter-key-to-continue.
        300000-finish-end-program.
            EXIT.
 
