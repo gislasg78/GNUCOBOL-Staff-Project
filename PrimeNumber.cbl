@@ -14,8 +14,8 @@
                    07  ws-idx-cnt-prime-numbers USAGE INDEX  VALUE ZERO.
                    07  ws-idx-num-prime-numbers USAGE INDEX  VALUE ZERO.
                05  ws-group-print-prime-numbers.
-                   07  ws-print-prime-index     PIC -Z(11)   VALUE ZERO.
-                   07  ws-print-prime-number    PIC -Z(11)   VALUE ZERO.
+                   07  ws-print-prime-index     PIC -(11)    VALUE ZERO.
+                   07  ws-print-prime-number    PIC -(11)    VALUE ZERO.
                05  ws-quantity-prime-numbers    UNSIGNED-INT VALUE ZERO.
                05  ws-quottients-prime-numbers  UNSIGNED-INT VALUE ZERO.
            03  ws-prime-numbers-division-results.
