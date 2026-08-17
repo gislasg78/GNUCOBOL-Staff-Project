@@ -84,8 +84,8 @@
            DISPLAY X"5B" ws-idx-acc-prime-numbers   X"5D"
                    X"20" "Output results generated" X"2E"
 
-            PERFORM 110000-start-press-enter-key-to-continue
-               THRU 110000-finish-press-enter-key-to-continue
+           PERFORM 110000-start-press-enter-key-to-continue
+              THRU 110000-finish-press-enter-key-to-continue
 
            DISPLAY SPACE
            DISPLAY "Viewing list..."
@@ -103,8 +103,8 @@
            DISPLAY X"5B" ws-idx-acc-prime-numbers   X"5D"
                    X"20" "Output results generated" X"2E"
 
-            PERFORM 110000-start-press-enter-key-to-continue
-               THRU 110000-finish-press-enter-key-to-continue.
+           PERFORM 110000-start-press-enter-key-to-continue
+              THRU 110000-finish-press-enter-key-to-continue.
        200000-finish-process-program.
            EXIT.
 
