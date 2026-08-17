@@ -176,8 +176,8 @@
            DISPLAY "Done" X"21"	
            DISPLAY "This program has ended" X"2E"
 
-            PERFORM 110000-start-press-enter-key-to-continue
-               THRU 110000-finish-press-enter-key-to-continue.
+           PERFORM 110000-start-press-enter-key-to-continue
+              THRU 110000-finish-press-enter-key-to-continue.
        300000-finish-end-program.
            EXIT.
 
